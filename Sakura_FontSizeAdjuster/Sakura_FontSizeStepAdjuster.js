@@ -1,4 +1,4 @@
-// Sakura_FontSizeAdjuster 1.0.0
+// Sakura_FontSizeStepAdjuster 1.0.0
 // Copyright (c) 2024 Sakurano
 // This software is released under the MIT license.
 // http://opensource.org/licenses/mit-license.php
@@ -31,7 +31,7 @@
  */
 
 (() => {
-  const pluginName = 'Sakura_FontSizeAdjuster';
+  const pluginName = 'Sakura_FontSizeStepAdjuster';
   const parameters = PluginManager.parameters(pluginName);
   const fontSizeStep = Number(parameters['FontSizeStep'] || 12);
 
