@@ -6,6 +6,13 @@
 ## ダウンロード
 [Sakura_ShowChapterTitle.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_ShowChapterTitle/Sakura_ShowChapterTitle.js)
 
+## 更新履歴
+| ver   | 日付       | 説明                                                           |
+| ----- | ---------- | -------------------------------------------------------------- |
+| 1.0.1 | 2024/08/30 | 行の途中で文字の大きさを変える制御文字があった場合の不具合対応 |
+| 1.0.0 | 2024/08/29 | 公開                                                           |
+
+
 ## 機能概要
 - 複数行の章タイトルをフェードイン・アウト効果付きで表示
 - 各行ごとにフォント、サイズを指定可能
@@ -54,6 +61,10 @@
 - 画面を黒画面にするかどうかまでは、本プラグインでは制御しません。黒画面にしたい場合は事前に「画面のフェードアウト」をしておいてください。
 
   ![alt text](image-9.png)
+
+- 修正 ver.1.0.1 行の途中で文字の大きさを変える制御文字があった場合でも正しく反映されるようにしました。
+  
+  ![alt text](image-3.png)
 
 # License
 - This software is released under the MIT license. http://opensource.org/licenses/mit-license.php
