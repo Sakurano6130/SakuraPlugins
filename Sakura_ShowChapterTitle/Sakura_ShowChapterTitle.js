@@ -201,7 +201,16 @@
     const picturePosition = String(args.picturePosition || 'center');
     const waitForFinish = String(args.waitForFinish) === 'true';
 
-    SceneManager._scene.showChapterTitleWindow(lines, duration, picture, tone, roundEdge, blurValue, titlePosition, picturePosition);
+    SceneManager._scene.showChapterTitleWindow(
+      lines,
+      duration,
+      picture,
+      tone,
+      roundEdge,
+      blurValue,
+      titlePosition,
+      picturePosition
+    );
 
     if (waitForFinish) {
       this.wait(duration + 60 * 2);
@@ -521,7 +530,16 @@
     titlePosition,
     picturePosition
   ) {
-    this._chapterTitleWindow.setTitle(lines, duration, picture, tone, roundEdge, blurValue, titlePosition, picturePosition);
+    this._chapterTitleWindow.setTitle(
+      lines,
+      duration,
+      picture,
+      tone,
+      roundEdge,
+      blurValue,
+      titlePosition,
+      picturePosition
+    );
     this._chapterTitleWindow.show();
   };
 
