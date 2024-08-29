@@ -42,7 +42,7 @@
    * @description 現在のフォントサイズが最大96以下の場合、フォントサイズを増加させます。
    */
   Window_Base.prototype.makeFontBigger = function () {
-    if (this.contents.fontSize <= 96 - fontSizeStep) {
+    if (this.contents.fontSize <= 96) {
       this.contents.fontSize += fontSizeStep;
     }
   };
@@ -54,7 +54,7 @@
    * @description 現在のフォントサイズが最小24以上の場合、フォントサイズを減少させます。
    */
   Window_Base.prototype.makeFontSmaller = function () {
-    if (this.contents.fontSize >= 24 + fontSizeStep) {
+    if (this.contents.fontSize >= 24) {
       this.contents.fontSize -= fontSizeStep;
     }
   };
