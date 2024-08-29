@@ -191,16 +191,7 @@
     const picturePosition = String(args.picturePosition || 'center');
     const waitForFinish = String(args.waitForFinish) === 'true';
 
-    SceneManager._scene.showChapterTitleWindow(
-      lines,
-      duration,
-      picture,
-      tone,
-      roundEdge,
-      blurValue,
-      titlePosition,
-      picturePosition
-    );
+    SceneManager._scene.showChapterTitleWindow(lines, duration, picture, tone, roundEdge, blurValue, titlePosition, picturePosition);
 
     if (waitForFinish) {
       this.wait(duration + 60 * 2);
@@ -286,11 +277,11 @@
         bitmap.addLoadListener(() => {
           this._pictureSprite = new Sprite(bitmap);
           this._pictureSprite.opacity = 0;
-          this._pictureSprite.setColorTone(tone);
-          this.applyRoundEdge(this._pictureSprite, roundEdge);
           if (blurValue) {
             this.applyBlurValue(this._pictureSprite, blurValue);
           }
+          this._pictureSprite.setColorTone(tone);
+          this.applyRoundEdge(this._pictureSprite, roundEdge);
           this.setPosition(this._pictureSprite, picturePosition);
           this.addChildToBack(this._pictureSprite);
         });
@@ -520,16 +511,7 @@
     titlePosition,
     picturePosition
   ) {
-    this._chapterTitleWindow.setTitle(
-      lines,
-      duration,
-      picture,
-      tone,
-      roundEdge,
-      blurValue,
-      titlePosition,
-      picturePosition
-    );
+    this._chapterTitleWindow.setTitle(lines, duration, picture, tone, roundEdge, blurValue, titlePosition, picturePosition);
     this._chapterTitleWindow.show();
   };
 
