@@ -1,15 +1,16 @@
-// Sakura_ShowChapterTitle 1.0.0
+// Sakura_ShowChapterTitle 1.0.1
 // Copyright (c) 2024 Sakurano
 // This software is released under the MIT license.
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/08/30 1.0.1 行の途中で文字の大きさを変える制御文字があった場合の不具合対応
  * 2024/08/29 1.0.0 公開
  */
 
 /*:
  * @target MZ
- * @plugindesc 1.0.0 章タイトルをコマンド１つで表示し、
+ * @plugindesc 1.0.1 章タイトルをコマンド１つで表示し、
  * フォントや背景を自由にカスタマイズできるプラグインです。
  *
  * @author Sakurano
@@ -219,8 +220,14 @@
 
   /**
    * 章タイトル表示用ウィンドウクラス
+   * @class
+   * @extends {Window_Base}
    */
   class Sakura_Window_ChapterTitle extends Window_Base {
+    /**
+     * コンストラクタ
+     * @param {Rectangle} rect - ウィンドウの矩形範囲
+     */
     constructor(rect) {
       super(rect);
       this.opacity = 0;
@@ -232,6 +239,9 @@
       this._lines = [];
     }
 
+    /**
+     * 更新処理
+     */
     update() {
       super.update();
 
@@ -244,6 +254,9 @@
       }
     }
 
+    /**
+     * フェードイン処理
+     */
     fadeIn() {
       this.contentsOpacity += 255 / 60;
       if (this._pictureSprite) this._pictureSprite.opacity += 255 / 60;
@@ -255,6 +268,9 @@
       }
     }
 
+    /**
+     * 表示処理
+     */
     display() {
       this._frameCount++;
       if (this._frameCount >= this._duration) {
@@ -263,6 +279,9 @@
       }
     }
 
+    /**
+     * フェードアウト処理
+     */
     fadeOut() {
       this.contentsOpacity -= 255 / 60;
       if (this._pictureSprite) this._pictureSprite.opacity -= 255 / 60;
@@ -378,6 +397,8 @@
       let totalHeight = 0;
       let maxWidth = 0;
 
+      const textSizes = [];
+
       // 各行の高さを計算して合計します
       this._lines.forEach((line) => {
         const fontFace = this.getFontFace(line.fontFaceIndex);
@@ -385,11 +406,11 @@
 
         this.contents.fontFace = fontFace;
         this.contents.fontSize = fontSize;
-        totalHeight += this.calcTextHeight({ text: line.text }, false);
-        maxWidth = Math.max(maxWidth, this.textSizeEx(line.text).width);
+        const { width, height } = this.textSizeEx(line.text);
+        textSizes.push({ width, height });
+        totalHeight += height;
+        maxWidth = Math.max(maxWidth, width);
       });
-
-      console.log({ totalHeight });
 
       let y;
       const paddingY = 30; // 端からの余白
@@ -408,14 +429,14 @@
           break;
       }
 
-      this._lines.forEach((line) => {
+      this._lines.forEach((line, index) => {
         const fontFace = this.getFontFace(line.fontFaceIndex);
         const fontSize = Number(line.fontSize || 48);
 
         this.contents.fontFace = fontFace;
         this.contents.fontSize = fontSize;
-        const textWidth = this.textSizeEx(line.text).width;
-        const textHeight = this.calcTextHeight({ text: line.text }, false);
+        const textWidth = textSizes[index].width;
+        const textHeight = textSizes[index].height;
 
         let x;
         const paddingX = 30; // 端からの余白
@@ -438,7 +459,7 @@
             break;
         }
 
-        this.drawTextEx(line.text, x, y, textWidth);
+        this.drawTextEx(line.text, x, y, textWidth, fontFace, fontSize);
         y += textHeight;
       });
     }
@@ -464,8 +485,8 @@
      * @param {Number} width - 描画範囲の幅
      * @returns {Number} テキストの幅
      */
-    drawTextEx(text, x, y, width) {
-      this.resetTextColor();
+    drawTextEx(text, x, y, width, fontFace, fontSize) {
+      this.resetFontSettings(fontFace, fontSize);
       const textState = this.createTextState(text, x, y, width);
       this.processAllText(textState);
       return textState.outputWidth;
@@ -476,7 +497,8 @@
      * @param {String} text - 対象のテキスト
      * @returns {Object} テキストの幅と高さ
      */
-    textSizeEx(text) {
+    textSizeEx(text, fontFace, fontSize) {
+      this.resetFontSettings(fontFace, fontSize);
       const textState = this.createTextState(text, 0, 0, 0);
       textState.drawing = false;
       this.processAllText(textState);
@@ -490,9 +512,22 @@
      */
     calcTextHeight(textState) {
       const lineSpacing = 10;
+      const lastFontSize = this.contents.fontSize;
       const lines = textState.text.slice(textState.index).split('\n');
       const textHeight = this.maxFontSizeInLine(lines[0]) + lineSpacing;
+      this.contents.fontSize = lastFontSize;
       return textHeight;
+    }
+
+    /**
+     * フォント設定をリセット
+     * @param {String} fontFace - フォント名
+     * @param {Number} fontSize - フォントサイズ
+     */
+    resetFontSettings(fontFace, fontSize) {
+      if (fontFace) this.contents.fontFace = fontFace;
+      if (fontSize) this.contents.fontSize = fontSize;
+      this.resetTextColor();
     }
   }
 
@@ -503,14 +538,19 @@
     this.createChapterTitleWindow();
   };
 
-  // 章タイトルウィンドウの作成
+  /**
+   * 章タイトルウィンドウの作成
+   */
   Scene_Map.prototype.createChapterTitleWindow = function () {
     const rect = this.chapterTitleWindowRect();
     this._chapterTitleWindow = new Sakura_Window_ChapterTitle(rect);
     this.addWindow(this._chapterTitleWindow);
   };
 
-  // 章タイトルウィンドウの矩形範囲を取得
+  /**
+   * 章タイトルウィンドウの矩形範囲を取得
+   * @returns {Rectangle} ウィンドウの矩形範囲
+   */
   Scene_Map.prototype.chapterTitleWindowRect = function () {
     const ww = Graphics.width;
     const wh = Graphics.height;
@@ -519,7 +559,17 @@
     return new Rectangle(wx, wy, ww, wh);
   };
 
-  // 章タイトルウィンドウを表示
+  /**
+   * 章タイトルウィンドウを表示
+   * @param {Array} lines - 表示する章タイトルの各行
+   * @param {Number} duration - 表示時間（フレーム数）
+   * @param {String} picture - ピクチャ画像のファイル名
+   * @param {Array} tone - ピクチャの色調 [赤, 緑, 青, グレー]
+   * @param {Number} roundEdge - ピクチャの四隅の丸みの度合い
+   * @param {Number} blurValue - ピクチャ全体のぼかしの強さ
+   * @param {String} titlePosition - タイトルの表示位置
+   * @param {String} picturePosition - ピクチャの表示位置
+   */
   Scene_Map.prototype.showChapterTitleWindow = function (
     lines,
     duration,
