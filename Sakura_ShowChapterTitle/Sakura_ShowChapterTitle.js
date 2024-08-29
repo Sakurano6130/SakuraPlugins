@@ -1,9 +1,19 @@
+// Sakura_ShowChapterTitle 1.0.0
+// Copyright (c) 2024 Sakurano
+// This software is released under the MIT license.
+// http://opensource.org/licenses/mit-license.php
+
+/**
+ * 2024/08/29 1.0.0 公開
+ */
+
 /*:
  * @target MZ
- * @plugindesc v1.0.0 章タイトルをフェードイン・アウト効果付きで表示し、
+ * @plugindesc 1.0.0 章タイトルをコマンド１つで表示し、
  * フォントや背景を自由にカスタマイズできるプラグインです。
+ *
  * @author Sakurano
- * @url https://github.com/Sakurano6130/Sakura_plugins
+ * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
  * このプラグインは、複数行の章タイトルをフェードイン・表示・フェードアウト
  * 付きで表示します。各行ごとにフォントとサイズを指定でき、ピクチャの色調や
@@ -286,11 +296,11 @@
         bitmap.addLoadListener(() => {
           this._pictureSprite = new Sprite(bitmap);
           this._pictureSprite.opacity = 0;
-          this._pictureSprite.setColorTone(tone);
-          this.applyRoundEdge(this._pictureSprite, roundEdge);
           if (blurValue) {
             this.applyBlurValue(this._pictureSprite, blurValue);
           }
+          this._pictureSprite.setColorTone(tone);
+          this.applyRoundEdge(this._pictureSprite, roundEdge);
           this.setPosition(this._pictureSprite, picturePosition);
           this.addChildToBack(this._pictureSprite);
         });
