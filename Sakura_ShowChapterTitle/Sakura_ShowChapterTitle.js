@@ -1,7 +1,17 @@
+// Sakura_ShowChapterTitle 1.0.0
+// Copyright (c) 2024 Sakurano
+// This software is released under the MIT license.
+// http://opensource.org/licenses/mit-license.php
+
+/**
+ * 2024/08/29 1.0.0 公開
+ */
+
 /*:
  * @target MZ
- * @plugindesc v1.0.0 章タイトルをフェードイン・アウト効果付きで表示し、
+ * @plugindesc 1.0.0 章タイトルをコマンド１つで表示し、
  * フォントや背景を自由にカスタマイズできるプラグインです。
+ *
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
