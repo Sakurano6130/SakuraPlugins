@@ -3,7 +3,7 @@
  * @plugindesc v1.0.0 章タイトルをフェードイン・アウト効果付きで表示し、
  * フォントや背景を自由にカスタマイズできるプラグインです。
  * @author Sakurano
- * @url https://github.com/Sakurano6130/Sakura_plugins
+ * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
  * このプラグインは、複数行の章タイトルをフェードイン・表示・フェードアウト
  * 付きで表示します。各行ごとにフォントとサイズを指定でき、ピクチャの色調や
@@ -170,42 +170,48 @@
 
 (() => {
   // プラグイン名と設定を取得
-  const pluginName = 'Sakura_ShowChapterTitle';
+  const pluginName = "Sakura_ShowChapterTitle";
   const parameters = PluginManager.parameters(pluginName);
 
   const settings = {
-    fontFiles: JSON.parse(parameters.fontFiles || '[]'),
+    fontFiles: JSON.parse(parameters.fontFiles || "[]"),
   };
 
   /**
    * プラグインコマンドの登録
    */
-  PluginManager.registerCommand(pluginName, 'showChapterTitle', function (args) {
-    const lines = JSON.parse(args.lines ?? '[]').map((line) => JSON.parse(line));
-    const duration = Number(args.duration || 240);
-    const picture = String(args.picture || '');
-    const tone = JSON.parse(args.tone || '[0, 0, 0, 0]');
-    const roundEdge = Number(args.roundEdge || 50);
-    const blurValue = Number(args.blurValue || 2);
-    const titlePosition = String(args.titlePosition || 'center');
-    const picturePosition = String(args.picturePosition || 'center');
-    const waitForFinish = String(args.waitForFinish) === 'true';
+  PluginManager.registerCommand(
+    pluginName,
+    "showChapterTitle",
+    function (args) {
+      const lines = JSON.parse(args.lines ?? "[]").map((line) =>
+        JSON.parse(line)
+      );
+      const duration = Number(args.duration || 240);
+      const picture = String(args.picture || "");
+      const tone = JSON.parse(args.tone || "[0, 0, 0, 0]");
+      const roundEdge = Number(args.roundEdge || 50);
+      const blurValue = Number(args.blurValue || 2);
+      const titlePosition = String(args.titlePosition || "center");
+      const picturePosition = String(args.picturePosition || "center");
+      const waitForFinish = String(args.waitForFinish) === "true";
 
-    SceneManager._scene.showChapterTitleWindow(
-      lines,
-      duration,
-      picture,
-      tone,
-      roundEdge,
-      blurValue,
-      titlePosition,
-      picturePosition
-    );
+      SceneManager._scene.showChapterTitleWindow(
+        lines,
+        duration,
+        picture,
+        tone,
+        roundEdge,
+        blurValue,
+        titlePosition,
+        picturePosition
+      );
 
-    if (waitForFinish) {
-      this.wait(duration + 60 * 2);
+      if (waitForFinish) {
+        this.wait(duration + 60 * 2);
+      }
     }
-  });
+  );
 
   /**
    * 章タイトル表示用ウィンドウクラス
@@ -217,7 +223,7 @@
       this.contentsOpacity = 0;
       this._duration = 0;
       this._pictureSprite = null;
-      this._phase = 'fadeIn';
+      this._phase = "fadeIn";
       this._frameCount = 0;
       this._lines = [];
     }
@@ -225,11 +231,11 @@
     update() {
       super.update();
 
-      if (this._phase === 'fadeIn') {
+      if (this._phase === "fadeIn") {
         this.fadeIn();
-      } else if (this._phase === 'display') {
+      } else if (this._phase === "display") {
         this.display();
-      } else if (this._phase === 'fadeOut') {
+      } else if (this._phase === "fadeOut") {
         this.fadeOut();
       }
     }
@@ -240,7 +246,7 @@
       this._frameCount++;
 
       if (this._frameCount >= 60) {
-        this._phase = 'display';
+        this._phase = "display";
         this._frameCount = 0;
       }
     }
@@ -248,7 +254,7 @@
     display() {
       this._frameCount++;
       if (this._frameCount >= this._duration) {
-        this._phase = 'fadeOut';
+        this._phase = "fadeOut";
         this._frameCount = 0;
       }
     }
@@ -276,7 +282,16 @@
      * @param {String} titlePosition - タイトルの表示位置
      * @param {String} picturePosition - ピクチャの表示位置
      */
-    setTitle(lines, duration, picture, tone, roundEdge, blurValue, titlePosition, picturePosition) {
+    setTitle(
+      lines,
+      duration,
+      picture,
+      tone,
+      roundEdge,
+      blurValue,
+      titlePosition,
+      picturePosition
+    ) {
       this.contents.clear();
       this._lines = lines;
       this._duration = duration;
@@ -296,7 +311,7 @@
         });
       }
 
-      this._phase = 'fadeIn';
+      this._phase = "fadeIn";
       this._frameCount = 0;
       this.contentsOpacity = 0;
       if (this._pictureSprite) this._pictureSprite.opacity = 0;
@@ -336,23 +351,23 @@
      */
     setPosition(sprite, position) {
       switch (position) {
-        case 'topLeft':
+        case "topLeft":
           sprite.x = 0;
           sprite.y = 0;
           break;
-        case 'topRight':
+        case "topRight":
           sprite.x = this.width - sprite.width;
           sprite.y = 0;
           break;
-        case 'bottomLeft':
+        case "bottomLeft":
           sprite.x = 0;
           sprite.y = this.height - sprite.height;
           break;
-        case 'bottomRight':
+        case "bottomRight":
           sprite.x = this.width - sprite.width;
           sprite.y = this.height - sprite.height;
           break;
-        case 'center':
+        case "center":
         default:
           sprite.x = (this.width - sprite.width) / 2;
           sprite.y = (this.height - sprite.height) / 2;
@@ -384,15 +399,15 @@
       let y;
       const paddingY = 30; // 端からの余白
       switch (position) {
-        case 'topLeft':
-        case 'topRight':
+        case "topLeft":
+        case "topRight":
           y = paddingY;
           break;
-        case 'bottomLeft':
-        case 'bottomRight':
+        case "bottomLeft":
+        case "bottomRight":
           y = this.height - totalHeight - paddingY;
           break;
-        case 'center':
+        case "center":
         default:
           y = (this.height - totalHeight) / 2;
           break;
@@ -410,19 +425,19 @@
         let x;
         const paddingX = 30; // 端からの余白
         switch (position) {
-          case 'topLeft':
+          case "topLeft":
             x = paddingX;
             break;
-          case 'topRight':
+          case "topRight":
             x = this.width - textWidth - paddingX;
             break;
-          case 'bottomLeft':
+          case "bottomLeft":
             x = paddingX;
             break;
-          case 'bottomRight':
+          case "bottomRight":
             x = this.width - textWidth - paddingX;
             break;
-          case 'center':
+          case "center":
           default:
             x = (this.width - textWidth) / 2;
             break;
@@ -480,14 +495,15 @@
      */
     calcTextHeight(textState) {
       const lineSpacing = 10;
-      const lines = textState.text.slice(textState.index).split('\n');
+      const lines = textState.text.slice(textState.index).split("\n");
       const textHeight = this.maxFontSizeInLine(lines[0]) + lineSpacing;
       return textHeight;
     }
   }
 
   // シーンマップでウィンドウを作成する処理をオーバーライド
-  const _Scene_Map_prototype_createAllWindows = Scene_Map.prototype.createAllWindows;
+  const _Scene_Map_prototype_createAllWindows =
+    Scene_Map.prototype.createAllWindows;
   Scene_Map.prototype.createAllWindows = function () {
     _Scene_Map_prototype_createAllWindows.call(this);
     this.createChapterTitleWindow();
@@ -534,7 +550,8 @@
   };
 
   // フォントの読み込み処理をオーバーライド
-  const _Scene_Boot_prototype_loadGameFonts = Scene_Boot.prototype.loadGameFonts;
+  const _Scene_Boot_prototype_loadGameFonts =
+    Scene_Boot.prototype.loadGameFonts;
   Scene_Boot.prototype.loadGameFonts = function () {
     _Scene_Boot_prototype_loadGameFonts.call(this);
     let index = 0;
