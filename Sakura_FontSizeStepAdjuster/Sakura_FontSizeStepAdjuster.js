@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/08/31 1.0.1 デフォルト値を修正
  * 2024/08/30 1.0.0 初回公開
  */
 
@@ -33,13 +34,13 @@
  * @param MaxFontSize
  * @text フォントサイズの最大値
  * @desc フォントサイズの最大値を指定します。
- * @default 96
+ * @default 108
  * @type number
  *
  * @param MinFontSize
  * @text フォントサイズの最小値
  * @desc フォントサイズの最小値を指定します。
- * @default 24
+ * @default 12
  * @type number
  *
  */
@@ -48,8 +49,8 @@
   const pluginName = 'Sakura_FontSizeStepAdjuster';
   const parameters = PluginManager.parameters(pluginName);
   const fontSizeStep = Number(parameters['FontSizeStep'] || 12);
-  const maxFontSize = Number(parameters['MaxFontSize'] || 96);
-  const minFontSize = Number(parameters['MinFontSize'] || 24);
+  const maxFontSize = Number(parameters['MaxFontSize'] || 108);
+  const minFontSize = Number(parameters['MinFontSize'] || 12);
 
   /**
    * フォントサイズを大きくするメソッド。
