@@ -1,4 +1,4 @@
-// Sakura_FontSizeStepAdjuster 1.1.0
+// Sakura_FontSizeStepAdjuster
 // Copyright (c) 2024 Sakurano
 // This software is released under the MIT license.
 // http://opensource.org/licenses/mit-license.php
