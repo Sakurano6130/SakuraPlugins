@@ -10,7 +10,7 @@
 
 /*:
  * @target MZ
- * @plugindesc 1.0.0 フォントサイズの増減幅および最大値と最小値を設定できるプラグインです。
+ * @plugindesc フォントサイズの増減幅および最大値と最小値を設定できるプラグインです。
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
