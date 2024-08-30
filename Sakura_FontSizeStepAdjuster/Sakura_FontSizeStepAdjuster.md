@@ -1,7 +1,6 @@
 # Sakura_FontSizeStepAdjuster
 メッセージウィンドウの制御文字`\}` `\{`で変化させるフォントサイズの増減幅を自由に設定できるプラグインです。
 
-![alt text](image-1.png)
 ![alt text](image.png)
 
 ## ダウンロード
