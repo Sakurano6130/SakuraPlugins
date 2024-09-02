@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/02 1.0.0 公開
  * 2024/09/02 0.5.0 ほぼ形に
  * 2024/08/31 0.0.1 作成
  */
@@ -23,32 +24,6 @@
  *
  * また、メッセージウィンドウ内で \BTN[ボタン名]
  * を使用してボタンを描画する機能もついています。
- *
- * プラグインパラメータの説明:
- *
- * - SceneKeys: 各シーンにおけるキーとその説明、クリックされたときに押すキーを
- *   定義します。設定されたスイッチによって表示内容が変わります。
- *
- * - GlobalHideSwitch: このスイッチがONの時、キーボードガイドウィンドウを非表示に
- *   します。
- *
- * - FontSize: キーテキストに使用するフォントサイズです。
- *
- * - ButtonHeight: ボタンの高さを指定します。
- *
- * - ButtonPaddingX: ボタンのX軸内側余白を指定します。
- *
- * - ButtonPaddingY: ボタンのY軸内側余白を指定します。
- *
- * - ButtonMarginX: ボタンと説明の間の余白を指定します。
- *
- * - ButtonNameOffsetYInWindowMessage: ボタン内のテキストを描画する際のY軸オフセットです。
- *   正の値で下に、負の値で上に移動します。
- *
- * - ButtonOffsetYInWindowMessage: メッセージウィンドウ内でボタンを描画する際のY軸
- *   オフセットです。別プラグインでルビを振る際に高さを揃えるために調整して
- *   ください。
- *
  *
  * 利用方法:
  *
@@ -75,8 +50,26 @@
  * @type number
  * @min 10
  * @max 40
- * @desc キーテキストに使用するフォントサイズです。
+ * @desc ボタンの文字のフォントサイズです。
  * @default 16
+ *
+ * @param ButtonTextColor
+ * @text ボタンの文字の色
+ * @type string
+ * @desc ボタンの文字の色です。
+ * @default #FFFFFF
+ *
+ * @param ButtonEdgeColor
+ * @text ボタンの外枠の色
+ * @type string
+ * @desc ボタンの外枠の色です。
+ * @default #808080
+ *
+ * @param ButtonInnerColor
+ * @text ボタンの内側の色
+ * @type string
+ * @desc ボタンの内側の色です。
+ * @default #333333
  *
  * @param ButtonHeight
  * @text ボタンの高さ
@@ -134,6 +127,7 @@
  * @desc キーボードガイドを表示するシーン名を選択します。
  * @type select
  * @option Scene_Map
+ * @option Scene_Menu
  * @option Scene_Item
  * @option Scene_Skill
  * @option Scene_Equip
@@ -199,7 +193,9 @@
  * @param TriggerKey
  * @text クリックされたときにトリガーするキー
  * @desc クリックされたときにトリガーするキー
+ * @default なし
  * @type select
+ * @option なし
  * @option 0
  * @option 1
  * @option 2
@@ -322,6 +318,9 @@
     };
   });
   const fontSize = Number(parameters['FontSize'] || 16);
+  const buttonEdgeColor = String(parameters['ButtonEdgeColor'] || 'grey');
+  const buttonInnerColor = String(parameters['ButtonInnerColor'] || '#333333');
+  const buttonTextColor = String(parameters['ButtonTextColor'] || '#FFFFFF');
   const buttonMarginX = Number(parameters['ButtonMarginX'] || 10);
   const buttonMarginY = 26;
   const buttonPaddingX = Number(parameters['ButtonPaddingX'] || 8);
@@ -389,7 +388,15 @@
       'rgba(0, 0, 0, 0.7)'
     );
     // ボタンの外枠を描画
-    drawRoundedRectToContext(context, x, y, buttonWidth, buttonHeight, buttonCornerRadius, 'grey');
+    drawRoundedRectToContext(
+      context,
+      x,
+      y,
+      buttonWidth,
+      buttonHeight,
+      buttonCornerRadius,
+      buttonEdgeColor
+    );
     // ボタンの内部を描画
     drawRoundedRectToContext(
       context,
@@ -398,8 +405,9 @@
       buttonWidth - 4,
       buttonHeight - 4,
       buttonCornerRadius - 2,
-      '#333333'
+      buttonInnerColor
     );
+    // 光部分を描画
     contents.paintOpacity = 120;
     contents.fillRect(x, y, buttonWidth, 8, 'rgba(255, 255, 255, 0.2)');
     contents.paintOpacity = 255;
@@ -610,28 +618,6 @@
   const keyManager = new KeyManager();
 
   /**
-   * マップシーンでのボタンクリックをチェックするメソッド
-   * @returns {boolean} クリックがトリガーされたかどうか
-   */
-  Scene_Map.prototype.checkButtonClick = function () {
-    if (TouchInput.isPressed()) {
-      const x = TouchInput.x;
-      const y = TouchInput.y;
-      const triggered = keyManager.triggerKeyEventByPosition(x, y);
-      return triggered;
-    }
-    return false;
-  };
-
-  const _Scene_Map_prototype_onMapTouch = Scene_Map.prototype.onMapTouch;
-  Scene_Map.prototype.onMapTouch = function () {
-    const buttonClicked = this.checkButtonClick(); // ボタンがクリックされたかどうかをチェック
-    if (!buttonClicked) {
-      _Scene_Map_prototype_onMapTouch.call(this);
-    }
-  };
-
-  /**
    * キーボードガイドウィンドウのクラス
    * @extends {Window_Base}
    */
@@ -681,7 +667,9 @@
       const adjustedTextY = y - this.itemPadding() + 4 + buttonPaddingY;
 
       this._keyDescriptions.forEach((keyDesc) => {
-        const { KeyName: keyName, TriggerKey: triggerKey, Description: description } = keyDesc;
+        const { KeyName: keyName, Description: description } = keyDesc;
+
+        const triggerKey = keyDesc.TriggerKey === 'なし' ? '' : keyDesc.TriggerKey;
 
         const textWidth = this.textWidth(keyName);
         const buttonWidth = textWidth + buttonPaddingX * 2;
@@ -705,7 +693,7 @@
           buttonHeight
         );
 
-        this.contents.textColor = '#FFFFFF';
+        this.contents.textColor = buttonTextColor;
         this.drawText(
           keyName,
           x + buttonPaddingX,
@@ -727,6 +715,8 @@
 
       if (this._showDimmer) {
         this.showBackgroundDimmer();
+      } else {
+        this.hideBackgroundDimmer();
       }
       this._initialized = true;
     }
@@ -847,41 +837,79 @@
     }
   }
 
+  /**
+   * マップシーンでのボタンクリックをチェックするメソッド
+   * @returns {boolean} クリックがトリガーされたかどうか
+   */
+  const checkButtonClick = () => {
+    if (TouchInput.isPressed()) {
+      const x = TouchInput.x;
+      const y = TouchInput.y;
+      const triggered = keyManager.triggerKeyEventByPosition(x, y);
+      return triggered;
+    }
+    return false;
+  };
+
+  //   Stage
+  //  └── Scene_Base
+  //       ├── Scene_Boot
+  //       ├── Scene_Splash
+  //       ├── Scene_Title
+  //       ├── Scene_Message
+  //       │     ├── Scene_Map
+  //       │     └── Scene_Battle
+  //       ├── Scene_MenuBase
+  //       │     ├── Scene_Menu
+  //       │     ├── Scene_ItemBase
+  //       │     │     ├── Scene_Item
+  //       │     │     ├── Scene_Skill
+  //       │     │     └── Scene_Equip
+  //       │     ├── Scene_Options
+  //       │     ├── Scene_File
+  //       │     │     ├── Scene_Save
+  //       │     │     └── Scene_Load
+  //       │     ├── Scene_GameEnd
+  //       │     └── Scene_Shop
+  //       └── Scene_Debug
+
   const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
   Scene_Map.prototype.createAllWindows = function () {
     _Scene_Map_createAllWindows.call(this);
     createKeyboardHelpWindowsForScene(this);
   };
 
-  const _Scene_Item_create = Scene_Item.prototype.create;
-  Scene_Item.prototype.create = function () {
-    _Scene_Item_create.call(this);
-    createKeyboardHelpWindowsForScene(this);
+  // Scene_Mapは、クリックで移動してしまうことを防ぐため他のSceneとは別の処理を行う
+  const _Scene_Map_prototype_onMapTouch = Scene_Map.prototype.onMapTouch;
+  Scene_Map.prototype.onMapTouch = function () {
+    const buttonClicked = checkButtonClick(); // ボタンがクリックされたかどうかをチェック
+    if (!buttonClicked) {
+      _Scene_Map_prototype_onMapTouch.call(this);
+    }
   };
 
-  const _Scene_Skill_create = Scene_Skill.prototype.create;
-  Scene_Skill.prototype.create = function () {
-    _Scene_Skill_create.call(this);
-    createKeyboardHelpWindowsForScene(this);
-  };
+  const Scene_MenuChildren = [
+    Scene_Battle,
+    Scene_Menu,
+    Scene_Item,
+    Scene_Skill,
+    Scene_Equip,
+    Scene_Status,
+  ];
 
-  const _Scene_Equip_create = Scene_Equip.prototype.create;
-  Scene_Equip.prototype.create = function () {
-    _Scene_Equip_create.call(this);
-    createKeyboardHelpWindowsForScene(this);
-  };
+  for (const scene of Scene_MenuChildren) {
+    const originalCreate = scene.prototype.create;
+    scene.prototype.create = function () {
+      originalCreate.call(this);
+      createKeyboardHelpWindowsForScene(this);
+    };
 
-  const _Scene_Status_create = Scene_Status.prototype.create;
-  Scene_Status.prototype.create = function () {
-    _Scene_Status_create.call(this);
-    createKeyboardHelpWindowsForScene(this);
-  };
-
-  const _Scene_Battle_create = Scene_Battle.prototype.create;
-  Scene_Battle.prototype.create = function () {
-    _Scene_Battle_create.call(this);
-    createKeyboardHelpWindowsForScene(this);
-  };
+    const originalUpdate = scene.prototype.update;
+    scene.prototype.update = function () {
+      originalUpdate.call(this);
+      checkButtonClick(); // ボタンがクリックされたかどうかをチェック
+    };
+  }
 
   /**
    * メッセージウィンドウ内で制御文字 \BTN[ボタン名] を使用してカスタムボタンを描画
@@ -928,7 +956,7 @@
     const originalOutlineColor = this.contents.outlineColor;
 
     this.contents.fontSize = fontSize;
-    this.contents.textColor = 'white';
+    this.contents.textColor = buttonTextColor;
     this.contents.outlineColor = ColorManager.outlineColor();
 
     const textWidth = this.textWidth(buttonName);
