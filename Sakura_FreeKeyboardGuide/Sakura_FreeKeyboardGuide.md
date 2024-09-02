@@ -4,7 +4,7 @@
 ![alt text](image-2.png)
 
 ## ダウンロード
-[Sakura_FreeKeyboardGuide.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_FreeKeyboardGuide/Sakura_FreeKeyboardGuide.js)
+[Sakura_FreeKeyboardGuide.js](Sakura_FreeKeyboardGuide.js)
 
 ## 更新履歴
 | ver   | 日付       | 説明     |
@@ -25,18 +25,39 @@
 
 - **SceneKeys**:  
   各シーンにおけるキーとその説明、クリックされたときに押すキーを定義します。設定されたスイッチによって表示内容が変わります。
-  - Scene_Map, Scene_Item, Scene_Skill, Scene_Equip, Scene_Status, Scene_Battleを指定できます。
+  - Scene_Map, Scene_Menu, Scene_Item, Scene_Skill, Scene_Equip, Scene_Status, Scene_Battleを指定できます。
+  - 同じシーンを複数登録すると複数表示されます。
+  
+    ![alt text](image-1.png)
+
+  - 表示位置や、表示/非表示を切り替えるスイッチを設定します。（スイッチの指定がない時は常に表示です）
+
+    ![alt text](image-4.png)
+
+  - ボタンの設定をします。
+
+    ![alt text](image-3.png)
+  
+  - 表示するキー、説明、クリックされたときにトリガーするボタンを決めます。（クリックされたときにトリガーするボタンは不要の場合指定しなくても良いです）
+
+    ![alt text](image-5.png)
 
 - **GlobalHideSwitch**:  
-  このスイッチがONの時、キーボードガイドウィンドウを非表示にします。
+  このスイッチがONの時、全てのキーボードガイドウィンドウを非表示にします。
 
 - **FontSize**:  
-  キーテキストに使用するフォントサイズです。
+  ボタンの文字のフォントサイズです。
 
-- **ButtonHeight**:  
-  ボタンの高さを指定します。
+- **ButtonTextColor**:  
+  ボタンの文字の色です。
 
-- **ButtonPaddingX**:  
+- **ButtonEdgeColor**:  
+  ボタンの外枠の色です。
+
+- **ButtonInnerColor**:  
+  ボタンの内側の色です。
+
+- **ButtonTextColor**:  
   ボタンのX軸内側余白を指定します。
 
 - **ButtonPaddingY**:  
@@ -51,13 +72,16 @@
 - **ButtonOffsetYInWindowMessage**:  
   メッセージウィンドウ内でボタンを描画する際のY軸オフセットです。別プラグインでルビを振る際に高さを揃えるために調整してください。
 
-### 利用方法:
-
-- **キーボードガイドウィンドウの表示**:  
-  `SceneKeys`でシーンごとの設定を行い、指定したスイッチをONにしてください。
-
-- **メッセージウィンドウ内のボタン描画**:  
+### メッセージウィンドウ内のボタン描画
   メッセージウィンドウ内で `\BTN[ボタン名]` を使用すると、指定したボタンが描画されます。
+
+  ![alt text](image-6.png)
+
+### ウィンドウの重なりについて
+  - RPGツクールのウィンドウ描画の仕様で、ウィンドウを重ねて表示した場合、後ろのウィンドウが欠けて表示されたように見えてしまいます。
+  - これが気になる方は、[Sakura_NonBlockingWindowLayer](../Sakura_NonBlockingWindowLayer/Sakura_NonBlockingWindowLayer.md)をお試しください。
+
+  ![alt text](image-7.png)
 
 
 # License
