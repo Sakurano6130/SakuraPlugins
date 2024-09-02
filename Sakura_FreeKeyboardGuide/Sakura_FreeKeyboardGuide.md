@@ -1,7 +1,7 @@
 # Sakura_FreeKeyboardGuide
 キーボードガイドを自由に出せるプラグイン
 
-![alt text](image-2.png)
+![alt text](image-8.png)
 
 ## ダウンロード
 [Sakura_FreeKeyboardGuide.js](Sakura_FreeKeyboardGuide.js)
@@ -9,7 +9,7 @@
 ## 更新履歴
 | ver   | 日付       | 説明     |
 | ----- | ---------- | -------- |
-| 1.0.0 | 2024/09/02 | 公開 |
+| 1.0.0 | 2024/09/02 | 公開     |
 | 0.5.0 | 2024/09/02 | ほぼ形に |
 | 0.0.1 | 2024/08/31 | 作成開始 |
 
@@ -87,3 +87,4 @@
 
 # License
 - This software is released under the MIT license. http://opensource.org/licenses/mit-license.php
+
