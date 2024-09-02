@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/02 1.0.1 デフォルト値変更
  * 2024/09/02 1.0.0 公開
  * 2024/09/02 0.5.0 ほぼ形に
  * 2024/08/31 0.0.1 作成
@@ -101,7 +102,7 @@
  * @min -40
  * @max 40
  * @desc ボタンと説明の間の余白です。
- * @default 10
+ * @default 14
  *
  * @param ButtonOffsetYInWindowMessage
  * @text メッセージ内ボタンYオフセット
