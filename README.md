@@ -9,6 +9,3 @@
 | <a href="Sakura_FreeKeyboardGuide/Sakura_FreeKeyboardGuide.md"><img src="image-3.png" alt="alt text"></a>       | 🎉1.0.0     | [Sakura_<br>FreeKeyboardGuide](Sakura_FreeKeyboardGuide/Sakura_FreeKeyboardGuide.md)<br>⌨️キーボードガイドを楽に自由に！                    |
 | <a href="Sakura_NonBlockingWindowLayer/Sakura_NonBlockingWindowLayer.md"><img src="image-6.png" alt="alt text"></a>       | 🎉1.0.0     | [Sakura_<br>NonBlockingWindowLayer](Sakura_NonBlockingWindowLayer/Sakura_NonBlockingWindowLayer.md)<br>✨ウィンドウが重なったとき、後ろのウィンドウを隠さないプラグイン                    |
 | <a href="#"><img src="image-5.png" alt="alt text"></a>                                                          | 🚧準備中    | Sakura_<br>ShowDestinationBySwitchOn<br>🧭スイッチオンで自動的に次の目的を表示                                                                     |
-
-
-![alt text](image-6.png)
