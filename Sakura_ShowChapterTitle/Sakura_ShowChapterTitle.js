@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/03 1.0.2 ウィンドウ初期化時に明示的にhideするように修正
  * 2024/08/30 1.0.1 行の途中で文字の大きさを変える制御文字があった場合の不具合対応
  * 2024/08/29 1.0.0 公開
  */
@@ -237,6 +238,7 @@
       this._phase = 'fadeIn';
       this._frameCount = 0;
       this._lines = [];
+      this.hide();
     }
 
     /**
@@ -306,6 +308,7 @@
      * @param {String} picturePosition - ピクチャの表示位置
      */
     setTitle(lines, duration, picture, tone, roundEdge, blurValue, titlePosition, picturePosition) {
+      this.show();
       this.contents.clear();
       this._lines = lines;
       this._duration = duration;
