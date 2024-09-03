@@ -1,7 +1,7 @@
 # Sakura_MapNameExtend
 マップ名表示をちょっといいかんじにします✨。
 
-![alt text](image-1.png)
+  ![alt text](image-5.png)
 
 ## ダウンロード
 [Sakura_MapNameExtend.js](Sakura_MapNameExtend.js)
