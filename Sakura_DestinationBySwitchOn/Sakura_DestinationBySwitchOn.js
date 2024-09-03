@@ -72,7 +72,7 @@
  * @text 目的を書き出すかどうか
  * @desc これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「destinationsBySwitch.txt」というファイルが出力されます
  * @type boolean
- * @default true
+ * @default false
  *
  * @help
  * スイッチ名が$で始まる名前のものをオンにしたとき、
@@ -101,7 +101,7 @@
   const fontSize = Number(parameters['fontSize'] || 16);
   const storyProgressText = String(parameters['storyProgressText'] || '');
   const storyProgressTextColor = Number(parameters['storyProgressTextColor'] || 0);
-  const needsOutputDestinations = parameters['needsOutputDestinations'] === 'true';
+  const needsOutputDestinations = parameters['needsOutputDestinations'] === 'false';
 
   /**
    * 目的地の管理を行うクラス
