@@ -98,6 +98,30 @@
  * @type color
  * @default 0
  *
+ * @param fadeDuration
+ * @text フェードイン・フェードアウトの時間
+ * @desc フェードイン・フェードアウトの時間
+ * @type number
+ * @min 10
+ * @max 360
+ * @default 60
+ *
+ * @param holdDuration
+ * @text 表示が制止する時間
+ * @desc 表示が制止する時間
+ * @type number
+ * @min 10
+ * @max 360
+ * @default 180
+ *
+ * @param moveDistance
+ * @text フェードイン/アウト時の移動距離
+ * @desc フェードイン/アウト時の移動距離
+ * @type number
+ * @min 0
+ * @max 120
+ * @default 30
+ *
  * @param needsOutputMaps
  * @text マップ表示名一覧データを書き出すかどうか
  * @desc これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「mapsData.txt」というファイルが出力されます
@@ -119,6 +143,9 @@
   const mainFontColor = Number(parameters.mainFontColor || 0);
   const subFontSize = Number(parameters.subFontSize || 16);
   const subFontColor = Number(parameters.subFontColor || 0);
+  const fadeDuration = Number(parameters['fadeDuration'] || 60); // フェードイン・フェードアウトの時間
+  const holdDuration = Number(parameters['holdDuration'] || 180); // 表示が制止する時間
+  const moveDistance = Number(parameters['moveDistance'] || 30); // フェードイン/アウト時の移動距離
   const needsOutputMaps = parameters['needsOutputMaps'] === 'false';
 
   // ファイル操作とパス操作のモジュールをインポート
@@ -236,6 +263,55 @@
     _Window_MapName_initialize.call(this, rect);
     this.opacity = 0; // ウィンドウの透明度を0に設定
     this.updatePosition(); // ウィンドウの位置を更新
+    this._phase = 0; // フェーズ管理: 0 = フェードイン, 1 = 制止, 2 = フェードアウト
+    this._fadeTimer = 0; // タイマーの初期化
+    this._initialX = this.x; // 初期X座標を保存
+  };
+
+  Window_MapName.prototype.update = function () {
+    Window_Base.prototype.update.call(this);
+    this.updateFade();
+  };
+
+  Window_MapName.prototype.updateFade = function () {
+    if (this._phase === 0) {
+      // フェードイン
+      this._fadeTimer++;
+      this.contentsOpacity = (this._fadeTimer / fadeDuration) * 255;
+      this.x = this._initialX - moveDistance * (1 - this._fadeTimer / fadeDuration);
+      if (this._fadeTimer >= fadeDuration) {
+        this._fadeTimer = 0;
+        this._phase = 1;
+        this.x = this._initialX; // 元の位置に戻す
+      }
+    } else if (this._phase === 1) {
+      // 制止
+      this._fadeTimer++;
+      if (this._fadeTimer >= holdDuration) {
+        this._fadeTimer = 0;
+        this._phase = 2;
+      }
+    } else if (this._phase === 2) {
+      // フェードアウト
+      this._fadeTimer++;
+      this.contentsOpacity = 255 - (this._fadeTimer / fadeDuration) * 255;
+      this.x = this._initialX + moveDistance * (this._fadeTimer / fadeDuration);
+      if (this._fadeTimer >= fadeDuration) {
+        this._fadeTimer = 0;
+        this._phase = 3;
+        this.close(); // フェードアウト後ウィンドウを閉じる
+      }
+    }
+  };
+
+  // リフレッシュ時にアニメーションを再度初期化
+  const _Window_MapName_refresh = Window_MapName.prototype.refresh;
+  Window_MapName.prototype.refresh = function () {
+    _Window_MapName_refresh.call(this);
+    this._phase = 0; // フェーズをリセット
+    this._fadeTimer = 0; // タイマーをリセット
+    this.contentsOpacity = 0; // ウィンドウを非表示に
+    this.x = this._initialX - moveDistance; // 少し左にオフセット
   };
 
   /**
@@ -269,7 +345,7 @@
         : { width: 0, height: 0 };
 
       // ウィンドウの幅と高さを計算
-      const marginX = 20;
+      const marginX = 100;
       const width = Math.max(mainTextWidth, subTextWidth) + this.padding * 2 + marginX * 2;
       const height = mainTextHeight + subTextHeight + this.padding * 2;
 
