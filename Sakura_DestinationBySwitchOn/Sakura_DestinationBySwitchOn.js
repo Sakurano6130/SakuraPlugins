@@ -4,15 +4,38 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/03 1.0.0 公開
  * 2024/09/03 0.5.0 だいたい形に
  * 2024/09/02 0.0.1 作成
  */
 
 /*:
  * @target MZ
- * @plugindesc 次の目的をスイッチ名から表示できるプラグイン
+ * @plugindesc スイッチオンで次の目的表示
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
+ *
+ * @command HideDestinationText
+ * @text 目的テキストを隠す
+ * @desc 表示されている目的テキストを隠します。
+ *
+ * @command ShowDestinationText
+ * @text 目的テキストを表示する
+ * @desc 隠していた目的テキストを表示します。
+ *
+ * @param destinationPosition
+ * @text 目的テキストの位置
+ * @desc 目的テキストを表示する位置（左上、右上、左下、右下から選択）
+ * @type select
+ * @option 左上
+ * @value topLeft
+ * @option 右上
+ * @value topRight
+ * @option 左下
+ * @value bottomLeft
+ * @option 右下
+ * @value bottomRight
+ * @default topLeft
  *
  * @param destinationTextX
  * @text 目的テキストX座標
@@ -27,38 +50,43 @@
  * @param fontSize
  * @text フォントサイズ
  * @desc 目的テキストのフォントサイズ
+ * @type number
+ * @min 10
+ * @max 40
  * @default 16
- *
- * @param destinationSymbol
- * @text 目的の前に表示するシンボル文字
- * @desc 目的の前に表示するシンボル文字です。少し大きく表示されます。
- * @default 🧭
  *
  * @param storyProgressText
  * @text ストーリーが進行したときに表示するテキスト
  * @desc ストーリーが進行したときに表示するテキストです。何も指定しないと、この表示はされなくなります。
  * @type string
- * @default 💡ストーリーが進行しました
+ * @default 💡ストーリーがすすんだ
+ *
+ * @param storyProgressTextColor
+ * @text ストーリーが進行したときに表示するテキストの色
+ * @desc ストーリーが進行したときに表示するテキストの色です。
+ * @type color
+ * @default 0
  *
  * @param needsOutputDestinations
  * @text 目的を書き出すかどうか
- * @desc 目的を書き出すかどうか
+ * @desc これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「destinationsBySwitch.txt」というファイルが出力されます
  * @type boolean
  * @default true
  *
  * @help
- * このプラグインを使用すると、ゲーム画面に目的を
- * 常に表示することができます。
+ * スイッチ名が$で始まる名前のものをオンにしたとき、
+ * 自動的に次の目的を表示します。
  *
  * 使用方法:
  * プラグインコマンドを使って目的を設定してください。
  *
  * プラグインコマンド:
- * ShowDestinationText [テキスト]
- * 例: ShowDestinationText "辺りを調べてみよう"
- *
  * HideDestinationText
  * 表示されている目的テキストを隠します。
+ *
+ * ShowDestinationText
+ * 隠していた目的テキストを表示します。
+ *
  */
 
 (() => {
@@ -66,11 +94,12 @@
 
   // プラグインパラメータの取得
   const parameters = PluginManager.parameters(pluginName);
+  const destinationPosition = String(parameters['destinationPosition'] || 'topLeft');
   const destinationTextX = Number(parameters['destinationTextX'] || 40);
   const destinationTextY = Number(parameters['destinationTextY'] || 0);
   const fontSize = Number(parameters['fontSize'] || 16);
-  const destinationSymbol = String(parameters['destinationSymbol'] || '🧭');
   const storyProgressText = String(parameters['storyProgressText'] || '');
+  const storyProgressTextColor = Number(parameters['storyProgressTextColor'] || 0);
   const needsOutputDestinations = parameters['needsOutputDestinations'] === 'true';
 
   /**
@@ -78,41 +107,17 @@
    */
   class DestinationManager {
     constructor() {
-      this._destinationText = [];
+      this._destinationText = '';
       this._destinationVisible = true;
       this._needsInformDestinationChanged = false;
     }
 
-    /**
-     * 目的地データをロードする
-     * @param {string} data - JSON形式の目的地データ
-     */
-    loadDestination(data) {
-      this._destinationText = data ? JSON.parse(data) : [];
+    get destinationText() {
+      return this._destinationText ?? '';
     }
 
-    /**
-     * 目的地データを保存する
-     * @returns {string} JSON形式の目的地データ
-     */
-    saveDestination() {
-      return JSON.stringify(this._destinationText);
-    }
-
-    /**
-     * 現在の目的地を取得する
-     * @returns {string} 現在の目的地
-     */
-    getCurrentDestination() {
-      return this._destinationText[0] ?? '';
-    }
-
-    /**
-     * 目的地を追加する
-     * @param {string} text - 追加する目的地のテキスト
-     */
-    pushDestination(text) {
-      this._destinationText.push(text);
+    set destinationText(text) {
+      this._destinationText = text;
     }
 
     get destinationVisible() {
@@ -137,6 +142,17 @@
   // ファイル操作とパス操作のモジュールをインポート
   const fs = require('fs');
   const path = require('path');
+
+  const splitFirstCharacter = (str) => {
+    if (str.length === 0) {
+      return ['', '']; // 空文字列の場合は、空の配列を返す
+    }
+
+    const firstCharacter = str.charAt(0); // 1文字目を取得
+    const restOfString = str.slice(1); // 2文字目以降を取得
+
+    return [firstCharacter, restOfString];
+  };
 
   /**
    * ベースパスを取得する
@@ -260,7 +276,8 @@
    * 目的地テキストを表示するウィンドウクラス
    */
   class Window_DestinationText extends Window_Base {
-    constructor(rect) {
+    constructor() {
+      const rect = new Rectangle(0, 0, Graphics.width, Graphics.height);
       super(rect);
       this.opacity = 0;
       this.contents.fontSize = fontSize;
@@ -320,14 +337,19 @@
 
     refresh() {
       this.contents.clear();
+      const [first, rest] = splitFirstCharacter(this._text);
       const text = this._showStoryProgressText
-        ? `\\FS[${fontSize}]${storyProgressText}`
-        : `\\FS[${fontSize}]\\{${destinationSymbol}\\}${this._text}`;
+        ? `\\FS[${fontSize}]\\C[${storyProgressTextColor}]${storyProgressText}`
+        : `\\FS[${fontSize}]\\{${first}\\}${rest}`;
       this.drawTextEx(text, 0, 0);
       const paddingX = 6;
       const paddingY = 10;
       const height = this.maxFontSizeInLine(text) + paddingY;
       this.drawUnderlineWithShadow(0, height, this.textWidth(text) + paddingX);
+      this.width = this.textWidth(text) + this.padding * 2;
+      this.height = this.lineHeight() + this.padding * 2 + paddingY + 1;
+      // ウィンドウの位置を更新
+      this.updatePlacement();
     }
 
     /**
@@ -339,11 +361,39 @@
     drawUnderlineWithShadow(x, y, width) {
       const context = this.contents.context;
       context.lineWidth = 1;
-      context.strokeStyle = 'white';
+      const gradient = context.createLinearGradient(x, y, x + width, y);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0.5)');
+      context.strokeStyle = gradient;
       context.beginPath();
       context.moveTo(x, y + 16);
       context.lineTo(x + width, y + 16);
       context.stroke();
+    }
+
+    /**
+     * ウィンドウの位置とサイズを更新する
+     */
+    updatePlacement() {
+      console.log({ destinationPosition });
+      switch (destinationPosition) {
+        case 'topLeft':
+          this.x = 0 + destinationTextX;
+          this.y = 0 + destinationTextY;
+          break;
+        case 'topRight':
+          this.x = Graphics.boxWidth - this.width + destinationTextX;
+          this.y = 0 + destinationTextY;
+          break;
+        case 'bottomLeft':
+          this.x = 0 + destinationTextX;
+          this.y = Graphics.boxHeight - this.height + destinationTextY;
+          break;
+        case 'bottomRight':
+          this.x = Graphics.boxWidth - this.width + destinationTextX;
+          this.y = Graphics.boxHeight - this.height + destinationTextY;
+          break;
+      }
     }
   }
 
@@ -358,13 +408,7 @@
    * 目的地表示用ウィンドウを作成する
    */
   Scene_Map.prototype.createDestinationWindow = function () {
-    const rect = new Rectangle(
-      destinationTextX,
-      destinationTextY,
-      Graphics.boxWidth,
-      Graphics.boxHeight
-    );
-    this._destinationWindow = new Window_DestinationText(rect);
+    this._destinationWindow = new Window_DestinationText();
     this.addWindow(this._destinationWindow);
   };
 
@@ -372,7 +416,7 @@
   const _Scene_Map_update = Scene_Map.prototype.update;
   Scene_Map.prototype.update = function () {
     _Scene_Map_update.call(this);
-    this._destinationWindow.setText(destinationManager.getCurrentDestination());
+    this._destinationWindow.setText(destinationManager.destinationText);
     if (destinationManager.needsInformDestinationChanged) {
       this._destinationWindow.setDestinationChanged();
       destinationManager.needsInformDestinationChanged = false;
@@ -385,7 +429,7 @@
     _Game_Switches_setValue.call(this, switchId, value);
     const switchName = $dataSystem.switches[switchId];
     if (switchName.startsWith('$') && value) {
-      destinationManager.pushDestination(switchName.substring(1));
+      destinationManager.destinationText = switchName.substring(1);
       destinationManager.destinationVisible = true;
       destinationManager.needsInformDestinationChanged = true;
     }
@@ -395,7 +439,7 @@
   const _Game_System_onBeforeSave = Game_System.prototype.onBeforeSave;
   Game_System.prototype.onBeforeSave = function () {
     _Game_System_onBeforeSave.call(this);
-    this._destinationText = destinationManager.saveDestination();
+    this._destinationText = destinationManager.destinationText;
     this._destinationVisible = destinationManager.destinationVisible;
   };
 
@@ -403,16 +447,14 @@
   const _Game_System_onAfterLoad = Game_System.prototype.onAfterLoad;
   Game_System.prototype.onAfterLoad = function () {
     _Game_System_onAfterLoad.call(this);
-    destinationManager.loadDestination(this._destinationText || '[]');
+    destinationManager.destinationText = this._destinationText ?? '';
     destinationManager.destinationVisible =
       this._destinationVisible !== undefined ? this._destinationVisible : true;
   };
 
   // プラグインコマンドを登録
   PluginManager.registerCommand(pluginName, 'ShowDestinationText', (args) => {
-    destinationManager.pushDestination(args.text || '');
     destinationManager.destinationVisible = true;
-    destinationManager.needsInformDestinationChanged = true;
   });
 
   PluginManager.registerCommand(pluginName, 'HideDestinationText', () => {
