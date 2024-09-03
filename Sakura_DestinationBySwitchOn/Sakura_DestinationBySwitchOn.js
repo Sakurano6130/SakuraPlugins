@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/03 1.0.0 公開
  * 2024/09/03 0.5.0 だいたい形に
  * 2024/09/02 0.0.1 作成
  */
