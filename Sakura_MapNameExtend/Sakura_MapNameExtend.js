@@ -146,7 +146,7 @@
   const fadeDuration = Number(parameters['fadeDuration'] || 60); // フェードイン・フェードアウトの時間
   const holdDuration = Number(parameters['holdDuration'] || 180); // 表示が制止する時間
   const moveDistance = Number(parameters['moveDistance'] || 30); // フェードイン/アウト時の移動距離
-  const needsOutputMaps = parameters['needsOutputMaps'] === 'false';
+  const needsOutputMaps = String(parameters['needsOutputMaps']) === 'true';
 
   // ファイル操作とパス操作のモジュールをインポート
   const fs = require('fs');
@@ -189,7 +189,7 @@
   const saveMapData = (resultList) => {
     const header = ['mapId', 'mapName', 'displayName'];
     const outputFilePath = path.join(getBasePath(), 'mapsData.txt');
-    const outputData = [header.join(','), ...resultList.sort((a, b) => a[0] - b[0])].join('\n');
+    const outputData = [header.join(','), ...resultList].join('\n');
     fs.writeFileSync(outputFilePath, outputData);
   };
 
@@ -206,7 +206,7 @@
       const mapId = parseInt(file.match(/Map(\d+)/)?.[1], 10);
       const mapInfo = $dataMapInfos[mapId];
       const { name } = mapInfo;
-      return [mapId, name, displayName].join(',');
+      return [String(mapId).padStart(3, '0'), name, displayName].join(',');
     });
 
     saveMapData(resultList);
