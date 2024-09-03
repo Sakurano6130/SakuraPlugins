@@ -1,5 +1,5 @@
 # Sakura_MapNameExtend
-マップ名表示を拡張します。
+マップ名表示をちょっといいかんじにします✨。
 
 ![alt text](image-1.png)
 
