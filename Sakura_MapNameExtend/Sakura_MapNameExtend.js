@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/04 1.0.1 1行しかなかった場合の表示を若干修正
  * 2024/09/03 1.0.0 公開
  */
 
@@ -347,7 +348,7 @@
       // ウィンドウの幅と高さを計算
       const marginX = 100;
       const width = Math.max(mainTextWidth, subTextWidth) + this.padding * 2 + marginX * 2;
-      const height = mainTextHeight + subTextHeight + this.padding * 2;
+      const height = mainTextHeight + subTextHeight + this.padding * (subName ? 2 : 4);
 
       // ウィンドウの位置を再計算して配置
       this.width = width;
@@ -378,8 +379,8 @@
       }
 
       this.drawTextEx(mainText, mainTextX, 0);
+      this.drawGradientLine(0, mainTextHeight, width, 2);
       if (subName) {
-        this.drawGradientLine(0, mainTextHeight, width, 2);
         this.drawTextEx(subText, subTextX, 0 + mainTextHeight);
       }
     }
