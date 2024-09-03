@@ -1,10 +1,10 @@
-# Sakura_DistinationBySwitchOn
+# Sakura_DestinationBySwitchOn
 スイッチオンで次の目的表示
 
 ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_DistinationBySwitchOn.js](Sakura_DistinationBySwitchOn.js)
+[Sakura_DestinationBySwitchOn.js](Sakura_DestinationBySwitchOn.js)
 
 
 ## 更新履歴
