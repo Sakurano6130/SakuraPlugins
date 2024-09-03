@@ -41,6 +41,7 @@
 - **needsOutputDestinations**
   - 目的をファイルに書き込むかどうか。これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「destinationsBySwitch.txt」というファイルが出力されます。
 - どのマップのどのイベントのどのページでオン、オフしたのかをカンマ区切りのデータにして出力します。わけわからなくならないように付けた機能です。
+  
   ![alt text](image-3.png)
 
   ![alt text](image-4.png)
