@@ -375,7 +375,6 @@
      * ウィンドウの位置とサイズを更新する
      */
     updatePlacement() {
-      console.log({ destinationPosition });
       switch (destinationPosition) {
         case 'topLeft':
           this.x = 0 + destinationTextX;
