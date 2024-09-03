@@ -41,7 +41,13 @@
   - サブのフォントサイズ
 - **subFontColor**
   - サブのフォント色
+- **needsOutputMaps**
+  - マップ表示名一覧をファイルに書き込むかどうか。これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「mapsData.txt」というファイルが出力されます。
+  - マップ表示名を一覧で確認する方法がなかったため、付けた機能です。
+  
+    ![alt text](image-2.png)
 
+    ![alt text](image-3.png)
 
 # License
 - This software is released under the MIT license. http://opensource.org/licenses/mit-license.php

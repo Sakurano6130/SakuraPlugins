@@ -9,12 +9,12 @@
 
 /*:
  * @target MZ
- * @plugindesc マップ名表示をちょっといい感じにします
+ * @plugindesc マップ名表示をちょっといい感じにします。
  *
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
- * マップ名表示をちょっといい感じにします
+ * マップ名表示をちょっといい感じにします。
  *
  * 主な機能:
  * - マップ名表示をちょっといい感じにします。
@@ -98,6 +98,12 @@
  * @type color
  * @default 0
  *
+ * @param needsOutputMaps
+ * @text マップ表示名一覧データを書き出すかどうか
+ * @desc これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「mapsData.txt」というファイルが出力されます
+ * @type boolean
+ * @default false
+ *
  */
 
 (() => {
@@ -113,6 +119,79 @@
   const mainFontColor = Number(parameters.mainFontColor || 0);
   const subFontSize = Number(parameters.subFontSize || 16);
   const subFontColor = Number(parameters.subFontColor || 0);
+  const needsOutputMaps = parameters['needsOutputMaps'] === 'false';
+
+  // ファイル操作とパス操作のモジュールをインポート
+  const fs = require('fs');
+  const path = require('path');
+
+  /**
+   * ベースパスを取得する
+   * @returns {string} ベースパス
+   */
+  const getBasePath = () => path.dirname(process.mainModule.filename);
+
+  /**
+   * データディレクトリのパスを取得する
+   * @returns {string} データディレクトリのパス
+   */
+  const getDataDirectory = () => path.join(getBasePath(), 'data');
+
+  /**
+   * ディレクトリ内のJSONファイルを取得する
+   * @param {string} directory - ディレクトリパス
+   * @returns {string[]} JSONファイルのリスト
+   */
+  const getJsonFiles = (directory) =>
+    fs.readdirSync(directory).filter((file) => /^Map\d+\.json$/.test(file));
+
+  /**
+   * JSONファイルをパースしてオブジェクトに変換する
+   * @param {string} filePath - ファイルパス
+   * @returns {object} パースされたオブジェクト
+   */
+  const parseJsonFile = (filePath) => {
+    const data = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(data);
+  };
+
+  /**
+   * 抽出されたマップデータを保存する
+   * @param {string[]} resultList - 抽出されたマップデータのリスト
+   */
+  const saveMapData = (resultList) => {
+    const header = ['mapId', 'mapName', 'displayName'];
+    const outputFilePath = path.join(getBasePath(), 'mapsData.txt');
+    const outputData = [header.join(','), ...resultList.sort((a, b) => a[0] - b[0])].join('\n');
+    fs.writeFileSync(outputFilePath, outputData);
+  };
+
+  /**
+   * マップデータを処理し、保存する
+   */
+  const processMapData = () => {
+    const dataDirectory = getDataDirectory();
+    const jsonFiles = getJsonFiles(dataDirectory);
+
+    const resultList = jsonFiles.map((file) => {
+      const mapData = parseJsonFile(path.join(dataDirectory, file));
+      const { displayName } = mapData;
+      const mapId = parseInt(file.match(/Map(\d+)/)?.[1], 10);
+      const mapInfo = $dataMapInfos[mapId];
+      const { name } = mapInfo;
+      return [mapId, name, displayName].join(',');
+    });
+
+    saveMapData(resultList);
+  };
+
+  // データベースがロードされた後の処理を拡張
+  const _Scene_Boot_prototype_onDatabaseLoaded = Scene_Boot.prototype.onDatabaseLoaded;
+  Scene_Boot.prototype.onDatabaseLoaded = function () {
+    _Scene_Boot_prototype_onDatabaseLoaded.call(this);
+    if (!Utils.isOptionValid('test') || !needsOutputMaps) return;
+    processMapData();
+  };
 
   /**
    * ウィンドウの位置を更新する関数
