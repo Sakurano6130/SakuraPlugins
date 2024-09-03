@@ -4,6 +4,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 /**
+ * 2024/09/04 1.0.2 ファイル出力判定ミス修正
  * 2024/09/03 1.0.1 初期表示時に後ろのウィンドウを隠さないように修正
  * 2024/09/03 1.0.0 公開
  * 2024/09/03 0.5.0 だいたい形に
@@ -101,7 +102,7 @@
   const fontSize = Number(parameters['fontSize'] || 16);
   const storyProgressText = String(parameters['storyProgressText'] || '');
   const storyProgressTextColor = Number(parameters['storyProgressTextColor'] || 0);
-  const needsOutputDestinations = parameters['needsOutputDestinations'] === 'false';
+  const needsOutputDestinations = parameters['needsOutputDestinations'] === 'true';
 
   /**
    * 目的地の管理を行うクラス
@@ -211,7 +212,7 @@
                     switchId,
                     switchName,
                     value,
-                    mapId,
+                    String(mapId).padStart(3, '0'),
                     mapInfo.name,
                     event.name,
                     pageIndex + 1,
