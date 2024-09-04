@@ -4,7 +4,7 @@
 ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_ShowChapterTitle.js](Sakura_ShowChapterTitle.js)
+[Sakura_ShowChapterTitle.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_ShowChapterTitle/Sakura_ShowChapterTitle.js)
 
 ## 更新履歴
 | ver   | 日付       | 説明                                                           |

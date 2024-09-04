@@ -4,7 +4,7 @@
   ![alt text](image-5.png)
 
 ## ダウンロード
-[Sakura_MapNameExtend.js](Sakura_MapNameExtend.js)
+[Sakura_MapNameExtend.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_MapNameExtend/Sakura_MapNameExtend.js)
 
 ## 更新履歴
 | ver   | 日付       | 説明                                |

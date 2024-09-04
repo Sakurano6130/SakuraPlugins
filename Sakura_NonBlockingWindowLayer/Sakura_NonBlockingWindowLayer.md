@@ -9,12 +9,12 @@
 ![alt text](image-1.png)
 
 ## ダウンロード
-[Sakura_NonBlockingWindowLayer.js](Sakura_NonBlockingWindowLayer.js)
+[Sakura_NonBlockingWindowLayer.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_NonBlockingWindowLayer/Sakura_NonBlockingWindowLayer.js)
 
 ## 更新履歴
-| ver   | 日付       | 説明               |
-| ----- | ---------- | ------------------ |
-| 1.0.0 | 2024/09/02 | 公開               |
+| ver   | 日付       | 説明 |
+| ----- | ---------- | ---- |
+| 1.0.0 | 2024/09/02 | 公開 |
 
 ## 機能概要
 - ウィンドウが重なった時、後ろのウィンドウが隠れないようにします。
