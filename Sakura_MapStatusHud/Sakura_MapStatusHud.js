@@ -12,7 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
- * 2024/09/04 1.0.0 公開
+ * 2024/09/05 1.0.0 公開
  * -------------------------------------------------
  *
  * プラグインパラメータ:
