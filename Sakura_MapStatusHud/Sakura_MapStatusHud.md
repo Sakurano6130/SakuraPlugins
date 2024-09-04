@@ -4,7 +4,7 @@
   ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_MapStatusHud.js](Sakura_MapStatusHud.js)
+[Sakura_MapStatusHud.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_MapStatusHud/Sakura_MapStatusHud.js)
 
 ## 更新履歴
 | ver   | 日付       | 説明 |

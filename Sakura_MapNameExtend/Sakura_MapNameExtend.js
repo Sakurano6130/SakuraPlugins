@@ -1,4 +1,4 @@
-// Sakura_MapNameExtend 1.0.0
+// Sakura_MapNameExtend
 // Copyright (c) 2024 Sakurano
 // This software is released under the MIT license.
 // http://opensource.org/licenses/mit-license.php
