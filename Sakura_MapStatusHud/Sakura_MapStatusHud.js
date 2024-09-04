@@ -244,19 +244,6 @@
 
   const WINDOW_PADDING = 12;
 
-  // プラグインコマンドの登録
-  PluginManager.registerCommand(pluginName, 'ShowPartyHud', () => {
-    // ウィンドウを表示する処理
-    if (SceneManager._scene instanceof Scene_Map) {
-      const scene = SceneManager._scene;
-      if (scene._statusWindows) {
-        scene._statusWindows.forEach((window) => {
-          window._requestShowPartyHud = true; // ウィンドウ表示をリクエスト
-        });
-      }
-    }
-  });
-
   Bitmap.prototype.maskedBlt = function (source1, sx, sy, sw, sh, dx, dy, dw, dh) {
     dw = dw || sw;
     dh = dh || sh;
@@ -821,12 +808,6 @@
     }
 
     needsAllShow() {
-      // リクエストがあったとき
-      if (this._requestShowPartyHud) {
-        this._requestShowPartyHud = false;
-        this._hideCount = this.constructor.HIDE_COUNT;
-        return true;
-      }
       // HPが変わったとき
       if (showActorHP && this._oldHp !== this._actor.hp) {
         this._oldHp = this._actor.hp;
