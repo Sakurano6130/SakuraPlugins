@@ -101,5 +101,9 @@
 - **globalHideSwitch**
   - このスイッチがONの時、HUDを非表示にします。
 
+## ウィンドウの重なりについて
+  - RPGツクールのウィンドウ描画の仕様で、ウィンドウを重ねて表示した場合、後ろのウィンドウが欠けて表示されたように見えてしまいます。
+  - これが気になる方は、[Sakura_NonBlockingWindowLayer](../Sakura_NonBlockingWindowLayer/Sakura_NonBlockingWindowLayer.md)をお試しください。
+
 # License
 - This software is released under the MIT license. http://opensource.org/licenses/mit-license.php
