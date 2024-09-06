@@ -55,7 +55,7 @@
  * @option 1.8
  * @option 1.9
  * @option 2.0
- * @default 1.7
+ * @default 1.8
  *
  */
 
@@ -94,7 +94,7 @@
     return parsedFile;
   });
 
-  const scaleUp = Number(parameters.scaleUp || 1.7);
+  const scaleUp = Number(parameters.scaleUp || 1.8);
 
   const HEAD_HEIGHT = 33; // headの高さ
   const BODY_HEIGHT = 8; // bodyの高さ
