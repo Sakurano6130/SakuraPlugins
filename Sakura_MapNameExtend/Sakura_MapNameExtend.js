@@ -1,21 +1,21 @@
-// Sakura_MapNameExtend 1.0.0
-// Copyright (c) 2024 Sakurano
-// This software is released under the MIT license.
-// http://opensource.org/licenses/mit-license.php
-
-/**
- * 2024/09/04 1.0.1 1行しかなかった場合の表示を若干修正
- * 2024/09/03 1.0.0 公開
- */
-
 /*:
  * @target MZ
  * @plugindesc マップ名表示をちょっといい感じにします。
- *
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
  * マップ名表示をちょっといい感じにします。
+ *
+ * -------------------------------------------------
+ * Sakura_MapStatusHud
+ * Copyright (c) 2024 Sakurano
+ * This software is released under the MIT license.
+ * http://opensource.org/licenses/mit-license.php
+ * -------------------------------------------------
+ * 2024/09/07 1.0.2 メニューなどから戻ってきた場合に再表示されていたため修正
+ * 2024/09/04 1.0.1 1行しかなかった場合の表示を若干修正
+ * 2024/09/03 1.0.0 公開
+ * -------------------------------------------------
  *
  * 主な機能:
  * - マップ名表示をちょっといい感じにします。
@@ -267,11 +267,20 @@
     this._phase = 0; // フェーズ管理: 0 = フェードイン, 1 = 制止, 2 = フェードアウト
     this._fadeTimer = 0; // タイマーの初期化
     this._initialX = this.x; // 初期X座標を保存
+    this._started = false;
+  };
+
+  const _Window_MapName_prototype_open = Window_MapName.prototype.open;
+  Window_MapName.prototype.open = function () {
+    _Window_MapName_prototype_open.call(this);
+    this._started = true;
   };
 
   Window_MapName.prototype.update = function () {
     Window_Base.prototype.update.call(this);
-    this.updateFade();
+    if (this._started && $gameMap.isNameDisplayEnabled()) {
+      this.updateFade();
+    }
   };
 
   Window_MapName.prototype.updateFade = function () {
@@ -303,16 +312,6 @@
         this.close(); // フェードアウト後ウィンドウを閉じる
       }
     }
-  };
-
-  // リフレッシュ時にアニメーションを再度初期化
-  const _Window_MapName_refresh = Window_MapName.prototype.refresh;
-  Window_MapName.prototype.refresh = function () {
-    _Window_MapName_refresh.call(this);
-    this._phase = 0; // フェーズをリセット
-    this._fadeTimer = 0; // タイマーをリセット
-    this.contentsOpacity = 0; // ウィンドウを非表示に
-    this.x = this._initialX - moveDistance; // 少し左にオフセット
   };
 
   /**
