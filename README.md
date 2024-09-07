@@ -12,7 +12,7 @@
 | <a href="Sakura_MapNameExtend/Sakura_MapNameExtend.md"><img src="image-12.png" alt="alt text"></a>                  | 🎉1.0.2     | [Sakura_<br>MapNameExtend](Sakura_MapNameExtend/Sakura_MapNameExtend.md)<br>🗺️マップ名表示をちょっといい感じに！                                                        |
 | <a href="Sakura_MapStatusHud/Sakura_MapStatusHud.md"><img src="image-14.png" alt="alt text"></a>                    | 🎉1.0.0     | [Sakura_<br>MapStatusHud](Sakura_MapStatusHud/Sakura_MapStatusHud.md) <br>🍀マップステータス表示                                                                        |
 | <a href="#"><img src="image-9.png" alt="alt text"></a>                                                              | 🚧準備中    | Sakura_<br>CharacterHeightUp <br>🚶‍♀️キャラクター頭身アップ                                                                                                               |
-
+| <a href="#"><img src="image-15.png" alt="alt text"></a>                                                             | 🚧準備中    | Sakura_<br>TransferIndicator <br>🔀場所移動インジケータ                                                                                                                 |
 ---
 - 画像には一部、AIで生成した画像を含みます。
 - 画像には一部、REFMAP様素材を利用させていただいてます。(C) REFMAP

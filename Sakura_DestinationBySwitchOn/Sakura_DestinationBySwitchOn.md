@@ -4,7 +4,7 @@
 ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_DestinationBySwitchOn.js](Sakura_DestinationBySwitchOn.js)
+[Sakura_DestinationBySwitchOn.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_DestinationBySwitchOn/Sakura_DestinationBySwitchOn.js)
 
 
 ## 更新履歴

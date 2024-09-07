@@ -4,7 +4,7 @@
 ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_FontSizeStepAdjuster.js](Sakura_FontSizeStepAdjuster.js)
+[Sakura_FontSizeStepAdjuster.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_FontSizeStepAdjuster/Sakura_FontSizeStepAdjuster.js)
 
 
 ## 更新履歴
