@@ -7,7 +7,7 @@
  * マップ名表示をちょっといい感じにします。
  *
  * -------------------------------------------------
- * Sakura_MapStatusHud
+ * Sakura_MapNameExtend
  * Copyright (c) 2024 Sakurano
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
