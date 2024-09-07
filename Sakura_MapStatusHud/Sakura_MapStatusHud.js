@@ -12,210 +12,221 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
- * 2024/09/05 1.0.0 公開
+ * 2024/09/07 1.1.0 表示制御の機能追加、アクター表示順の選択機能追加
+ * 2024/09/04 1.0.0 公開
  * -------------------------------------------------
  *
- * プラグインパラメータ:
+ * プラグインコマンド:
  *
- * ShowActorName: アクター名を表示するかどうか。trueで表示、falseで
- * 非表示。
+ * 常に表示モードにする:
+ * HUDを常に表示します。自動表示モードに戻すまで表示し続けます。
+ * イベント実行中も表示されます。
  *
- * ShowActorLevel: アクターレベルを表示するかどうか。trueで表示、
- * falseで非表示。
+ * 常に隠すモードにする:
+ * HUDを常に隠します。自動表示モードに戻すまで表示されません。
  *
- * ShowActorClass: アクター職業を表示するかどうか。trueで表示、
- * falseで非表示。
+ * 自動表示モードに戻す:
+ * 自動表示モードに切り替えます。時間差で半分隠れるようになり、
+ * イベント実行中は全体が隠れます。
  *
- * ShowActorFace: アクターの顔グラフィックを表示するかどうか。trueで
- * 表示、falseで非表示。
- *
- * ShowActorHP: アクターのHPを表示するかどうか。trueで表示、falseで
- * 非表示。
- *
- * ShowActorMP: アクターのMPを表示するかどうか。trueで表示、falseで
- * 非表示。
- *
- * ShowActorTP: アクターのTPを表示するかどうか。trueで表示、falseで
- * 非表示。
- *
- * ShowActorState: アクターのステートアイコンを表示するかどうか。
- * trueで表示、falseで非表示。
- *
- * windowWidth: ウィンドウの幅を設定します。
- *
- * windowHeight: ウィンドウの高さを設定します。
- *
- * faceSize: 顔グラフィックのサイズを設定します。等倍は144です。
- * 0にすると大きさを自動調整します。
- *
- * nameFontSize: アクター名のフォントサイズを設定します。
- *
- * levelFontSize: レベルのフォントサイズを設定します。
- *
- * gaugeLabelFontSize: ゲージラベルのフォントサイズを設定します。
- *
- * gaugeHeight: ゲージの高さを設定します。
- *
- * gaugeValueFontSize: ゲージ値のフォントサイズを設定します。
- *
- * statusIconSize: ステートアイコンのサイズを設定します。
- *
- * marginOfEachActor: アクター間の余白を設定します。
- *
- * hudHideCount: HUDが自動で隠れるまでのカウント数を設定します。
- *
- * fontFileForString: 文字やラベルのフォントファイル名。
- *
- * fontFileForNumber: HPなどの数字のフォントファイル名。
- *
- * needsCheckPlayerCollide: プレイヤーと重なった時、HUDを半透明にするか
- * 設定します。処理が重たくなった場合はfalseにしてください。
- *
- * globalHideSwitch: このスイッチがONの時、HUDを非表示にします。
+ * -------------------------------------------------
+ * @param groupShowEachItem
+ * @text 📄 各項目を表示するかどうか ---
  *
  * @param ShowActorName
- * @text アクター名を表示するかどうか。
- * @desc アクター名を表示するかどうか。trueで表示、falseで非表示。
+ * @parent groupShowEachItem
+ * @text 名前を表示するかどうか
+ * @desc 名前を表示するかどうか。trueで表示、falseで非表示。
  * @type boolean
  * @default true
  *
  * @param ShowActorLevel
- * @text アクターレベルを表示するかどうか
+ * @parent groupShowEachItem
+ * @text レベルを表示するかどうか
  * @type boolean
- * @desc アクターレベルを表示するかどうか。trueで表示、falseで非表示。
+ * @desc レベルを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorClass
- * @text アクター職業を表示するかどうか
+ * @parent groupShowEachItem
+ * @text 職業を表示するかどうか
  * @type boolean
- * @desc アクター職業を表示するかどうか。trueで表示、falseで非表示。
+ * @desc 職業を表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorFace
- * @text アクターの顔グラフィックを表示するかどうか
+ * @parent groupShowEachItem
+ * @text 顔グラフィックを表示するかどうか
  * @type boolean
- * @desc アクターの顔グラフィックを表示するかどうか。trueで表示、falseで非表示。
+ * @desc 顔グラフィックを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorHP
- * @text アクターのHPを表示するかどうか
+ * @parent groupShowEachItem
+ * @text HPを表示するかどうか
  * @type boolean
- * @desc アクターのHPを表示するかどうか。trueで表示、falseで非表示。
+ * @desc HPを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorMP
- * @text アクターのMPを表示するかどうか
+ * @parent groupShowEachItem
+ * @text MPを表示するかどうか
  * @type boolean
- * @desc アクターのMPを表示するかどうか。trueで表示、falseで非表示。
+ * @desc MPを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorTP
- * @text アクターのTPを表示するかどうか
+ * @parent groupShowEachItem
+ * @text TPを表示するかどうか
  * @type boolean
- * @desc アクターのTPを表示するかどうか。trueで表示、falseで非表示。
+ * @desc TPを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorState
- * @text アクターのステートアイコンを表示するかどうか
+ * @parent groupShowEachItem
+ * @text ステートアイコンを表示するかどうか
  * @type boolean
- * @desc アクターのステートアイコンを表示するかどうか。trueで表示、falseで非表示。
+ * @desc ステートアイコンを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
+ * @param groupLayout
+ * @text 🖼️ レイアウト ---
+ *
+ * @param displayOrder
+ * @parent groupLayout
+ * @text 表示順
+ * @desc 各アクターの表示順を設定します。
+ * @type select
+ * @option 上から下
+ * @value fromTopToBottom
+ * @option 下から上
+ * @value fromBottomToTop
+ * @default fromTopToBottom
+ *
  * @param windowWidth
- * @text ウィンドウの幅
+ * @parent groupLayout
+ * @text 各アクターのウィンドウの幅
  * @type number
- * @desc ウィンドウの幅を設定します。
+ * @desc 各アクターのウィンドウの幅を設定します。
  * @default 220
  *
  * @param windowHeight
- * @text ウィンドウの高さ
+ * @parent groupLayout
+ * @text 各アクターのウィンドウの高さ（全体の高さではなく各アクターの高さです）
  * @type number
- * @desc ウィンドウの高さを設定します。
+ * @desc 各アクターのウィンドウの高さを設定します。
  * @default 100
  *
  * @param faceSize
- * @text 顔グラフィックのサイズ
+ * @parent groupLayout
+ * @text 顔グラフィックのサイズ(0で自動調整)
  * @type number
  * @desc 顔グラフィックのサイズを設定します。等倍は144です。0にすると大きさを自動調整します。
  * @default 0
  *
  * @param nameFontSize
- * @text アクター名のフォントサイズ
+ * @parent groupLayout
+ * @text 名前のフォントサイズ
  * @type number
- * @desc アクター名のフォントサイズを設定します。
+ * @desc 名前のフォントサイズを設定します。
  * @default 18
  *
  * @param levelFontSize
+ * @parent groupLayout
  * @text レベルのフォントサイズ
  * @type number
  * @desc レベルのフォントサイズを設定します。
  * @default 18
  *
  * @param gaugeLabelFontSize
+ * @parent groupLayout
  * @text ゲージラベルのフォントサイズ
  * @type number
  * @desc ゲージラベルのフォントサイズを設定します。
  * @default 18
  *
  * @param gaugeHeight
+ * @parent groupLayout
  * @text ゲージの高さ
  * @type number
  * @desc ゲージの高さを設定します。
  * @default 8
  *
  * @param gaugeValueFontSize
+ * @parent groupLayout
  * @text ゲージ値のフォントサイズ
  * @type number
  * @desc ゲージ値のフォントサイズを設定します。
  * @default 18
  *
  * @param statusIconSize
+ * @parent groupLayout
  * @text ステートアイコンのサイズ
  * @type number
  * @desc ステートアイコンのサイズを設定します。
  * @default 24
  *
  * @param marginOfEachActor
+ * @parent groupLayout
  * @text アクター間の余白
  * @type number
  * @desc アクター間の余白を設定します。
  * @default 0
  *
- * @param hudHideCount
- * @text HUDが隠れるまでのカウント数
- * @type number
- * @desc HUDが自動で隠れるまでのカウント数を設定します。
- * @default 600
- *
  * @param fontFileForString
+ * @parent groupLayout
  * @text 文字やラベルのフォントファイル名
  * @desc 文字やラベルのフォントファイル名
  * @type string
  * @default
  *
  * @param fontFileForNumber
+ * @parent groupLayout
  * @text HPなどの数字のフォントファイル名
  * @desc HPなどの数字のフォントファイル名
  * @type string
  * @default
  *
+ * @param controlVisibility
+ * @text 🎛️ 表示制御 ---
+ *
+ * @param hudHideCount
+ * @parent controlVisibility
+ * @text HUDが半分隠れるまでのカウント数
+ * @type number
+ * @desc HUDが自動で隠れるまでのカウント数を設定します。
+ * @default 600
+ * @min 1
+ *
  * @param needsCheckPlayerCollide
+ * @parent controlVisibility
  * @text プレイヤーと重なった時半透明にするか
  * @type boolean
+ * @on 半透明にする
+ * @off 半透明にしない
  * @desc プレイヤーと重なった時、HUDを半透明にします。処理が重たくなってしまうようだったらfalseにしてください。
  * @default true
  *
- * @param globalHideSwitch
- * @text 全体非表示スイッチ
- * @type switch
- * @desc このスイッチがONの時、HUDを非表示にします。
- * @default 0
+ * -------------------------------------------------
+ * @command forceNeedsAllShowOn
+ * @text 常に表示モードにする
+ * @desc HUDを常に表示します。自動表示モードに戻すまで表示し続けます。イベント実行中も表示されます。
+ *
+ * @command forceNeedsAllHideOn
+ * @text 常に隠すモードにする
+ * @desc HUDを常に隠します。自動表示モードに戻すまで表示されません。
+ *
+ * @command setForceModeOff
+ * @text 自動表示モードに戻す
+ * @desc 自動表示モードに切り替えます。時間差で半分隠れるようになり、イベント実行中は全体が隠れます。
+ *
  */
 
 (() => {
   const pluginName = 'Sakura_MapStatusHud';
   const parameters = PluginManager.parameters(pluginName);
 
+  const displayOrder = String(parameters['displayOrder'] || 'fromTopToBottom');
   const showActorName = parameters['ShowActorName'] === 'true';
   const showActorLevel = parameters['ShowActorLevel'] === 'true';
   const showActorClass = parameters['ShowActorClass'] === 'true';
@@ -240,9 +251,21 @@
   const fontFileForNumber = String(parameters.fontFileForNumber || '');
 
   const needsCheckPlayerCollide = parameters['needsCheckPlayerCollide'] === 'true';
-  const globalHideSwitch = Number(parameters['globalHideSwitch'] || 0);
 
   const WINDOW_PADDING = 12;
+
+  /**
+   * プラグインコマンドの登録
+   */
+  PluginManager.registerCommand(pluginName, 'forceNeedsAllShowOn', function () {
+    $gameSystem._mapHudForceControlMode = 'allShow';
+  });
+  PluginManager.registerCommand(pluginName, 'forceNeedsAllHideOn', function () {
+    $gameSystem._mapHudForceControlMode = 'allHide';
+  });
+  PluginManager.registerCommand(pluginName, 'setForceModeOff', function () {
+    $gameSystem._mapHudForceControlMode = null;
+  });
 
   Bitmap.prototype.maskedBlt = function (source1, sx, sy, sw, sh, dx, dy, dw, dh) {
     dw = dw || sw;
@@ -718,6 +741,8 @@
       this._oldMp = null;
       this._oldTp = null;
       this._oldLevel = null;
+      this._oldClassId = null;
+      this._oldStates = null;
       this._targetOpacity = 255; // 目標の透明度（ウィンドウ内のコンテンツの透明度）
       this._fadeSpeed = 10; // フェードの速さ
       this.initialize(rect);
@@ -766,12 +791,13 @@
       }
       const iconOffset = statusIconSize / 2;
       x = 0 + iconOffset;
-      y = lineHeight * 3 + iconOffset;
+      // 下を起点にする
+      y = windowHeight - WINDOW_PADDING - statusIconSize;
       if (showActorState) {
         /**
          * @remarks 1pxずらしたほうが見た目がよかった
          */
-        this.placeStateIconMapStatusHud(actor, x + 1, y - 1);
+        this.placeStateIconMapStatusHud(actor, x + 1, y);
       }
       this.allShow();
     }
@@ -799,15 +825,38 @@
         this.allShow();
         return;
       }
-      if (this._hideCount >= 0) {
-        this._hideCount -= 1;
-      }
-      if (this._hideCount <= 200) {
+      if (this.needsHalfHide()) {
         this.halfHide();
       }
     }
 
+    needsAllHide() {
+      if ($gameSystem._mapHudForceControlMode === 'allHide') {
+        return true;
+      }
+      if ($gameSystem._mapHudForceControlMode === 'allShow') {
+        return false;
+      }
+      // イベント実行中
+      if ($gameMap.isEventRunning()) {
+        return true;
+      }
+      return false;
+    }
+
     needsAllShow() {
+      if ($gameSystem._mapHudForceControlMode === 'allShow') {
+        return true;
+      }
+      if ($gameSystem._mapHudForceControlMode === 'allHide') {
+        return false;
+      }
+      // 拡張用
+      // if (this._requestShowPartyHud) {
+      //   this._requestShowPartyHud = false;
+      //   this._hideCount = this.constructor.HIDE_COUNT;
+      //   return true;
+      // }
       // HPが変わったとき
       if (showActorHP && this._oldHp !== this._actor.hp) {
         this._oldHp = this._actor.hp;
@@ -832,22 +881,34 @@
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
+      // 職業が変わったとき
+      if (showActorClass && this._oldClassId !== this._actor.classId) {
+        this._oldClassId = this._actor.classId;
+        this._hideCount = this.constructor.HIDE_COUNT;
+        return true;
+      }
+      // ステートが変わったとき 配列をjoinして文字列で比較
+      const currentActorStatesJoin = this._actor._states.join();
+      if (showActorState && this._oldStates !== currentActorStatesJoin) {
+        this._oldStates = currentActorStatesJoin;
+        this._hideCount = this.constructor.HIDE_COUNT;
+        return true;
+      }
       return false;
     }
 
-    needsAllHide() {
-      // イベント実行中
-      if ($gameMap.isEventRunning()) {
-        return true;
+    needsHalfHide() {
+      if (this._hideCount >= 0) {
+        this._hideCount -= 1;
       }
-      // globalHideSwitchがオン
-      if ($gameSwitches.value(globalHideSwitch)) {
+      if (this._hideCount <= 200) {
         return true;
       }
       return false;
     }
 
     allShow() {
+      if (this._isAllShow) return;
       this._isAllShow = true;
       this._isHalfHidden = false;
       this._isAllHidden = false;
@@ -873,19 +934,21 @@
 
     // プレイヤーとの重なりをチェックして透明度を変更するメソッド
     checkPlayerCollision() {
+      const tileWidth = $gameMap.tileWidth();
+      const tileHeight = $gameMap.tileHeight();
       const playerRect = new Rectangle(
-        $gamePlayer.screenX() - $gamePlayer._realX,
-        $gamePlayer.screenY() - $gamePlayer._realY,
+        $gamePlayer.screenX() - tileWidth,
+        $gamePlayer.screenY() - tileHeight,
         /**
          * @todo Sprite_Characterの幅を取得する方法ってある？
          */
-        48, // プレイヤーの幅
-        48 // プレイヤーの高さ
+        tileWidth, // プレイヤーの幅
+        tileHeight // プレイヤーの高さ
       );
 
       const windowRect = new Rectangle(this.x, this.y, this.width, this.height);
 
-      // プレイヤーとHUDが重なったら目標透明度を128に設定し、そうでない場合は255に設定
+      // プレイヤーとHUDが重なったら目標透明度を50に設定し、そうでない場合は255に設定
       if (this.isCollided(playerRect, windowRect)) {
         this._targetOpacity = 50; // 半透明
       } else {
@@ -938,7 +1001,10 @@
     this._mapStatusHudWindows = [];
 
     let i = 0;
-    for (const actor of $gameParty.members()) {
+    const members =
+      displayOrder === 'fromTopToBottom' ? $gameParty.members().reverse() : $gameParty.members();
+
+    for (const actor of members) {
       if (!actor) continue;
 
       const margin = marginOfEachActor;
@@ -973,6 +1039,12 @@
     }
     SceneManager._scene.destroyMapStatusHudWindows();
     SceneManager._scene.createMapStatusHudWindows();
+  };
+
+  const _Game_System_prototype_initialize = Game_System.prototype.initialize;
+  Game_System.prototype.initialize = function () {
+    _Game_System_prototype_initialize.call(this);
+    this._mapHudForceControlMode = null;
   };
 
   // フォントの読み込み処理をオーバーライド
