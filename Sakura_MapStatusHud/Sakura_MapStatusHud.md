@@ -29,8 +29,9 @@
   ![alt text](image-3.png)
 
 - プラグインコマンドで常に表示、隠すを切り替えられる `ver.1.1` 
+- 常に半分隠すこともできる `ver1.2`
   
-  ![alt text](image-4.png)
+  ![alt text](image-10.png)
 
 - アクターの表示順を上から下か下から上から選択できる `ver.1.1` 
   
