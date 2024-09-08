@@ -12,6 +12,9 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/08 1.2.0 画面の幅・高さとUIエリアの幅・高さが異なる場合の位置調整。
+ *                  表示位置の調整機能追加。
+ *                  常に半分表示機能の追加。
  * 2024/09/07 1.1.0 表示制御の機能追加、アクター表示順の選択機能追加
  * 2024/09/05 1.0.0 公開
  * -------------------------------------------------
@@ -187,6 +190,24 @@
  * @type string
  * @default
  *
+ * @param windowOffsetX
+ * @parent groupLayout
+ * @text HUD全体のX軸位置調整
+ * @desc HUD全体のX軸位置調整。正の値で右、負の値で左にずらします。
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @default 0
+ *
+ * @param windowOffsetY
+ * @parent groupLayout
+ * @text HUD全体のY軸位置調整
+ * @desc HUD全体のY軸位置調整。正の値で下、負の値で上にずらします。
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @default 0
+ *
  * @param controlVisibility
  * @text 🎛️ 表示制御 ---
  *
@@ -213,8 +234,12 @@
  * @desc HUDを常に表示します。自動表示モードに戻すまで表示し続けます。イベント実行中も表示されます。
  *
  * @command forceNeedsAllHideOn
- * @text 常に隠すモードにする
- * @desc HUDを常に隠します。自動表示モードに戻すまで表示されません。
+ * @text 常に全部隠すモードにする
+ * @desc HUDを常に全部隠します。自動表示モードに戻すまで表示されません。
+ *
+ * @command forceNeedsHalfHideOn
+ * @text 常に半分隠すモードにする
+ * @desc HUDを常に半分隠します。自動表示モードに戻すまで半分隠れます
  *
  * @command setForceModeOff
  * @text 自動表示モードに戻す
@@ -246,6 +271,9 @@
   const gaugeValueFontSize = Number(parameters['gaugeValueFontSize'] || 18);
   const statusIconSize = Number(parameters['statusIconSize'] || 24);
   const marginOfEachActor = Number(parameters['marginOfEachActor'] || 0);
+  const windowOffsetX = Number(parameters['windowOffsetX'] || 0);
+  const windowOffsetY = Number(parameters['windowOffsetY'] || 0);
+
   const hudHideCount = Number(parameters['hudHideCount'] || 600);
   const fontFileForString = String(parameters.fontFileForString || '');
   const fontFileForNumber = String(parameters.fontFileForNumber || '');
@@ -262,6 +290,9 @@
   });
   PluginManager.registerCommand(pluginName, 'forceNeedsAllHideOn', function () {
     $gameSystem._mapHudForceControlMode = 'allHide';
+  });
+  PluginManager.registerCommand(pluginName, 'forceNeedsHalfHideOn', function () {
+    $gameSystem._mapHudForceControlMode = 'halfHide';
   });
   PluginManager.registerCommand(pluginName, 'setForceModeOff', function () {
     $gameSystem._mapHudForceControlMode = null;
@@ -716,6 +747,14 @@
     }
   }
 
+  const getMarginXOfUIArea = () => {
+    return (Graphics.width - Graphics.boxWidth) / 2;
+  };
+
+  const getMarginYOfUIArea = () => {
+    return (Graphics.height - Graphics.boxHeight) / 2;
+  };
+
   class Window_MapStatusHud extends Window_StatusBaseTween {
     static HIDE_COUNT = hudHideCount;
 
@@ -727,16 +766,19 @@
       this._isAllShow = false;
       this._isHalfHidden = false;
       this._isAllHidden = false;
-      const sx = Graphics.boxWidth;
+      const sx = Graphics.width - getMarginXOfUIArea();
       const sy = this.y;
-      const dx = Graphics.boxWidth - this.width;
+      const dx = Graphics.width - this.width - getMarginXOfUIArea() + windowOffsetX;
       const dy = sy;
+      const hx = sx - this.width / 2;
+      const hy = dy;
+
       this._sx = sx;
       this._sy = sy;
       this._dx = dx;
       this._dy = dy;
-      this._hx = dx + this.width / 2;
-      this._hy = dy;
+      this._hx = hx;
+      this._hy = hy;
       this._oldHp = null;
       this._oldMp = null;
       this._oldTp = null;
@@ -837,6 +879,9 @@
       if ($gameSystem._mapHudForceControlMode === 'allShow') {
         return false;
       }
+      if ($gameSystem._mapHudForceControlMode === 'halfHide') {
+        return false;
+      }
       // イベント実行中
       if ($gameMap.isEventRunning()) {
         return true;
@@ -849,6 +894,9 @@
         return true;
       }
       if ($gameSystem._mapHudForceControlMode === 'allHide') {
+        return false;
+      }
+      if ($gameSystem._mapHudForceControlMode === 'halfHide') {
         return false;
       }
       // 拡張用
@@ -898,6 +946,15 @@
     }
 
     needsHalfHide() {
+      if ($gameSystem._mapHudForceControlMode === 'halfHide') {
+        return true;
+      }
+      if ($gameSystem._mapHudForceControlMode === 'allShow') {
+        return false;
+      }
+      if ($gameSystem._mapHudForceControlMode === 'allHide') {
+        return false;
+      }
       if (this._hideCount >= 0) {
         this._hideCount -= 1;
       }
@@ -946,7 +1003,12 @@
         tileHeight // プレイヤーの高さ
       );
 
-      const windowRect = new Rectangle(this.x, this.y, this.width, this.height);
+      const windowRect = new Rectangle(
+        this.x + getMarginXOfUIArea(),
+        this.y + getMarginYOfUIArea(),
+        this.width,
+        this.height
+      );
 
       // プレイヤーとHUDが重なったら目標透明度を50に設定し、そうでない場合は255に設定
       if (this.isCollided(playerRect, windowRect)) {
@@ -997,7 +1059,8 @@
   };
 
   Scene_Map.prototype.createMapStatusHudWindows = function () {
-    const baseY = Graphics.height - windowHeight;
+    const baseX = Graphics.width - getMarginXOfUIArea() + windowOffsetX;
+    const baseY = Graphics.height - windowHeight - getMarginYOfUIArea() + windowOffsetY;
     this._mapStatusHudWindows = [];
 
     let i = 0;
@@ -1009,7 +1072,7 @@
 
       const margin = marginOfEachActor;
       const rect = new Rectangle(
-        Graphics.boxWidth + windowWidth / 2,
+        baseX,
         baseY - i * (windowHeight + margin),
         windowWidth,
         windowHeight
