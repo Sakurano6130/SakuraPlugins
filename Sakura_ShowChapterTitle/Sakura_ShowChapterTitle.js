@@ -1,19 +1,7 @@
-// Sakura_ShowChapterTitle 1.0.1
-// Copyright (c) 2024 Sakurano
-// This software is released under the MIT license.
-// http://opensource.org/licenses/mit-license.php
-
-/**
- * 2024/09/03 1.0.2 ウィンドウ初期化時に明示的にhideするように修正
- * 2024/08/30 1.0.1 行の途中で文字の大きさを変える制御文字があった場合の不具合対応
- * 2024/08/29 1.0.0 公開
- */
-
 /*:
  * @target MZ
  * @plugindesc 1.0.1 章タイトルをコマンド１つで表示し、
  * フォントや背景を自由にカスタマイズできるプラグインです。
- *
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
@@ -21,6 +9,18 @@
  * 付きで表示します。各行ごとにフォントとサイズを指定でき、ピクチャの色調や
  * ぼかし効果を調整することが可能です。
  *
+ * -------------------------------------------------
+ * Sakura_ShowChapterTitle
+ * Copyright (c) 2024 Sakurano
+ * This software is released under the MIT license.
+ * http://opensource.org/licenses/mit-license.php
+ * -------------------------------------------------
+ * 2024/09/09 1.0.3 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
+ *                  異なる設定をしている場合の位置を調整。
+ * 2024/09/03 1.0.2 ウィンドウ初期化時に明示的にhideするように修正
+ * 2024/08/30 1.0.1 行の途中で文字の大きさを変える制御文字があった場合の不具合対応
+ * 2024/08/29 1.0.0 公開
+ * -------------------------------------------------
  * 主な機能:
  * - 複数行の章タイトル表示
  * - フェードイン・アウトのトランジション効果
@@ -187,6 +187,22 @@
 
   const settings = {
     fontFiles: JSON.parse(parameters.fontFiles || '[]'),
+  };
+
+  /**
+   * UIエリアのマージンを取得します。
+   *
+   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
+   *
+   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
+   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
+   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
+   */
+  const getMarginOfUIArea = () => {
+    return {
+      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
+      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
+    };
   };
 
   /**
@@ -555,10 +571,12 @@
    * @returns {Rectangle} ウィンドウの矩形範囲
    */
   Scene_Map.prototype.chapterTitleWindowRect = function () {
+    const { uiMarginX, uiMarginY } = getMarginOfUIArea();
+
     const ww = Graphics.width;
     const wh = Graphics.height;
-    const wx = 0;
-    const wy = 0;
+    const wx = -uiMarginX;
+    const wy = -uiMarginY;
     return new Rectangle(wx, wy, ww, wh);
   };
 
