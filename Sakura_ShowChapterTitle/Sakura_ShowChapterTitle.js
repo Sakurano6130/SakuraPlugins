@@ -1,6 +1,6 @@
 /*:
  * @target MZ
- * @plugindesc 1.0.1 章タイトルをコマンド１つで表示し、
+ * @plugindesc 章タイトルをコマンド１つで表示し、
  * フォントや背景を自由にカスタマイズできるプラグインです。
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
