@@ -1,15 +1,3 @@
-// Sakura_FreeKeyboardGuide
-// Copyright (c) 2024 Sakurano
-// This software is released under the MIT license.
-// http://opensource.org/licenses/mit-license.php
-
-/**
- * 2024/09/02 1.0.1 デフォルト値変更
- * 2024/09/02 1.0.0 公開
- * 2024/09/02 0.5.0 ほぼ形に
- * 2024/08/31 0.0.1 作成
- */
-
 /*:
  * @target MZ
  * @plugindesc キーボードガイドを自由に出せるプラグイン
@@ -18,6 +6,22 @@
  *
  * @help
  * キーボードガイドウィンドウを表示するプラグインです。
+ *
+ * -------------------------------------------------
+ * Sakura_MapNameExtend
+ * Copyright (c) 2024 Sakurano
+ * This software is released under the MIT license.
+ * http://opensource.org/licenses/mit-license.php
+ * -------------------------------------------------
+ * 2024/09/09 1.0.2 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
+ *                  異なる設定をしている場合の位置を調整。
+ * 2024/09/02 1.0.1 デフォルト値変更
+ * 2024/09/02 1.0.0 公開
+ * 2024/09/02 0.5.0 ほぼ形に
+ * 2024/08/31 0.0.1 作成
+ * -------------------------------------------------
+ *
+ *
  * シーンごとにキーとその説明を定義し、スイッチで表示/非表示を制御することが
  * できます。
  *
@@ -335,6 +339,22 @@
   const buttonOffsetYInWindowMessage = Number(parameters['ButtonOffsetYInWindowMessage'] || 0);
 
   /**
+   * UIエリアのマージンを取得します。
+   *
+   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
+   *
+   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
+   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
+   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
+   */
+  const getMarginOfUIArea = () => {
+    return {
+      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
+      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
+    };
+  };
+
+  /**
    * 角丸の矩形を描画するための関数
    * @param {CanvasRenderingContext2D} context - キャンバスの描画コンテキスト
    * @param {number} x - 矩形の左上のX座標
@@ -542,7 +562,7 @@
      * @param {number} height - ボタンの高さ
      */
     registerKey(triggerKey, absX, absY, width, height) {
-      const positionKey = `${absX}-${absY}-${width}-${height}`;
+      const positionKey = [absX, absY, width, height].join(',');
       this.keys[positionKey] = triggerKey;
     }
 
@@ -554,7 +574,7 @@
      */
     findKeyNameByPosition(x, y) {
       for (const [positionKey, keyName] of [...Object.entries(this.keys)].reverse()) {
-        const [buttonX, buttonY, buttonWidth, buttonHeight] = positionKey.split('-');
+        const [buttonX, buttonY, buttonWidth, buttonHeight] = positionKey.split(',');
         const numButtonX = Number(buttonX);
         const numButtonY = Number(buttonY);
         const numButtonWidth = Number(buttonWidth);
@@ -633,13 +653,15 @@
      * @param {number} gameSwitchForVisible - 表示/非表示を制御するゲームスイッチID
      */
     initialize(position, offsetX, offsetY, keyDescriptions, showDimmer, gameSwitchForVisible) {
+      const { uiMarginX, uiMarginY } = getMarginOfUIArea();
+
       this._position = position;
       this._offsetX = offsetX;
       this._offsetY = offsetY;
       this._keyDescriptions = keyDescriptions;
       this._showDimmer = showDimmer;
       this._gameSwitchForVisible = gameSwitchForVisible;
-      const rect = new Rectangle(0, 0, Graphics.width, this.windowHeight()); // 初期の幅はGraphics.widthを使用
+      const rect = new Rectangle(-uiMarginX, -uiMarginY, Graphics.width, this.windowHeight()); // 初期の幅はGraphics.widthを使用
       super.initialize(rect);
       this.opacity = 0;
       this.visible = false;
@@ -756,10 +778,12 @@
      * @returns {number} - ウィンドウのX座標
      */
     calculateXPosition() {
+      const { uiMarginX } = getMarginOfUIArea();
+
       if (['left-bottom', 'left-top'].includes(this._position)) {
-        return 0 + this._offsetX;
+        return -uiMarginX + this._offsetX;
       }
-      return Graphics.width - this.windowWidth() + this._offsetX;
+      return -uiMarginX + Graphics.width - this.windowWidth() + this._offsetX;
     }
 
     /**
@@ -767,10 +791,12 @@
      * @returns {number} - ウィンドウのY座標
      */
     calculateYPosition() {
+      const { uiMarginY } = getMarginOfUIArea();
+
       if (['left-top', 'right-top'].includes(this._position)) {
-        return 0 + this._offsetY;
+        return -uiMarginY + this._offsetY;
       }
-      return Graphics.height - this.windowHeight() + this._offsetY;
+      return -uiMarginY + Graphics.height - this.windowHeight() + this._offsetY;
     }
 
     /**
@@ -846,7 +872,8 @@
     if (TouchInput.isPressed()) {
       const x = TouchInput.x;
       const y = TouchInput.y;
-      const triggered = keyManager.triggerKeyEventByPosition(x, y);
+      const { uiMarginX, uiMarginY } = getMarginOfUIArea();
+      const triggered = keyManager.triggerKeyEventByPosition(x - uiMarginX, y - uiMarginY);
       return triggered;
     }
     return false;

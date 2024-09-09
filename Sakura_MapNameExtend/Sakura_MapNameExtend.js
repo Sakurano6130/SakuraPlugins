@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/09 1.0.3 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
+ *                  異なる設定をしている場合の位置を調整。
  * 2024/09/07 1.0.2 メニューなどから戻ってきた場合に再表示されていたため修正
  * 2024/09/04 1.0.1 1行しかなかった場合の表示を若干修正
  * 2024/09/03 1.0.0 公開
@@ -149,6 +151,22 @@
   const moveDistance = Number(parameters['moveDistance'] || 30); // フェードイン/アウト時の移動距離
   const needsOutputMaps = String(parameters['needsOutputMaps']) === 'true';
 
+  /**
+   * UIエリアのマージンを取得します。
+   *
+   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
+   *
+   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
+   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
+   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
+   */
+  const getMarginOfUIArea = () => {
+    return {
+      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
+      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
+    };
+  };
+
   // ファイル操作とパス操作のモジュールをインポート
   const fs = require('fs');
   const path = require('path');
@@ -228,28 +246,29 @@
   Window_MapName.prototype.updatePosition = function () {
     const width = this.width;
     const height = this.height;
+    const { uiMarginX, uiMarginY } = getMarginOfUIArea();
 
     switch (mapNamePosition) {
       case 'topLeft':
-        this.x = 0 + mapNameTextX;
-        this.y = 0 + mapNameTextY;
+        this.x = -uiMarginX + mapNameTextX;
+        this.y = -uiMarginY + mapNameTextY;
         break;
       case 'topRight':
-        this.x = Graphics.boxWidth - width + mapNameTextX;
-        this.y = 0 + mapNameTextY;
+        this.x = -uiMarginX + Graphics.width - width + mapNameTextX;
+        this.y = -uiMarginY + +mapNameTextY;
         break;
       case 'bottomLeft':
-        this.x = 0 + mapNameTextX;
-        this.y = Graphics.boxHeight - height + mapNameTextY;
+        this.x = -uiMarginX + mapNameTextX;
+        this.y = -uiMarginY + Graphics.height - height + mapNameTextY;
         break;
       case 'bottomRight':
-        this.x = Graphics.boxWidth - width + mapNameTextX;
-        this.y = Graphics.boxHeight - height + mapNameTextY;
+        this.x = -uiMarginX + Graphics.width - width + mapNameTextX;
+        this.y = -uiMarginY + Graphics.height - height + mapNameTextY;
         break;
       case 'center':
       default:
-        this.x = Math.floor((Graphics.boxWidth - width) / 2) + mapNameTextX;
-        this.y = Math.floor((Graphics.boxHeight - height) / 2) + mapNameTextY;
+        this.x = -uiMarginX + Math.floor((Graphics.width - width) / 2) + mapNameTextX;
+        this.y = -uiMarginY + Math.floor((Graphics.height - height) / 2) + mapNameTextY;
         break;
     }
   };
@@ -367,8 +386,8 @@
           break;
         case 'topRight':
         case 'bottomRight':
-          mainTextX = width - this.padding - marginX - mainTextWidth;
-          subTextX = width - this.padding - marginX - subTextWidth;
+          mainTextX = width - this.padding * 2 - mainTextWidth;
+          subTextX = width - this.padding * 2 - subTextWidth;
           break;
         case 'center':
         default:
@@ -410,10 +429,11 @@
    * @returns {Rectangle} ウィンドウの矩形領域
    */
   Scene_Map.prototype.mapNameWindowRect = function () {
-    const wx = 0;
-    const wy = 0;
-    const ww = Graphics.boxWidth;
-    const wh = Graphics.boxHeight;
+    const { uiMarginX, uiMarginY } = getMarginOfUIArea();
+    const wx = -uiMarginX;
+    const wy = -uiMarginY;
+    const ww = Graphics.width;
+    const wh = Graphics.height;
     return new Rectangle(wx, wy, ww, wh);
   };
 
