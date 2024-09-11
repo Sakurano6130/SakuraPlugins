@@ -24,6 +24,7 @@
 ```
 
 ![alt text](image-1.png)
+
 ![alt text](image-2.png)
 
 カッコは全角でも半角でも大丈夫。ただしカッコはじめと終わりは全角同士、半角同士じゃないとだめです。
@@ -37,6 +38,7 @@
 「ｶｷﾞｶｯｺで囲むと下向き▼」
 ```
 
+![alt text](image-3.png)
 
 ![alt text](image-4.png)
 
