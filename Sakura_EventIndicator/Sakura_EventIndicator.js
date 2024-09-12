@@ -798,21 +798,37 @@
   };
 
   Sprite_Character.prototype.createIconOnEvent = function (iconIndex) {
+    const index = iconIndex;
+    const pw = ImageManager.iconWidth;
+    const ph = ImageManager.iconHeight;
+    const sx = (index % 16) * pw;
+    const sy = Math.floor(index / 16) * ph;
+
+    // アイコンスプライトが既に存在している場合
+    if (this._iconSprite) {
+      this._iconSprite.setFrame(sx, sy, pw, ph);
+      return;
+    }
+
+    // まだアイコンスプライトが作成されていない場合
     const bitmap = ImageManager.loadSystem('IconSet');
     const onLoad = () => {
-      const iconSprite = new Sprite(bitmap);
-      const w = 32;
-      const h = 32;
-      iconSprite.anchor.x = 0.5;
-      iconSprite.anchor.y = 1.0;
-      const index = iconIndex;
-      const sx = (index % 16) * 32;
-      const sy = Math.floor(index / 16) * 32;
-      iconSprite.setFrame(sx, sy, w, h);
-      this._iconSprite = iconSprite;
-      this.addChild(this._iconSprite);
+      if (!this._iconSprite) {
+        this._iconSprite = new Sprite(bitmap);
+        this._iconSprite.anchor.x = 0.5;
+        this._iconSprite.anchor.y = 1.0;
+        this.addChild(this._iconSprite);
+      }
+      this._iconSprite.bitmap = bitmap;
+      this._iconSprite.setFrame(sx, sy, pw, ph);
     };
-    bitmap.addLoadListener(onLoad.bind(this));
+
+    // アイコンセットの画像が読み込まれている場合にも対応
+    if (bitmap.isReady()) {
+      onLoad();
+    } else {
+      bitmap.addLoadListener(onLoad.bind(this));
+    }
   };
 
   /**
@@ -1013,7 +1029,6 @@
   Sprite_Character.prototype.clearIndicator = function () {
     if (this._lineSprite) this._lineSprite.bitmap.clear();
     if (this._textSprite) this._textSprite.bitmap.clear();
-    if (this._iconSprite) this._iconSprite.bitmap.clear();
   };
 
   /**
