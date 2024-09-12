@@ -60,7 +60,7 @@
  * @text ﾌｷﾀﾞｼが表示されるﾌﾟﾚｲﾔｰとの距離
  * @type number
  * @max 9999
- * @desc ﾌｷﾀﾞｼが表示されるﾌﾟﾚｲﾔｰとの距離を設定します
+ * @desc ﾌｷﾀﾞｼが表示されるﾌﾟﾚｲﾔｰとの距離を設定します。0だとどんなに離れていても表示されます。
  * @default 5
  *
  * @command hideIndicator
@@ -627,6 +627,7 @@
     this._hasCustomRange = false; // カスタム範囲が設定されているかどうか
     this._eventPageIndex = null; // イベントページインデックスの初期化
     this._showLocation = null; // 移動先表示フラグの初期化
+    this._needsDrawLine = null; // 線表示フラグの初期化
     this._freeText = null; // フリーテキストの初期化
     this._textType = null; // フリーテキスト表示タイプの初期化
     this._textSprite = null; // テキストスプライトの初期化
@@ -675,55 +676,6 @@
   };
 
   /**
-   * ラインスプライトを作成
-   * @param {number} xLineLength - X軸のラインの長さ
-   * @param {number} yLineLength - Y軸のラインの長さ
-   * @param {string} axis - X または Y 軸
-   * @param {string} style - ラインのスタイル
-   * @param {string} colorName - ラインの色
-   */
-  const createLineSprite = function (xLineLength, yLineLength, axis, style, colorName) {
-    const tileWidth = $gameMap.tileWidth();
-    const tileHeight = $gameMap.tileHeight();
-    const lengthX = xLineLength ? Number(xLineLength) * 2 : 0;
-    const lengthY = yLineLength ? Number(yLineLength) * 2 : 0;
-    const realWidth = Math.max(lengthX * tileWidth + tileWidth, tileWidth);
-    const realHeight = Math.max(lengthY * tileHeight + tileHeight, tileHeight);
-
-    this._lineSprite = new Sprite(new Bitmap(realWidth, realHeight));
-    this._lineSprite.anchor.x = 0.5;
-    this._lineSprite.anchor.y = 0.5;
-    this._lineSprite.y -= tileHeight / 2; // ラインの位置を調整
-
-    if (axis === 'X') {
-      drawDotLine({
-        bitmap: this._lineSprite.bitmap,
-        x1: 0,
-        y1: realHeight / 2,
-        x2: realWidth,
-        y2: realHeight / 2,
-        style,
-        colorName,
-      });
-    }
-
-    if (axis === 'Y') {
-      drawDotLine({
-        bitmap: this._lineSprite.bitmap,
-        x1: realWidth / 2,
-        y1: 0,
-        x2: realWidth / 2,
-        y2: realHeight,
-        style,
-        colorName,
-      });
-    }
-
-    this._lineSprite.opacity = INITIAL_OPACITY; // 初期の透明度
-    this.addChild(this._lineSprite); // キャラクターの後ろに線を表示
-  };
-
-  /**
    * 指定されたノートを基に、テキストとラインのスプライトを作成してキャラクターに関連付けます。
    * @param {string} note - イベントノートの内容
    */
@@ -746,6 +698,7 @@
 
     // テキスト表示フラグを設定
     this._showLocation = showLocation;
+    this._needsDrawLine = needsDrawLine;
     this._freeText = freeText;
     this._textType = textType;
     this._exTextTextColorName = lineColor; // テキストの色を設定
@@ -761,11 +714,16 @@
       this.createIconOnEvent(iconIndex);
     }
 
+    // 移動先表示
+    if (showLocation) {
+      // イベントリスト内に場所移動があれば、移動先の名前を取得
+      const locationName = getTransferDestinationNameFromEventList(this._character);
+      if (!locationName) return;
+      this.createTextOnEvent(locationName, this._textType);
+    }
+
     // 縦横の指定がなければここで終了
     if (!axis) return;
-
-    // ラインの描画スタイルを設定
-    const style = needsDrawLine ? 'DOT' : 'NOLINE';
 
     // 軸の設定に基づいてラインの長さを設定
     const { xLineLength, yLineLength } = getLineLengths(axis, lineLength);
@@ -773,10 +731,12 @@
     // キャラクターのカスタムレンジを設定
     setCustomRange(this._character, xLineLength, yLineLength);
 
-    if (style === 'NOLINE') return;
-
     // ラインスプライトの作成
-    createLineSprite.call(this, xLineLength, yLineLength, axis, style, lineColor);
+    if (needsDrawLine) {
+      // ラインの描画スタイルを設定
+      const style = needsDrawLine ? 'DOT' : 'NOLINE';
+      this.createLineSprite(xLineLength, yLineLength, axis, style, lineColor);
+    }
   };
 
   /**
@@ -856,15 +816,75 @@
   };
 
   /**
+   * ラインスプライトを作成
+   * @param {number} xLineLength - X軸のラインの長さ
+   * @param {number} yLineLength - Y軸のラインの長さ
+   * @param {string} axis - X または Y 軸
+   * @param {string} style - ラインのスタイル
+   * @param {string} colorName - ラインの色
+   */
+  Sprite_Character.prototype.createLineSprite = function (
+    xLineLength,
+    yLineLength,
+    axis,
+    style,
+    colorName
+  ) {
+    const tileWidth = $gameMap.tileWidth();
+    const tileHeight = $gameMap.tileHeight();
+    const lengthX = xLineLength ? Number(xLineLength) * 2 : 0;
+    const lengthY = yLineLength ? Number(yLineLength) * 2 : 0;
+    const realWidth = Math.max(lengthX * tileWidth + tileWidth, tileWidth);
+    const realHeight = Math.max(lengthY * tileHeight + tileHeight, tileHeight);
+
+    this._lineSprite = new Sprite(new Bitmap(realWidth, realHeight));
+    this._lineSprite.anchor.x = 0.5;
+    this._lineSprite.anchor.y = 0.5;
+    this._lineSprite.y -= tileHeight / 2; // ラインの位置を調整
+
+    if (axis === 'X') {
+      drawDotLine({
+        bitmap: this._lineSprite.bitmap,
+        x1: 0,
+        y1: realHeight / 2,
+        x2: realWidth,
+        y2: realHeight / 2,
+        style,
+        colorName,
+      });
+    }
+
+    if (axis === 'Y') {
+      drawDotLine({
+        bitmap: this._lineSprite.bitmap,
+        x1: realWidth / 2,
+        y1: 0,
+        x2: realWidth / 2,
+        y2: realHeight,
+        style,
+        colorName,
+      });
+    }
+
+    this._lineSprite.opacity = INITIAL_OPACITY; // 初期の透明度
+    this.addChild(this._lineSprite); // キャラクターの後ろに線を表示
+  };
+
+  /**
    * @remarks コアスクリプトでは Sprite_Character.prototype.updateVisibilityでのみ使用
    * これをいれないとグラフィックが指定されていないイベントがisEmptyCharacterとみなされて
    * 表示されない。
    */
   const _Sprite_Character_prototype_isEmptyCharacter = Sprite_Character.prototype.isEmptyCharacter;
   Sprite_Character.prototype.isEmptyCharacter = function () {
-    const isEmpty = _Sprite_Character_prototype_isEmptyCharacter.call(this);
+    const originalIsEmpty = _Sprite_Character_prototype_isEmptyCharacter.call(this);
     return (
-      isEmpty && !this._hasCustomRange && !this._showLocation && !this._freeText && !this._iconIndex
+      originalIsEmpty &&
+      !this._hasCustomRange &&
+      !this._showLocation &&
+      !this._freeText &&
+      !this._needsDrawLine &&
+      !this._iconIndex
     );
   };
 
@@ -897,7 +917,8 @@
     if (!this._freeText) return;
     if (!this.isNotVehicleCharacter()) return;
     if (this._textType !== 'bubble') return;
-    this._isNearPlayer = this._character.checkNearPlayer(distanceToShowBubble);
+    this._isNearPlayer =
+      distanceToShowBubble === 0 ? true : this._character.checkNearPlayer(distanceToShowBubble);
   };
 
   /**
@@ -984,14 +1005,6 @@
     const note = this._character._requestCreateIndicator ?? getEventNote.call(this);
     this._character._requestCreateIndicator = null;
     this.createIndicator(note);
-
-    // テキストの表示条件を満たしているか確認
-    if (!this._showLocation) return;
-
-    // イベントリスト内に場所移動があれば、移動先の名前を取得
-    const locationName = getTransferDestinationNameFromEventList(this._character);
-    if (!locationName) return;
-    this.createTextOnEvent(locationName, this._textType);
   };
 
   /**
@@ -1141,10 +1154,10 @@
   /**
    * このイベントとプレイヤーの距離が範囲内か確認する関数
    * イベントコマンドの条件分岐で使用できる関数です
-   * @param {number} range - プレイヤーとの距離（デフォルト3）
+   * @param {number} range - プレイヤーとの距離（デフォルト5）
    * @returns
    */
-  Game_CharacterBase.prototype.checkNearPlayer = function (range = distanceToShowBubble) {
+  Game_CharacterBase.prototype.checkNearPlayer = function (range = 5) {
     if (isNaN(range)) false;
     const character = this;
     const sx = Math.abs(character.deltaXFrom($gamePlayer.x));
@@ -1158,10 +1171,10 @@
   /**
    * このイベントとプレイヤーの距離が範囲内か確認する関数
    * イベントコマンドの条件分岐で使用できる関数です
-   * @param {number} range - プレイヤーとの距離（デフォルト3）
+   * @param {number} range - プレイヤーとの距離（デフォルト5）
    * @returns
    */
-  Game_Interpreter.prototype.isNearPlayer = function (range = distanceToShowBubble) {
+  Game_Interpreter.prototype.isNearPlayer = function (range = 5) {
     return this.character(0).checkNearPlayer(range);
   };
 })();
