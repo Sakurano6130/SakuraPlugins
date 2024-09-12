@@ -40,6 +40,29 @@
  * @desc ｲﾝｼﾞｹｰﾀのフォントサイズを設定します
  * @default 16
  *
+ * @param xOffsetIndicator
+ * @text ｲﾝｼﾞｹｰﾀのX軸位置調整
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @desc ｲﾝｼﾞｹｰﾀのX軸位置調整を設定します 正の値で右、負の値で左です
+ * @default 0
+ *
+ * @param yOffsetIndicator
+ * @text ｲﾝｼﾞｹｰﾀのY軸位置調整
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @desc ｲﾝｼﾞｹｰﾀのY軸位置調整を設定します 正の値で下、負の値で上です
+ * @default 0
+ *
+ * @param distanceToShowBubble
+ * @text ﾌｷﾀﾞｼが表示されるﾌﾟﾚｲﾔｰとの距離
+ * @type number
+ * @max 9999
+ * @desc ﾌｷﾀﾞｼが表示されるﾌﾟﾚｲﾔｰとの距離を設定します
+ * @default 5
+ *
  * @command hideIndicator
  * @text 🙈ｲﾝｼﾞｹｰﾀを一時的に隠す
  * @desc ｲﾝｼﾞｹｰﾀを一時的に隠します。
@@ -77,7 +100,7 @@
  *
  * @command clearIndicator
  * @text 🚫このﾍﾟｰｼﾞではｲﾝｼﾞｹｰﾀを表示しない
- * @desc このコマンドをイベントリストに入れておくと、そのページの時はｲﾝｼﾞｹｰﾀが表示されません。
+ * @desc このコマンドをイベントリストの1番最初に入れておくと、そのページの時はｲﾝｼﾞｹｰﾀが表示されません。
  *
  */
 
@@ -85,6 +108,9 @@
   const pluginName = 'Sakura_EventIndicator';
   const parameters = PluginManager.parameters(pluginName);
   const fontSizeForIndicator = Number(parameters['fontSizeForIndicator'] || 16);
+  const xOffsetIndicator = Number(parameters['xOffsetIndicator'] || 0);
+  const yOffsetIndicator = Number(parameters['yOffsetIndicator'] || 0);
+  const distanceToShowBubble = Number(parameters['distanceToShowBubble'] || 5);
 
   const INITIAL_OPACITY = 255;
 
@@ -178,7 +204,11 @@
   const eventListHasClearIndicatorCommand = (event) => {
     if (!event) return false;
     if (!(event instanceof Game_Event)) return false;
+
+    let index = 0;
+
     for (const { code, parameters } of event?.page()?.list ?? []) {
+      if (index > 0) break;
       const PLUGIN_COMMAND_CODE = 357;
       if (code === PLUGIN_COMMAND_CODE) {
         const [eventPluginName, eventPluginCommandName] = parameters;
@@ -188,6 +218,7 @@
           }
         }
       }
+      index += 1;
     }
     return false;
   };
@@ -295,8 +326,18 @@
    * @param {string} input - テキスト入力
    * @returns {boolean} 移動先が含まれているかどうか
    */
-  const checkLocationName = (input) => {
+  const checkShowLocation = (input) => {
     return /(?:\(|（|「)?\\移動先(?:\)|）|」)?(?:$|\s)/.test(input);
+  };
+
+  /**
+   * テキストからアイコン数字を抽出
+   * @param {string} input - テキスト入力
+   * @returns {number|null} 抽出されたアイコン数字、またはnull
+   */
+  const extractIconIndex = (input) => {
+    const iconIndexMatch = input.match(/アイコン\s*([０-９\d]+)/);
+    return iconIndexMatch ? parseInt(toHalfWidth(iconIndexMatch[1]), 10) : null;
   };
 
   /**
@@ -304,17 +345,21 @@
    * @param {string} input - テキスト入力
    * @returns {object} 抽出された情報のオブジェクト
    */
-  const extractAxisAndLocation = (input) => {
+  const extractIndicatorInfo = (input) => {
+    const { freeText, textType } = extractFreeText(input);
+
     // 「」や()内の文字列を除外
     const strippedInput = input.replace(/「.*?」|\（.*?\）|\(.*?\)/g, '');
 
     return {
       axis: extractAxis(strippedInput),
       lineLength: extractLineLength(strippedInput),
-      showLocationName: checkLocationName(input),
+      showLocation: checkShowLocation(input),
       needsDrawLine: /縦線|横線/.test(strippedInput),
       lineColor: extractLineColor(strippedInput),
-      ...extractFreeText(input),
+      freeText,
+      textType,
+      iconIndex: extractIconIndex(strippedInput),
     };
   };
 
@@ -550,6 +595,18 @@
     });
   };
 
+  const _Spriteset_Map_prototype_createLowerLayer = Spriteset_Map.prototype.createLowerLayer;
+  Spriteset_Map.prototype.createLowerLayer = function () {
+    _Spriteset_Map_prototype_createLowerLayer.call(this);
+    this.createIndicatorLayer();
+  };
+
+  Spriteset_Map.prototype.createIndicatorLayer = function () {
+    this._indicatorLayer = new Sprite();
+    this._indicatorLayer.z = 10;
+    this._tilemap.addChild(this._indicatorLayer);
+  };
+
   // ------------------------------------------------------------------------------- //
   // ■ Game_CharacterBase, Sprite_Characterに拡張用の初期値をセット
   // ------------------------------------------------------------------------------- //
@@ -569,10 +626,13 @@
     this._lineOpacitySpeed = 5; // ラインの不透明度の変化速度
     this._hasCustomRange = false; // カスタム範囲が設定されているかどうか
     this._eventPageIndex = null; // イベントページインデックスの初期化
-    this._showLocationName = null; // 移動先表示フラグの初期化
-    this._showFreeText = null; // フリーテキスト表示フラグの初期化
-    this._freeTextType = null; // フリーテキスト表示タイプの初期化
+    this._showLocation = null; // 移動先表示フラグの初期化
+    this._freeText = null; // フリーテキストの初期化
+    this._textType = null; // フリーテキスト表示タイプの初期化
     this._textSprite = null; // テキストスプライトの初期化
+    this._isNearPlayer = null; // フキダシのとき、プレイヤーの近くにいたらtrueになるフラグを初期化
+    this._iconIndex = null; // アイコンインデックスの初期化
+    this._iconSprite = null; // アイコンスプライトの初期化
   };
 
   /**
@@ -592,45 +652,12 @@
   // ■ Sprite_Character.prototype.createIndicator で使用する関数群
   // ------------------------------------------------------------------------------- //
   /**
-   * テキストとラインのスプライトをクリア
-   */
-  const clearExistingTextAndLine = function () {
-    this.clearIndicator();
-  };
-
-  /**
-   * テキストの表示フラグを設定
-   * @param {boolean} showLocationName - 移動先を表示するか
-   * @param {string} freeText - フリーテキスト
-   * @param {string} textType - テキストの種類
-   * @param {string} lineColor - テキストの色
-   */
-  const setTextDisplayFlags = function (showLocationName, freeText, textType, lineColor) {
-    this._showLocationName = showLocationName;
-    this._showFreeText = !!freeText;
-    this._freeTextType = textType;
-    this._exTextTextColorName = lineColor; // テキストの色を設定
-  };
-
-  /**
-   * フリーテキストを表示
-   * @param {boolean} showLocationName - 移動先が表示されているか
-   * @param {string} freeText - フリーテキスト
-   * @param {string} textType - テキストの種類
-   */
-  const displayFreeText = function (showLocationName, freeText, textType) {
-    if (!showLocationName && freeText) {
-      this.createTextOnEvent(freeText, textType);
-    }
-  };
-
-  /**
    * ラインの長さを設定
    * @param {string} axis - 軸 (XまたはY)
    * @param {number|null} lineLength - ラインの長さ
    * @returns {object} xLineLength, yLineLength のオブジェクト
    */
-  const getLineLengths = function (axis, lineLength) {
+  const getLineLengths = (axis, lineLength) => {
     const xLineLength = axis === 'X' ? (lineLength === null ? $gameMap.width() : lineLength) : 0;
     const yLineLength = axis === 'Y' ? (lineLength === null ? $gameMap.height() : lineLength) : 0;
     return { xLineLength, yLineLength };
@@ -642,7 +669,7 @@
    * @param {number} xLineLength - X軸の長さ
    * @param {number} yLineLength - Y軸の長さ
    */
-  const setCustomRange = function (character, xLineLength, yLineLength) {
+  const setCustomRange = (character, xLineLength, yLineLength) => {
     character._customRange = { width: xLineLength + 0.5, height: yLineLength + 0.5 };
     character._hasCustomRange = true;
   };
@@ -704,17 +731,37 @@
     if (!this.isNotVehicleCharacter()) return;
 
     // 既存のテキストやラインをクリア
-    clearExistingTextAndLine.call(this);
+    this.clearIndicator();
 
-    const { axis, lineLength, showLocationName, needsDrawLine, lineColor, freeText, textType } =
-      extractAxisAndLocation(note);
+    const {
+      axis,
+      lineLength,
+      showLocation,
+      needsDrawLine,
+      lineColor,
+      freeText,
+      textType,
+      iconIndex,
+    } = extractIndicatorInfo(note);
 
     // テキスト表示フラグを設定
-    setTextDisplayFlags.call(this, showLocationName, freeText, textType, lineColor);
+    this._showLocation = showLocation;
+    this._freeText = freeText;
+    this._textType = textType;
+    this._exTextTextColorName = lineColor; // テキストの色を設定
+    this._iconIndex = iconIndex;
 
     // フリーテキストを表示
-    displayFreeText.call(this, showLocationName, freeText, textType);
+    if (freeText) {
+      this.createTextOnEvent(freeText, textType);
+    }
 
+    // アイコン表示を表示
+    if (iconIndex) {
+      this.createIconOnEvent(iconIndex);
+    }
+
+    // 縦横の指定がなければここで終了
     if (!axis) return;
 
     // ラインの描画スタイルを設定
@@ -724,7 +771,7 @@
     const { xLineLength, yLineLength } = getLineLengths(axis, lineLength);
 
     // キャラクターのカスタムレンジを設定
-    setCustomRange.call(this, this._character, xLineLength, yLineLength);
+    setCustomRange(this._character, xLineLength, yLineLength);
 
     if (style === 'NOLINE') return;
 
@@ -739,7 +786,6 @@
    */
   Sprite_Character.prototype.createTextOnEvent = function (text, type) {
     if (!this.isNotVehicleCharacter()) return;
-    // if (this._textSprite) this._textSprite.bitmap.clear();
 
     const tileWidth = $gameMap.tileWidth();
     const tileHeight = $gameMap.tileHeight();
@@ -780,16 +826,33 @@
     textSprite.bitmap = bitmap;
 
     // イベントの位置にスプライトを配置
-    textSprite.x = 0;
+    textSprite.x = 0 + xOffsetIndicator;
     textSprite.y = 0;
-    textSprite.z = 8; // キャラクターの上に表示するためにZ座標を調整
     textSprite.anchor.x = 0.5;
     textSprite.anchor.y = 0.5;
-    textSprite.opacity = 0;
-    this._character._hideIndicator = false;
 
     this._textSprite = textSprite;
-    this.addChild(this._textSprite); // スプライトを追加
+
+    // ここで indicatorLayer にスプライトを追加
+    SceneManager._scene._spriteset._indicatorLayer.addChild(this._textSprite);
+  };
+
+  Sprite_Character.prototype.createIconOnEvent = function (iconIndex) {
+    const bitmap = ImageManager.loadSystem('IconSet');
+    const onLoad = () => {
+      const iconSprite = new Sprite(bitmap);
+      const w = 32;
+      const h = 32;
+      iconSprite.anchor.x = 0.5;
+      iconSprite.anchor.y = 1.0;
+      const index = iconIndex;
+      const sx = (index % 16) * 32;
+      const sy = Math.floor(index / 16) * 32;
+      iconSprite.setFrame(sx, sy, w, h);
+      this._iconSprite = iconSprite;
+      this.addChild(this._iconSprite);
+    };
+    bitmap.addLoadListener(onLoad.bind(this));
   };
 
   /**
@@ -800,7 +863,9 @@
   const _Sprite_Character_prototype_isEmptyCharacter = Sprite_Character.prototype.isEmptyCharacter;
   Sprite_Character.prototype.isEmptyCharacter = function () {
     const isEmpty = _Sprite_Character_prototype_isEmptyCharacter.call(this);
-    return isEmpty && !this._hasCustomRange && !this._showLocationName && !this._showFreeText;
+    return (
+      isEmpty && !this._hasCustomRange && !this._showLocation && !this._freeText && !this._iconIndex
+    );
   };
 
   /**
@@ -816,10 +881,36 @@
    * 各スプライト（ライン、テキスト）の表示位置や透明度を更新するメソッド
    */
   Sprite_Character.prototype.updateIndicator = function () {
+    this.checkNearPlayer();
     this.updateIndicatorVisible();
     this.updateCreateIndicator();
     this.updateIndicatorLineOpacity();
-    this.updateIndicatorPosition();
+    this.updateTextSpritePosition();
+    this.updateIconSpritePosition();
+  };
+
+  /**
+   * テキストやラインの表示状態を更新するメソッド
+   * opacityを徐々に変化させるように修正
+   */
+  Sprite_Character.prototype.checkNearPlayer = function () {
+    if (!this._freeText) return;
+    if (!this.isNotVehicleCharacter()) return;
+    if (this._textType !== 'bubble') return;
+    this._isNearPlayer = this._character.checkNearPlayer(distanceToShowBubble);
+  };
+
+  /**
+   * 目標の透明度を取得
+   * @param {"bubble"|"triangle"} textType
+   * @param {boolean} hideIndicator
+   * @param {boolean} isNearPlayer
+   * @returns
+   */
+  const getTargetOpacity = (textType, hideIndicator, isNearPlayer) => {
+    if (hideIndicator) return 0;
+    if (textType === 'triangle') return 255;
+    return isNearPlayer ? 255 : 0;
   };
 
   /**
@@ -827,8 +918,15 @@
    * opacityを徐々に変化させるように修正
    */
   Sprite_Character.prototype.updateIndicatorVisible = function () {
-    const targetOpacity = this._character._hideIndicator ? 0 : 255; // 目標の透明度
-    const fadeSpeed = 10; // 透明度が変わる速度（任意で調整）
+    // 目標の透明度
+    const targetOpacity = getTargetOpacity(
+      this._textType,
+      this._character._hideIndicator,
+      this._isNearPlayer
+    );
+
+    // 透明度が変わる速度
+    const fadeSpeed = 10;
 
     if (this._textSprite) {
       // 現在の透明度と目標透明度の差を徐々に埋める
@@ -888,12 +986,12 @@
     this.createIndicator(note);
 
     // テキストの表示条件を満たしているか確認
-    if (!this._showLocationName) return;
+    if (!this._showLocation) return;
 
     // イベントリスト内に場所移動があれば、移動先の名前を取得
     const locationName = getTransferDestinationNameFromEventList(this._character);
     if (!locationName) return;
-    this.createTextOnEvent(locationName, this._freeTextType);
+    this.createTextOnEvent(locationName, this._textType);
   };
 
   /**
@@ -902,6 +1000,7 @@
   Sprite_Character.prototype.clearIndicator = function () {
     if (this._lineSprite) this._lineSprite.bitmap.clear();
     if (this._textSprite) this._textSprite.bitmap.clear();
+    if (this._iconSprite) this._iconSprite.bitmap.clear();
   };
 
   /**
@@ -921,7 +1020,7 @@
   /**
    * テキストスプライトの位置を更新するメソッド
    */
-  Sprite_Character.prototype.updateIndicatorPosition = function () {
+  Sprite_Character.prototype.updateTextSpritePosition = function () {
     if (!this._textSprite) return;
 
     const fontSize = this._textSprite.bitmap.fontSize;
@@ -931,7 +1030,31 @@
     if (this._character.y < 1) {
       y += tileHeight;
     }
-    this._textSprite.y = y;
+
+    // キャラクターと同期する位置にテキストスプライトを配置
+    this._textSprite.x = this.x + xOffsetIndicator;
+    this._textSprite.y = this.y + y + yOffsetIndicator;
+  };
+
+  /**
+   * アイコンスプライトの位置を更新するメソッド
+   */
+  Sprite_Character.prototype.updateIconSpritePosition = function () {
+    if (!this._iconSprite) return;
+
+    // 現在のアイコンスプライトの基本Y位置を設定（初期位置）
+    const baseY = 0 - this.patternHeight(); // アイコンスプライトをキャラクターの上に表示
+
+    // アニメーションを制御する変数 (フレームごとに値を変動させる)
+    const animationSpeed = 0.05; // 動作の速さを調整（値が小さいほどゆっくり）
+    const amplitude = 3; // 上下移動するピクセル数
+
+    // フレームの進行に基づき、sin波を使って上下に移動させる
+    const offsetY = Math.sin(Graphics.frameCount * animationSpeed) * amplitude;
+
+    // アイコンスプライトの位置を更新
+    this._iconSprite.x = 0;
+    this._iconSprite.y = baseY + offsetY;
   };
 
   // ------------------------------------------------------------------------------- //
@@ -1015,6 +1138,20 @@
     return this.events().filter((event) => event.posInCustomRange(x, y));
   };
 
+  /**
+   * このイベントとプレイヤーの距離が範囲内か確認する関数
+   * イベントコマンドの条件分岐で使用できる関数です
+   * @param {number} range - プレイヤーとの距離（デフォルト3）
+   * @returns
+   */
+  Game_CharacterBase.prototype.checkNearPlayer = function (range = distanceToShowBubble) {
+    if (isNaN(range)) false;
+    const character = this;
+    const sx = Math.abs(character.deltaXFrom($gamePlayer.x));
+    const sy = Math.abs(character.deltaYFrom($gamePlayer.y));
+    return sx + sy < range;
+  };
+
   // ------------------------------------------------------------------------------- //
   // ■ おまけ
   // ------------------------------------------------------------------------------- //
@@ -1024,11 +1161,7 @@
    * @param {number} range - プレイヤーとの距離（デフォルト3）
    * @returns
    */
-  Game_Interpreter.prototype.isNearPlayer = function (range = 3) {
-    if (isNaN(range)) false;
-    const character = this.character(0);
-    const sx = Math.abs(character.deltaXFrom($gamePlayer.x));
-    const sy = Math.abs(character.deltaYFrom($gamePlayer.y));
-    return sx + sy < range;
+  Game_Interpreter.prototype.isNearPlayer = function (range = distanceToShowBubble) {
+    return this.character(0).checkNearPlayer(range);
   };
 })();
