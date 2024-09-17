@@ -1883,7 +1883,8 @@ ${outputFilePath}
       this.contents.fontBold = false;
 
       // 現在のスイッチIDと一致するかどうか
-      const isCurrentDestination = destinationManager.switchId === switchId;
+      const isCurrentDestination =
+        destinationManager.switchId > 0 && destinationManager.switchId === switchId;
       const textColor = isCurrentDestination ? '6' : '0';
       // 目的達成済みか
       const isCompleted = destinationManager.isDestinationCompleted(switchId);
