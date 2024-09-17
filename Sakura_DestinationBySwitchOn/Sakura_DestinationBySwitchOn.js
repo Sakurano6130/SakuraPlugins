@@ -1342,7 +1342,6 @@ ${outputFilePath}
     initializeCategories() {
       this._categories = this.createCategories();
       this._categories.forEach((category) => {
-        // this._expandedCategories[category.name] = category.items.length;
         this._expandedCategories[category.name] = false;
         this._animatingCategories[category.name] = 0;
       });
@@ -1409,6 +1408,7 @@ ${outputFilePath}
     processOk() {
       const index = this.index();
       if (this.isCategory(index)) {
+        this.playOkSound();
         this.toggleCategory(index);
       } else {
         const itemData = this.itemAt(index);
@@ -1785,13 +1785,17 @@ ${outputFilePath}
       // データをループし、ｶﾃｺﾞﾘごとにグループ化
       for (const entry of inputData) {
         const { categoryName, switchId, destinationTitle, detail, picture } = entry;
+
         if (!$gameTemp._sceneDestinationTargetCategories) {
           $gameTemp._sceneDestinationTargetCategories = [];
         }
-        if (
-          $gameTemp._sceneDestinationTargetCategories.length > 0 &&
-          !$gameTemp._sceneDestinationTargetCategories.includes(categoryName)
-        ) {
+
+        // 前方一致でカテゴリを判定する
+        const hasMatchingCategory = $gameTemp._sceneDestinationTargetCategories.some(
+          (targetCategory) => categoryName.startsWith(targetCategory)
+        );
+
+        if ($gameTemp._sceneDestinationTargetCategories.length > 0 && !hasMatchingCategory) {
           continue;
         }
 
@@ -2205,7 +2209,7 @@ ${outputFilePath}
       } else {
         this.addCommand(commandWindowTextAlreadyCompleted, 'ok', enabled);
       }
-      this.addCommand('キャンセル', 'cancel', true);
+      this.addCommand(TextManager.cancel, 'cancel');
     }
 
     setItem(item) {
@@ -2214,7 +2218,7 @@ ${outputFilePath}
     }
 
     processOk() {
-      const { switchId, switchName, detail } = this._item;
+      const { switchId } = this._item;
       destinationManager.setActiveSwitchId(switchId, false);
       super.processOk();
     }
