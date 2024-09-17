@@ -13,7 +13,7 @@
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
  * 2024/09/17 2.0.0 子目的表示の追加
- *                  Scene_Destinationsの追加
+ *                  アーカイブシーンの追加
  * 2024/09/09 1.0.3 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
  *                  異なる設定をしている場合の位置を調整。
  * 2024/09/04 1.0.2 ファイル出力判定ミス修正
@@ -36,7 +36,7 @@
  *
  * @command setDestinationCompleted
  * @text 🏆目的を達成状態にする
- * @desc 目的を達成状態にし、目的表示シーンで「優先表示」を選択できないようにします。
+ * @desc 目的を達成状態にし、アーカイブシーンで「目的の優先表示」を選択できないようにします。
  * @arg switchId
  * @text スイッチ
  * @desc 達成状態にするスイッチを指定してください。
@@ -68,19 +68,19 @@
  * @decimals 1
  * @default 0.7
  *
- * @command registerDestinationDetail
- * @text 📝目的登録
- * @desc 「目的登録:目的のｶﾃｺﾞﾘ名」という名前のｺﾓﾝｲﾍﾞﾝﾄを作りその中に登録して。ｹﾞｰﾑ開始時に自動で読取るので実行不要。複数作れます。
+ * @command registerArchiveEntry
+ * @text 📝ｱｰｶｲﾌﾞ登録
+ * @desc ｱｰｶｲﾌﾞ登録します。ｹﾞｰﾑ開始時に自動で読取るので実行は不要です。
  *
- * @arg destinationCategory
+ * @arg archiveCategory
  * @text 🗂️カテゴリ
- * @desc 目的のｶﾃｺﾞﾘです。このｶﾃｺﾞﾘごとに折りたたまれます。
+ * @desc ｱｰｶｲﾌﾞのｶﾃｺﾞﾘです。このｶﾃｺﾞﾘごとに折りたたまれます。
  * @type string
  * @default
  *
- * @arg destinationTitle
+ * @arg archiveTitle
  * @text 🏷️タイトル
- * @desc 目的のﾀｲﾄﾙです。
+ * @desc ｱｰｶｲﾌﾞのﾀｲﾄﾙです。
  * @type string
  * @default
  *
@@ -103,17 +103,17 @@
  * @type multiline_string
  * @default
  * 
- * @command callSceneDestination
- * @text 🖼️目的表示シーンの呼び出し
- * @desc 🖼️目的表示シーンを呼び出します。
+ * @command callSceneArchive
+ * @text 📞ｱｰｶｲﾌﾞｼｰﾝの呼び出し
+ * @desc ｱｰｶｲﾌﾞｼｰﾝを呼び出します。
  * @arg title
  * @text タイトル
- * @desc タイトルを指定してください。目的表示シーンの左上に大きく出るタイトルになります。指定しなければ表示されません。
+ * @desc タイトルを指定してください。ｱｰｶｲﾌﾞｼｰﾝの左上に大きく出るタイトルになります。指定しなければ表示されません。
  * @type string
  * @default
  * @arg targetCategories
  * @text 対象のｶﾃｺﾞﾘ
- * @desc 対象のｶﾃｺﾞﾘを指定してください。（複数指定可。未指定の場合はすべて対象になります）
+ * @desc 対象のｶﾃｺﾞﾘを指定してください。（前方一致検索します。複数指定可。未指定の場合はすべて対象になります）
  * @type string[]
  * @default []
 
@@ -140,7 +140,7 @@
  * @parent groupMapDisplay
  * @text 目的ｳｨﾝﾄﾞｳX座標
  * @desc 目的ｳｨﾝﾄﾞｳの表示位置（X座標）
- * @default 40
+ * @default 0
  *
  * @param destinationTextY
  * @parent groupMapDisplay
@@ -224,11 +224,20 @@
  * @type color
  * @default 0
  *
- * @param groupSceneDestination
- * @text ⚙️ 目的表示シーンの設定 ---
+ * @param storyProgressTextDuration
+ * @parent groupMapDisplay
+ * @text ｽﾄｰﾘｰが進行したときに表示するﾃｷｽﾄの時間
+ * @desc ｽﾄｰﾘｰが進行したときに表示するﾃｷｽﾄの時間です。
+ * @type number
+ * @min 0
+ * @max 9999
+ * @default 120
  *
- * @param paddingInSceneDestination
- * @parent groupSceneDestination
+ * @param groupSceneArchive
+ * @text ⚙️ ｱｰｶｲﾌﾞｼｰﾝの設定 ---
+ *
+ * @param paddingInSceneArchive
+ * @parent groupSceneArchive
  * @text シーン全体の画面との余白
  * @desc シーン全体の画面との余白
  * @type number
@@ -237,7 +246,7 @@
  * @default 0
  *
  * @param listWindowWidthRate
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 左側のｶﾃｺﾞﾘｳｨﾝﾄﾞｳ幅の画面に対する大きさ（％）
  * @desc 左側のｶﾃｺﾞﾘｳｨﾝﾄﾞｳ幅の画面に対する大きさ（％）
  * @type number
@@ -246,7 +255,7 @@
  * @default 35
  *
  * @param listWindowItemHeight
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 左側のｶﾃｺﾞﾘｳｨﾝﾄﾞｳの１行の高さ
  * @desc 左側のｶﾃｺﾞﾘｳｨﾝﾄﾞｳの１行の高さ
  * @type number
@@ -255,7 +264,7 @@
  * @default 72
  *
  * @param listWindowFontSize
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 左側のｶﾃｺﾞﾘｳｨﾝﾄﾞｳのﾌｫﾝﾄｻｲｽﾞ
  * @desc 左側のｶﾃｺﾞﾘｳｨﾝﾄﾞｳのﾌｫﾝﾄｻｲｽﾞ
  * @type number
@@ -264,7 +273,7 @@
  * @default 20
  *
  * @param detailWindowTitleFontSize
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 右側の詳細ｳｨﾝﾄﾞｳのﾀｲﾄﾙのﾌｫﾝﾄｻｲｽﾞ
  * @desc 右側の詳細ｳｨﾝﾄﾞｳのﾀｲﾄﾙのﾌｫﾝﾄｻｲｽﾞ
  * @type number
@@ -273,7 +282,7 @@
  * @default 26
  *
  * @param detailWindowDescFontSize
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 右側の詳細ｳｨﾝﾄﾞｳの詳細のﾌｫﾝﾄｻｲｽﾞ
  * @desc 右側の詳細ｳｨﾝﾄﾞｳの詳細のﾌｫﾝﾄｻｲｽﾞ
  * @type number
@@ -282,7 +291,7 @@
  * @default 20
  *
  * @param detailWindowPadding
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 右側の詳細ｳｨﾝﾄﾞｳの内側の余白
  * @desc 右側の詳細ｳｨﾝﾄﾞｳの内側の余白
  * @type number
@@ -291,7 +300,7 @@
  * @default 24
  *
  * @param detailWindowPictureWidth
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 右側の詳細ｳｨﾝﾄﾞｳのピクチャの幅
  * @desc 右側の詳細ｳｨﾝﾄﾞｳのピクチャの幅
  * @type number
@@ -300,7 +309,7 @@
  * @default 300
  *
  * @param detailWindowPictureHeight
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 右側の詳細ｳｨﾝﾄﾞｳのピクチャの高さ
  * @desc 右側の詳細ｳｨﾝﾄﾞｳのピクチャの高さ
  * @type number
@@ -309,7 +318,7 @@
  * @default 300
  *
  * @param detailWindowMaxContentsHeight
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 右側の詳細ｳｨﾝﾄﾞｳの文章の最大高さ(px)
  * @desc 右側の詳細ｳｨﾝﾄﾞｳの文章の最大高さ(px)（高くするほど長い文章を表示できますが重くなります）
  * @type number
@@ -318,27 +327,27 @@
  * @default 10000
  *
  * @param commandWindowTextSetPriority
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 「この目的を優先表示する」の言葉
  * @desc 「この目的を優先表示する」の言葉を変更します
  * @type string
  * @default この目的を優先表示する
  *
  * @param commandWindowTextAlreadyCompleted
- * @parent groupSceneDestination
+ * @parent groupSceneArchive
  * @text 「この目的は達成済みです」の言葉
  * @desc 「この目的は達成済みです」の言葉を変更します
  * @type string
  * @default この目的は達成済みです
  *
  * @param groupAddDestinationToMenuCommand
- * @text ➕ ﾒﾆｭｰへの追加 ---
+ * @text ➕ ﾒﾆｭｰｺﾏﾝﾄﾞへの追加 ---
  *
- * @param commandsOfSceneDestination
+ * @param commandsOfSceneArchive
  * @parent groupAddDestinationToMenuCommand
  * @text ﾒﾆｭｰｺﾏﾝﾄﾞ設定
  * @desc ﾒﾆｭｰｺﾏﾝﾄﾞを設定します
- * @type struct<CommandAddDestination>[]
+ * @type struct<CommandAddArchiveEntry>[]
  * @default []
  *
  * @param groupDebug
@@ -353,7 +362,7 @@
  *
  */
 
-/*~struct~CommandAddDestination:
+/*~struct~CommandAddArchiveEntry:
  * @param commandName
  * @text コマンド名
  * @desc メニューに表示されるコマンド名です。例）ストーリー、人物紹介、チュートリアル
@@ -396,8 +405,9 @@
   const childrenFontColorIfCompleted = Number(parameters['childrenFontColorIfCompleted'] || 24);
   const storyProgressText = String(parameters['storyProgressText'] || '');
   const storyProgressTextColor = Number(parameters['storyProgressTextColor'] || 0);
+  const storyProgressTextDuration = Number(parameters['storyProgressTextDuration'] || 120);
 
-  const paddingInSceneDestination = Number(parameters['paddingInSceneDestination'] || 10);
+  const paddingInSceneArchive = Number(parameters['paddingInSceneArchive'] || 10);
   const listWindowWidthRate = Number(parameters['listWindowWidthRate'] || 35);
   const listWindowItemHeight = Number(parameters['listWindowItemHeight'] || 72);
   const listWindowFontSize = Number(parameters['listWindowFontSize'] || 20);
@@ -417,18 +427,16 @@
     parameters['commandWindowTextAlreadyCompleted'] || 'この目的は達成済みです'
   );
 
-  const commandsOfSceneDestinationRaw = parameters['commandsOfSceneDestination'];
+  const commandsOfSceneArchiveRaw = parameters['commandsOfSceneArchive'];
 
-  const commandsOfSceneDestination = JSON.parse(commandsOfSceneDestinationRaw || '[]').map(
-    (command) => {
-      const parsedCommand = JSON.parse(command);
-      return {
-        commandName: parsedCommand.commandName || 'ストーリー', // デフォルト値
-        categories: JSON.parse(parsedCommand.categories || '[]'), // カテゴリは配列
-        enableSwitchId: Number(parsedCommand.enableSwitchId) || 0, // スイッチIDは数値、未指定なら0（無効）
-      };
-    }
-  );
+  const commandsOfSceneArchive = JSON.parse(commandsOfSceneArchiveRaw || '[]').map((command) => {
+    const parsedCommand = JSON.parse(command);
+    return {
+      commandName: parsedCommand.commandName || 'ストーリー', // デフォルト値
+      categories: JSON.parse(parsedCommand.categories || '[]'), // カテゴリは配列
+      enableSwitchId: Number(parsedCommand.enableSwitchId) || 0, // スイッチIDは数値、未指定なら0（無効）
+    };
+  });
 
   const needsOutputDestinations = parameters['needsOutputDestinations'] === 'true';
 
@@ -438,8 +446,8 @@
   const _Game_Temp_prototype_initialize = Game_Temp.prototype.initialize;
   Game_Temp.prototype.initialize = function () {
     _Game_Temp_prototype_initialize.call(this);
-    this._sceneDestinationTitle = '';
-    this._sceneDestinationTargetCategories = [];
+    this._sceneArchiveTitle = '';
+    this._sceneArchiveTargetCategories = [];
   };
 
   // ---------------------------------------------------------------------
@@ -480,16 +488,16 @@
     destinationManager.saveSnapshot(switchId, width, height, quality);
   });
 
-  PluginManager.registerCommand(pluginName, 'callSceneDestination', (args) => {
+  PluginManager.registerCommand(pluginName, 'callSceneArchive', (args) => {
     const title = args['title'] ?? '';
-    $gameTemp._sceneDestinationTitle = title;
+    $gameTemp._sceneArchiveTitle = title;
 
     const targetCategories = JSON.parse(args['targetCategories'] || '[]');
-    if (!$gameTemp._sceneDestinationTargetCategories) {
-      $gameTemp._sceneDestinationTargetCategories = [];
+    if (!$gameTemp._sceneArchiveTargetCategories) {
+      $gameTemp._sceneArchiveTargetCategories = [];
     }
-    $gameTemp._sceneDestinationTargetCategories = targetCategories;
-    SceneManager.push(Scene_Destinations);
+    $gameTemp._sceneArchiveTargetCategories = targetCategories;
+    SceneManager.push(Scene_Archive);
   });
 
   // ---------------------------------------------------------------------
@@ -543,15 +551,15 @@
               pluginName,
               pluginCommand,
               _,
-              { switchId, destinationCategory, destinationTitle, detail, picture },
+              { switchId, archiveCategory, archiveTitle, detail, picture },
             ] = parameters;
             if (pluginName === 'Sakura_DestinationBySwitchOn') {
-              if (pluginCommand === 'registerDestinationDetail') {
+              if (pluginCommand === 'registerArchiveEntry') {
                 list.push({
-                  categoryName: destinationCategory,
+                  categoryName: archiveCategory,
                   switchId: Number(switchId || 0),
-                  destinationCategory: destinationCategory ?? '',
-                  destinationTitle: destinationTitle ?? '',
+                  archiveCategory: archiveCategory ?? '',
+                  archiveTitle: archiveTitle ?? '',
                   detail: detail ?? '',
                   picture: picture ?? '',
                 });
@@ -571,9 +579,9 @@
     Window_MenuCommand.prototype.addOriginalCommands;
   Window_MenuCommand.prototype.addOriginalCommands = function () {
     _Window_MenuCommand_prototype_addOriginalCommands.call(this);
-    for (const { categories, commandName, enableSwitchId } of commandsOfSceneDestination) {
+    for (const { categories, commandName, enableSwitchId } of commandsOfSceneArchive) {
       const enabled = enableSwitchId === 0 ? true : $gameSwitches.value(enableSwitchId);
-      this.addCommand(commandName, 'destination', enabled, categories);
+      this.addCommand(commandName, 'archive', enabled, categories);
     }
     //
   };
@@ -583,21 +591,21 @@
   // ---------------------------------------------------------------------
   const _Window_MenuCommand_prototype_processOk = Window_MenuCommand.prototype.processOk;
   Window_MenuCommand.prototype.processOk = function () {
-    if (this.currentSymbol() === 'destination') {
-      $gameTemp._sceneDestinationTitle = this.commandName(this.index());
-      $gameTemp._sceneDestinationTargetCategories = this.currentExt();
+    if (this.currentSymbol() === 'archive') {
+      $gameTemp._sceneArchiveTitle = this.commandName(this.index());
+      $gameTemp._sceneArchiveTargetCategories = this.currentExt();
     }
     _Window_MenuCommand_prototype_processOk.call(this);
   };
 
   // ---------------------------------------------------------------------
-  // Scene_MenuにScene_Destinationsへのハンドラを追加
+  // Scene_MenuにScene_Archiveへのハンドラを追加
   // ---------------------------------------------------------------------
   const _Scene_Menu_prototype_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
   Scene_Menu.prototype.createCommandWindow = function () {
     _Scene_Menu_prototype_createCommandWindow.call(this);
-    this._commandWindow.setHandler('destination', () => {
-      SceneManager.push(Scene_Destinations);
+    this._commandWindow.setHandler('archive', () => {
+      SceneManager.push(Scene_Archive);
     });
   };
 
@@ -906,12 +914,12 @@
       this._destinationText = text;
     }
 
-    get destinationCategoryName() {
-      return this._destinationCategoryName ?? '';
+    get archiveCategoryName() {
+      return this._archiveCategoryName ?? '';
     }
 
-    set destinationCategoryName(text) {
-      this._destinationCategoryName = text;
+    set archiveCategoryName(text) {
+      this._archiveCategoryName = text;
     }
 
     get destinationVisible() {
@@ -937,7 +945,7 @@
       const categoryName =
         $dataDestinations.find((destination) => destination.switchId === switchId)?.categoryName ??
         '';
-      this.destinationCategoryName = categoryName;
+      this.archiveCategoryName = categoryName;
       this.needsInformDestinationChanged = needsInformDestinationChanged;
     }
 
@@ -970,11 +978,11 @@
       return result; // 結果配列を返す
     }
 
-    hasChildren(switchId = null) {
+    hasChildren(switchId) {
       return this.getChildDestinations(switchId).length > 0;
     }
 
-    getChildDestinationsProgress(switchId = null) {
+    getChildDestinationsProgress(switchId) {
       const childDestinations = destinationManager.getChildDestinations(switchId);
       const denominator = childDestinations.length;
       const numerator = childDestinations.filter(({ switchId }) =>
@@ -992,6 +1000,10 @@
     }
 
     isDestinationCompleted(switchId) {
+      if (this.hasChildren(switchId)) {
+        const [numerator, denominator] = this.getChildDestinationsProgress(switchId);
+        return numerator === denominator;
+      }
       return $gameSystem.isDestinationSwitchIdCompleted(switchId);
     }
 
@@ -1153,7 +1165,7 @@ ${outputFilePath}
       this._text = '';
       this._categoryName = '';
       this._showStoryProgressText = false;
-      this._storyProgressTextDuration = 120;
+      this._storyProgressTextDuration = storyProgressTextDuration;
       this._fadeOutDuration = 0;
       this._fadeInDuration = 0;
     }
@@ -1175,7 +1187,7 @@ ${outputFilePath}
     setDestinationChanged() {
       if (storyProgressText) {
         this._showStoryProgressText = true;
-        this._storyProgressTextDuration = 120;
+        this._storyProgressTextDuration = storyProgressTextDuration;
         this.contentsOpacity = 255;
         this.refresh();
       }
@@ -1219,7 +1231,7 @@ ${outputFilePath}
 
     refresh() {
       this.contents.clear();
-      const categoryName = destinationManager.destinationCategoryName;
+      const categoryName = destinationManager.archiveCategoryName;
       if (categoryName) {
         this.contents.fontBold = true;
         this.drawTextEx(
@@ -1700,15 +1712,15 @@ ${outputFilePath}
   const TITLE_WINDOW_HEIGHT = 64;
 
   // ---------------------------------------------------------------------
-  // Window_DestinationTitle
-  // Scene_Destinationsの上のタイトルウィンドウ
+  // Window_ArchiveTitle
+  // Scene_Archiveの上のタイトルウィンドウ
   // ---------------------------------------------------------------------
-  class Window_DestinationTitle extends Window_Base {
+  class Window_ArchiveTitle extends Window_Base {
     constructor() {
-      const x = 0 + paddingInSceneDestination;
-      const y = 0 + paddingInSceneDestination;
-      const width = Graphics.boxWidth - paddingInSceneDestination * 2;
-      const height = $gameTemp._sceneDestinationTitle ? TITLE_WINDOW_HEIGHT : 0;
+      const x = 0 + paddingInSceneArchive;
+      const y = 0 + paddingInSceneArchive;
+      const width = Graphics.boxWidth - paddingInSceneArchive * 2;
+      const height = $gameTemp._sceneArchiveTitle ? TITLE_WINDOW_HEIGHT : 0;
       const rect = new Rectangle(x, y, width, height);
       super(rect);
       this.opacity = 0;
@@ -1724,7 +1736,7 @@ ${outputFilePath}
 
     refresh() {
       this.contents.clear();
-      const text = $gameTemp._sceneDestinationTitle;
+      const text = $gameTemp._sceneArchiveTitle;
       const [first, rest] = splitFirstCharacter(text);
       this.drawTextEx(`\\FS[32]${first}\\FS[20]${rest}`, 0, 0, this.contentsWidth());
       this.drawUnderlineWithLinearOpacity(0, 24, this.contentsWidth());
@@ -1732,17 +1744,16 @@ ${outputFilePath}
   }
 
   // ---------------------------------------------------------------------
-  // Window_DestinationList
-  // Scene_Destinationsの左側のカテゴリウィンドウ
+  // Window_ArchiveList
+  // Scene_Archiveの左側のカテゴリウィンドウ
   // ---------------------------------------------------------------------
-  class Window_DestinationList extends Window_CategorySelectable {
+  class Window_ArchiveList extends Window_CategorySelectable {
     constructor() {
-      const titleWindowHeight = $gameTemp._sceneDestinationTitle ? TITLE_WINDOW_HEIGHT : 0;
-      const x = paddingInSceneDestination;
-      const y = paddingInSceneDestination + titleWindowHeight;
-      const width =
-        (Graphics.boxWidth - paddingInSceneDestination * 2) * (listWindowWidthRate / 100);
-      const height = Graphics.boxHeight - paddingInSceneDestination * 2 - titleWindowHeight;
+      const titleWindowHeight = $gameTemp._sceneArchiveTitle ? TITLE_WINDOW_HEIGHT : 0;
+      const x = paddingInSceneArchive;
+      const y = paddingInSceneArchive + titleWindowHeight;
+      const width = (Graphics.boxWidth - paddingInSceneArchive * 2) * (listWindowWidthRate / 100);
+      const height = Graphics.boxHeight - paddingInSceneArchive * 2 - titleWindowHeight;
       const rect = new Rectangle(x, y, width, height);
       super(rect);
       this.opacity = 0;
@@ -1784,18 +1795,18 @@ ${outputFilePath}
 
       // データをループし、ｶﾃｺﾞﾘごとにグループ化
       for (const entry of inputData) {
-        const { categoryName, switchId, destinationTitle, detail, picture } = entry;
+        const { categoryName, switchId, archiveTitle, detail, picture } = entry;
 
-        if (!$gameTemp._sceneDestinationTargetCategories) {
-          $gameTemp._sceneDestinationTargetCategories = [];
+        if (!$gameTemp._sceneArchiveTargetCategories) {
+          $gameTemp._sceneArchiveTargetCategories = [];
         }
 
         // 前方一致でカテゴリを判定する
-        const hasMatchingCategory = $gameTemp._sceneDestinationTargetCategories.some(
-          (targetCategory) => categoryName.startsWith(targetCategory)
+        const hasMatchingCategory = $gameTemp._sceneArchiveTargetCategories.some((targetCategory) =>
+          categoryName.startsWith(targetCategory)
         );
 
-        if ($gameTemp._sceneDestinationTargetCategories.length > 0 && !hasMatchingCategory) {
+        if ($gameTemp._sceneArchiveTargetCategories.length > 0 && !hasMatchingCategory) {
           continue;
         }
 
@@ -1815,7 +1826,7 @@ ${outputFilePath}
           categoryMap[categoryName].items.push({
             switchId,
             switchName,
-            destinationTitle,
+            archiveTitle,
             detail,
             picture,
           });
@@ -1829,7 +1840,7 @@ ${outputFilePath}
         }
       }
 
-      $gameTemp._sceneDestinationTargetCategories = [];
+      $gameTemp._sceneArchiveTargetCategories = [];
 
       return result;
     }
@@ -1867,8 +1878,8 @@ ${outputFilePath}
       return 100;
     }
 
-    drawItemName(itemData, rect, index) {
-      const { switchId, destinationTitle } = itemData;
+    drawItemName(itemData, rect) {
+      const { switchId, archiveTitle } = itemData;
       this.contents.fontBold = false;
 
       // 現在のスイッチIDと一致するかどうか
@@ -1881,7 +1892,7 @@ ${outputFilePath}
       const isNew = destinationManager.isNew(switchId);
 
       this.drawTextExAutoWrap(
-        `\\C[${textColor}]${destinationTitle} ${isNew ? '\\FS[14]\\C[3]NEW' : ''}`,
+        `\\C[${textColor}]${archiveTitle} ${isNew ? '\\FS[14]\\C[3]NEW' : ''}`,
         rect.x + 20,
         rect.y,
         rect.width - 20 - this.padding
@@ -1983,17 +1994,17 @@ ${outputFilePath}
   }
 
   // ---------------------------------------------------------------------
-  // Window_DestinationDetail
-  // Scene_Destinationsの右側の詳細ウィンドウ
+  // Window_ArchiveDetail
+  // Scene_Archiveの右側の詳細ウィンドウ
   // ---------------------------------------------------------------------
-  class Window_DestinationDetail extends Window_ScrollableText {
+  class Window_ArchiveDetail extends Window_ScrollableText {
     constructor() {
-      const titleWindowHeight = $gameTemp._sceneDestinationTitle ? TITLE_WINDOW_HEIGHT : 0;
-      const x = (Graphics.boxWidth - paddingInSceneDestination) * (listWindowWidthRate / 100);
-      const y = paddingInSceneDestination + titleWindowHeight;
+      const titleWindowHeight = $gameTemp._sceneArchiveTitle ? TITLE_WINDOW_HEIGHT : 0;
+      const x = (Graphics.boxWidth - paddingInSceneArchive) * (listWindowWidthRate / 100);
+      const y = paddingInSceneArchive + titleWindowHeight;
       const width =
-        (Graphics.boxWidth - paddingInSceneDestination * 2) * ((100 - listWindowWidthRate) / 100);
-      const height = Graphics.boxHeight - paddingInSceneDestination * 2 - titleWindowHeight;
+        (Graphics.boxWidth - paddingInSceneArchive * 2) * ((100 - listWindowWidthRate) / 100);
+      const height = Graphics.boxHeight - paddingInSceneArchive * 2 - titleWindowHeight;
       const rect = new Rectangle(x, y, width, height);
       super(rect);
       this._title = '';
@@ -2020,7 +2031,7 @@ ${outputFilePath}
       this._item = item;
       const newText = item?.detail ?? '';
       if (this._text !== newText) {
-        this._title = item?.destinationTitle ?? '';
+        this._title = item?.archiveTitle ?? '';
         this.setText(newText);
       }
     }
@@ -2176,10 +2187,10 @@ ${outputFilePath}
   }
 
   // ---------------------------------------------------------------------
-  // Window_DestinationCommand
-  // Scene_Destinationsで目的を優先表示するかどうか確認するダイアログ
+  // Window_ArchiveCommand
+  // Scene_Archiveで目的を優先表示するかどうか確認するダイアログ
   // ---------------------------------------------------------------------
-  class Window_DestinationCommand extends Window_Command {
+  class Window_ArchiveCommand extends Window_Command {
     constructor() {
       const width = 300;
       const height = Graphics.boxHeight * (1 / 4);
@@ -2225,16 +2236,16 @@ ${outputFilePath}
   }
 
   // ---------------------------------------------------------------------
-  // Scene_Destinations
-  // 目的表示シーン
+  // Scene_Archive
+  // アーカイブシーン
   // ---------------------------------------------------------------------
-  class Scene_Destinations extends Scene_MenuBase {
+  class Scene_Archive extends Scene_MenuBase {
     create() {
       super.create();
-      this.createDestinationTitleWindow();
-      this.createDestinationDetailWindow();
-      this.createDestinationListWindow();
-      this.createDestinationCommandWindow();
+      this.createArchiveTitleWindow();
+      this.createArchiveDetailWindow();
+      this.createArchiveListWindow();
+      this.createArchiveCommandWindow();
       this._listWindow._helpWindow = this._detailWindow;
       this._detailWindow._commandWindow = this._commandWindow;
       this._detailWindow._listWindow = this._listWindow;
@@ -2243,27 +2254,27 @@ ${outputFilePath}
       this._detailWindow.deactivate();
     }
 
-    createDestinationTitleWindow() {
-      this._titleWindow = new Window_DestinationTitle();
+    createArchiveTitleWindow() {
+      this._titleWindow = new Window_ArchiveTitle();
       this.addWindow(this._titleWindow);
     }
 
-    createDestinationListWindow() {
-      this._listWindow = new Window_DestinationList();
+    createArchiveListWindow() {
+      this._listWindow = new Window_ArchiveList();
       this._listWindow.setHandler('ok', this.onCategoryOk.bind(this));
       this._listWindow.setHandler('cancel', this.onCategoryCancel.bind(this));
       this.addWindow(this._listWindow);
     }
 
-    createDestinationDetailWindow() {
-      this._detailWindow = new Window_DestinationDetail();
+    createArchiveDetailWindow() {
+      this._detailWindow = new Window_ArchiveDetail();
       this._detailWindow.setHandler('ok', this.onDetailOk.bind(this));
       this._detailWindow.setHandler('cancel', this.onDetailCancel.bind(this));
       this.addWindow(this._detailWindow);
     }
 
-    createDestinationCommandWindow() {
-      this._commandWindow = new Window_DestinationCommand();
+    createArchiveCommandWindow() {
+      this._commandWindow = new Window_ArchiveCommand();
       this._commandWindow.setHandler('ok', this.onCommandOk.bind(this));
       this._commandWindow.setHandler('cancel', this.onCommandCancel.bind(this));
       this.addWindow(this._commandWindow);
@@ -2308,6 +2319,6 @@ ${outputFilePath}
     }
   }
 
-  window['Scene_Destinations'] = Scene_Destinations;
+  window['Scene_Archive'] = Scene_Archive;
   window['destinationManager'] = destinationManager;
 })();
