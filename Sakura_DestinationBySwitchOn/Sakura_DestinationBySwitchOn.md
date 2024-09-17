@@ -1,5 +1,9 @@
 # Sakura_DestinationBySwitchOn
 ### スイッチオンで次の目的表示
+
+![alt text](image-41.png)
+
+
 ### 子目的も表示できる `ver.2.0`
 
 ![alt text](image-19.png)
