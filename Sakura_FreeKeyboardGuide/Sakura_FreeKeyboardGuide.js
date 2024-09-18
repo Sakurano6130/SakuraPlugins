@@ -13,6 +13,10 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/18 1.1.0 表示できるSceneを拡大。
+ *                  外部ﾌﾟﾗｸﾞｲﾝ等任意のSceneでも表示できるように。（ただしそのﾌﾟﾗｸﾞｲﾝ次第
+ *                  なのでｴﾗｰになる可能性はあります）
+ *                  イベント実行中にも表示するか選択できる機能追加
  * 2024/09/09 1.0.2 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
  *                  異なる設定をしている場合の位置を調整。
  * 2024/09/02 1.0.1 デフォルト値変更
@@ -129,7 +133,7 @@
 /*~struct~SceneKeySetting:
  * @param SceneName
  * @text シーン名
- * @desc キーボードガイドを表示するシーン名を選択します。
+ * @desc キーボードガイドを表示するシーン名を選択します。（選択肢以外の場合は、テキストから直接入力してください）
  * @type select
  * @option Scene_Map
  * @option Scene_Menu
@@ -138,6 +142,12 @@
  * @option Scene_Equip
  * @option Scene_Status
  * @option Scene_Battle
+ * @option Scene_Shop
+ * @option Scene_Title
+ * @option Scene_Load
+ * @option Scene_Options
+ * @option Scene_Save
+ * @option Scene_GameEnd
  *
  * @param KeyDescriptions
  * @text キーと説明のペア
@@ -184,6 +194,12 @@
  * @text スイッチID
  * @type switch
  * @desc この設定を有効にするゲームスイッチのIDです。
+ *
+ * @param showIfEventRunning
+ * @text イベント実行中も表示するか
+ * @type boolean
+ * @desc ﾃﾞﾌｫﾙﾄはｲﾍﾞﾝﾄ実行中非表示にします。これをtrueにするとイベント実行中であっても表示します。
+ * @default false
  */
 
 /*~struct~KeyDescriptionPair:
@@ -320,6 +336,7 @@
       windowOffsetY: Number(parsedSetting.WindowOffsetY || 0),
       showDimmer: String(parsedSetting.ShowDimmer) === 'true',
       gameSwitch: Number(parsedSetting.GameSwitch || 0),
+      showIfEventRunning: String(parsedSetting.showIfEventRunning) === 'true',
     };
   });
   const fontSize = Number(parameters['FontSize'] || 16);
@@ -651,8 +668,17 @@
      * @param {Array} keyDescriptions - キーとその説明のリスト
      * @param {boolean} showDimmer - 背景を暗くするか
      * @param {number} gameSwitchForVisible - 表示/非表示を制御するゲームスイッチID
+     * @param {boolean} showIfEventRunning - イベント実行中も表示するか
      */
-    initialize(position, offsetX, offsetY, keyDescriptions, showDimmer, gameSwitchForVisible) {
+    initialize(
+      position,
+      offsetX,
+      offsetY,
+      keyDescriptions,
+      showDimmer,
+      gameSwitchForVisible,
+      showIfEventRunning
+    ) {
       const { uiMarginX, uiMarginY } = getMarginOfUIArea();
 
       this._position = position;
@@ -661,6 +687,7 @@
       this._keyDescriptions = keyDescriptions;
       this._showDimmer = showDimmer;
       this._gameSwitchForVisible = gameSwitchForVisible;
+      this._showIfEventRunning = showIfEventRunning;
       const rect = new Rectangle(-uiMarginX, -uiMarginY, Graphics.width, this.windowHeight()); // 初期の幅はGraphics.widthを使用
       super.initialize(rect);
       this.opacity = 0;
@@ -819,7 +846,7 @@
         return;
       }
 
-      if ($gameMap.isEventRunning()) {
+      if (!this._showIfEventRunning && $gameMap.isEventRunning()) {
         this.visible = false;
         return;
       }
@@ -850,6 +877,7 @@
       const keyDescriptions = sceneSetting.keyDescriptions;
       const showDimmer = sceneSetting.showDimmer;
       const gameSwitchForVisible = sceneSetting.gameSwitch;
+      const showIfEventRunning = sceneSetting.showIfEventRunning;
 
       const window = new Window_InputKeyGuide(
         windowPosition,
@@ -857,8 +885,10 @@
         windowOffsetY,
         keyDescriptions,
         showDimmer,
-        gameSwitchForVisible
+        gameSwitchForVisible,
+        showIfEventRunning
       );
+
       scene._keyboardHelpWindows.push(window);
       scene.addWindow(window);
     }
@@ -879,35 +909,13 @@
     return false;
   };
 
-  //   Stage
-  //  └── Scene_Base
-  //       ├── Scene_Boot
-  //       ├── Scene_Splash
-  //       ├── Scene_Title
-  //       ├── Scene_Message
-  //       │     ├── Scene_Map
-  //       │     └── Scene_Battle
-  //       ├── Scene_MenuBase
-  //       │     ├── Scene_Menu
-  //       │     ├── Scene_ItemBase
-  //       │     │     ├── Scene_Item
-  //       │     │     ├── Scene_Skill
-  //       │     │     └── Scene_Equip
-  //       │     ├── Scene_Options
-  //       │     ├── Scene_File
-  //       │     │     ├── Scene_Save
-  //       │     │     └── Scene_Load
-  //       │     ├── Scene_GameEnd
-  //       │     └── Scene_Shop
-  //       └── Scene_Debug
-
+  // Scene_Mapは、クリックで移動してしまうことを防ぐため他のSceneとは別の処理を行う
   const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
   Scene_Map.prototype.createAllWindows = function () {
     _Scene_Map_createAllWindows.call(this);
     createKeyboardHelpWindowsForScene(this);
   };
 
-  // Scene_Mapは、クリックで移動してしまうことを防ぐため他のSceneとは別の処理を行う
   const _Scene_Map_prototype_onMapTouch = Scene_Map.prototype.onMapTouch;
   Scene_Map.prototype.onMapTouch = function () {
     const buttonClicked = checkButtonClick(); // ボタンがクリックされたかどうかをチェック
@@ -916,28 +924,33 @@
     }
   };
 
-  const Scene_MenuChildren = [
-    Scene_Battle,
-    Scene_Menu,
-    Scene_Item,
-    Scene_Skill,
-    Scene_Equip,
-    Scene_Status,
-  ];
+  // シーン名のリストをユニークにする関数
+  const uniqueSceneNames = (sceneNames) => [...new Set(sceneNames)];
+  const targetSceneNames = sceneKeySettings.map((sceneKeySetting) => sceneKeySetting.sceneName);
+  const uniqueTargetSceneNames = uniqueSceneNames(targetSceneNames);
 
-  for (const scene of Scene_MenuChildren) {
-    const originalCreate = scene.prototype.create;
-    scene.prototype.create = function () {
-      originalCreate.call(this);
+  // Scene_Map以外はScene_Baseのstartメソッドにフック
+  const _Scene_Base_start = Scene_Base.prototype.start;
+  Scene_Base.prototype.start = function () {
+    _Scene_Base_start.call(this);
+    const sceneName = SceneManager._scene.constructor.name;
+    // プラグインパラメータで指定されたシーンかどうかを確認
+    // Scene_Mapは上で特殊処理を行っているので除外
+    if (sceneName !== 'Scene_Map' && uniqueTargetSceneNames.includes(sceneName)) {
       createKeyboardHelpWindowsForScene(this);
-    };
+    }
+  };
 
-    const originalUpdate = scene.prototype.update;
-    scene.prototype.update = function () {
-      originalUpdate.call(this);
-      checkButtonClick(); // ボタンがクリックされたかどうかをチェック
-    };
-  }
+  const _Scene_Base_update = Scene_Base.prototype.update;
+  Scene_Base.prototype.update = function () {
+    _Scene_Base_update.call(this);
+    const sceneName = SceneManager._scene.constructor.name;
+    // プラグインパラメータで指定されたシーンかどうかを確認
+    // Scene_Mapは上で特殊処理を行っているので除外
+    if (sceneName !== 'Scene_Map' && uniqueTargetSceneNames.includes(sceneName)) {
+      checkButtonClick();
+    }
+  };
 
   /**
    * メッセージウィンドウ内で制御文字 \BTN[ボタン名] を使用してカスタムボタンを描画
