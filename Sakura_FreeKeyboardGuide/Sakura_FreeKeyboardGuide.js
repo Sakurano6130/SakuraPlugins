@@ -13,6 +13,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/18 1.1.1 プラグインパラメータの説明文の誤り修正（処理変更なし）
  * 2024/09/18 1.1.0 表示できるSceneを拡大。
  *                  外部ﾌﾟﾗｸﾞｲﾝ等任意のSceneでも表示できるように。（ただしそのﾌﾟﾗｸﾞｲﾝ次第
  *                  なのでｴﾗｰになる可能性はあります）
@@ -205,7 +206,7 @@
 /*~struct~KeyDescriptionPair:
  * @param KeyName
  * @text 表示するキー
- * @desc 表示するキー（例: "M,Esc"）。複数のキーはカンマで区切ってください。
+ * @desc 表示するキー（例: "M"）
  *
  * @param Description
  * @text 説明
