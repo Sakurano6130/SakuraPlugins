@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/25 1.0.5 マップ名非表示スイッチとイベントコマンドの「マップ名表示」を
+ *                  OFFにしたときの動きが同じになるように。ただしスイッチの設定が優先
  * 2024/09/23 1.0.4 マップ名非表示スイッチを追加
  * 2024/09/09 1.0.3 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
  *                  異なる設定をしている場合の位置を調整。
@@ -128,7 +130,7 @@
  *
  * @param hideSwitch
  * @text マップ名非表示スイッチ
- * @desc マップ名非表示スイッチ
+ * @desc このスイッチがオンになっているとき、マップ名を表示しません。イベントコマンドの「マップ名表示」よりも優先されます。
  * @type switch
  * @default 0
  *
@@ -292,11 +294,12 @@
     _Window_MapName_initialize.call(this, rect);
     this.opacity = 0; // ウィンドウの透明度を0に設定
     this.updatePosition(); // ウィンドウの位置を更新
+    this._initialX = this.x; // 初期X座標を保存
     this._phase = 0; // フェーズ管理: 0 = フェードイン, 1 = 制止, 2 = フェードアウト
     this._fadeTimer = 0; // タイマーの初期化
-    this._initialX = this.x; // 初期X座標を保存
     this._started = false;
     this._lastHideSwitchOn = false;
+    this._lastIsNameDisplayEnabled = true;
   };
 
   const _Window_MapName_prototype_open = Window_MapName.prototype.open;
@@ -307,30 +310,56 @@
 
   Window_MapName.prototype.update = function () {
     Window_Base.prototype.update.call(this);
-    // スイッチでの非表示は表示されている途中でも非表示になる
+    this.updateMapNameVisible();
+    if (this._started && $gameMap.isNameDisplayEnabled()) {
+      this.updateFade();
+    }
+  };
+
+  Window_MapName.prototype.updateMapNameVisible = function () {
+    const resetPhaseAndTimer = function () {
+      this._phase = 0; // フェーズ管理: 0 = フェードイン, 1 = 制止, 2 = フェードアウト
+      this._fadeTimer = 0; // タイマーの初期化
+      this._started = false;
+    }.bind(this);
+
+    // スイッチがオンの場合は、常に非表示を優先
     if ($gameSwitches.value(hideSwitch)) {
       this._lastHideSwitchOn = true;
       if (this.visible) {
         this.visible = false;
         this.close();
-        this._phase = 0; // フェーズ管理: 0 = フェードイン, 1 = 制止, 2 = フェードアウト
-        this._fadeTimer = 0; // タイマーの初期化
-        this._started = false;
+        resetPhaseAndTimer();
       }
+      // スイッチがオンの場合は、ここで処理を終える
       return;
     }
-    // 非表示スイッチがオンからオフに切り替わった時、再度アニメーションを表示
+
+    // スイッチがオフの場合は通常の表示処理
     if (this._lastHideSwitchOn) {
       this._lastHideSwitchOn = false;
       this.close();
-      this._phase = 0; // フェーズ管理: 0 = フェードイン, 1 = 制止, 2 = フェードアウト
-      this._fadeTimer = 0; // タイマーの初期化
-      this._started = false;
+      resetPhaseAndTimer();
       this.visible = true;
       this.open();
     }
-    if (this._started && $gameMap.isNameDisplayEnabled()) {
-      this.updateFade();
+
+    // マップ名表示が無効の場合は非表示
+    if (!$gameMap.isNameDisplayEnabled()) {
+      this._lastIsNameDisplayEnabled = false;
+      if (this.visible) {
+        this.visible = false;
+        this.close();
+        resetPhaseAndTimer();
+      }
+    } else {
+      if (!this._lastIsNameDisplayEnabled) {
+        this._lastIsNameDisplayEnabled = true;
+        this.close();
+        resetPhaseAndTimer();
+        this.visible = true;
+        this.open();
+      }
     }
   };
 
