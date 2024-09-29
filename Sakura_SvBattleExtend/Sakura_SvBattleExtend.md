@@ -33,7 +33,7 @@
 
 ## β版
 - このプラグインは、β版です。今後破壊的変更のある可能性があります。
-- 不具合や他プラグインとの競合解決のご相談がありましたら、[[text](https://x.com/minnon6130)](https://x.com/minnon6130)まで、リプライかDMお願いします。
+- 不具合や他プラグインとの競合解決のご相談がありましたら、[https://x.com/minnon6130](https://x.com/minnon6130) まで、リプライかDMお願いします。
 
 # License
 - This software is released under the MIT license. http://opensource.org/licenses/mit-license.php
