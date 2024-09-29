@@ -25,6 +25,12 @@
 ## プラグインパラメータ
 🚧執筆中
 
+### ウィンドウの重なりについて
+  - RPGツクールのウィンドウ描画の仕様で、ウィンドウを重ねて表示した場合、後ろのウィンドウが欠けて表示されたように見えてしまいます。
+  - これが気になる方は、[Sakura_NonBlockingWindowLayer](../Sakura_NonBlockingWindowLayer/Sakura_NonBlockingWindowLayer.md)をお試しください。
+
+![alt text](image-3.png)
+
 ## β版
 - このプラグインは、β版です。今後破壊的変更のある可能性があります。
 - 不具合や他プラグインとの競合解決のご相談がありましたら、[[text](https://x.com/minnon6130)](https://x.com/minnon6130)まで、リプライかDMお願いします。
