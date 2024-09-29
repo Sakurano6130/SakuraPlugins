@@ -1,10 +1,10 @@
-# Sakura_SvBattleExtends
+# Sakura_SvBattleExtend
 サイドビュー戦闘をいい感じにします✨
 
 ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_SvBattleExtends.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtends/Sakura_SvBattleExtends.js)
+[Sakura_SvBattleExtend.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtend/Sakura_SvBattleExtend.js)
 
 ## 更新履歴
 | ver   | 日付       | 説明    |

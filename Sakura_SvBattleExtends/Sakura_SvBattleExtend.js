@@ -7,7 +7,7 @@
  * SVバトルをいい感じにします
  *
  * -------------------------------------------------
- * Sakura_SvBattleExtends
+ * Sakura_SvBattleExtend
  * Copyright (c) 2024 Sakurano
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
@@ -16,7 +16,7 @@
  * -------------------------------------------------
  *
  * 使用方法:
- * https://github.com/Sakurano6130/SakuraPlugins/blob/main/Sakura_SvBattleExtends/Sakura_SvBattleExtends.md
+ * https://github.com/Sakurano6130/SakuraPlugins/blob/main/Sakura_SvBattleExtend/Sakura_SvBattleExtend.md
  *
  * @param layoutDamagePop
  * @text 💥 ﾀﾞﾒｰｼﾞﾎﾟｯﾌﾟのﾚｲｱｳﾄ ---
