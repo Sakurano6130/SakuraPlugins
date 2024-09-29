@@ -1,5 +1,5 @@
 # Sakura_SvBattleExtend
-サイドビュー戦闘をいい感じにします✨
+サイドビュー戦闘をいい感じにします✨  β版
 
 ![alt text](image.png)
 

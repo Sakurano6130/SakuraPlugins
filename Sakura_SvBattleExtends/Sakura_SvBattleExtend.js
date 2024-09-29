@@ -1,6 +1,6 @@
 /*:
  * @target MZ
- * @plugindesc SVバトルをいい感じに
+ * @plugindesc SVバトルをいい感じに β版
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
