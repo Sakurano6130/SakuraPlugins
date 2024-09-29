@@ -115,7 +115,7 @@
  * @text 敵の名前の横幅
  * @desc 敵の名前の横幅です
  * @type number
- * @default 16
+ * @default 128
  *
  * @param showEnemyGauge
  * @parent enemyStatusDisplay
