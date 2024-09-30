@@ -12,6 +12,10 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/30 1.3.0 経験値の表示を追加
+ *                  各ゲージの色をプラグインパラメータで変えられる機能を追加
+ *                  HP,MP,TP,経験値に変化があった場合に差分をポップアップ表示する機能を追加
+ *                  各アクターのウィンドウの高さのデフォルト値を100→110に変更
  * 2024/09/08 1.2.0 画面の幅・高さとUIエリアの幅・高さが異なる場合の位置調整。
  *                  表示位置の調整機能追加。
  *                  常に半分表示機能の追加。
@@ -71,11 +75,25 @@
  * @desc HPを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
+ * @param ShowActorHPDiff
+ * @parent groupShowEachItem
+ * @text HPの変化を表示するかどうか
+ * @type boolean
+ * @desc HPの変化を表示するかどうかtrueで表示、falseで非表示。
+ * @default true
+ *
  * @param ShowActorMP
  * @parent groupShowEachItem
  * @text MPを表示するかどうか
  * @type boolean
  * @desc MPを表示するかどうか。trueで表示、falseで非表示。
+ * @default true
+ *
+ * @param ShowActorMPDiff
+ * @parent groupShowEachItem
+ * @text MPの変化を表示するかどうか
+ * @type boolean
+ * @desc MPの変化を表示するかどうかtrueで表示、falseで非表示。
  * @default true
  *
  * @param ShowActorTP
@@ -85,11 +103,32 @@
  * @desc TPを表示するかどうか。trueで表示、falseで非表示。
  * @default true
  *
+ * @param ShowActorTPDiff
+ * @parent groupShowEachItem
+ * @text TPの変化を表示するかどうか
+ * @type boolean
+ * @desc TPの変化を表示するかどうかtrueで表示、falseで非表示。
+ * @default true
+ *
  * @param ShowActorState
  * @parent groupShowEachItem
  * @text ステートアイコンを表示するかどうか
  * @type boolean
  * @desc ステートアイコンを表示するかどうか。trueで表示、falseで非表示。
+ * @default true
+ *
+ * @param ShowActorExp
+ * @parent groupShowEachItem
+ * @text 経験値を表示するかどうか
+ * @type boolean
+ * @desc 経験値を表示するかどうか。trueで表示、falseで非表示。
+ * @default true
+ *
+ * @param ShowActorExpDiff
+ * @parent groupShowEachItem
+ * @text 経験値の変化を表示するかどうか
+ * @type boolean
+ * @desc 経験値の変化を表示するかどうかtrueで表示、falseで非表示。
  * @default true
  *
  * @param groupLayout
@@ -118,7 +157,7 @@
  * @text 各アクターのウィンドウの高さ（全体の高さではなく各アクターの高さです）
  * @type number
  * @desc 各アクターのウィンドウの高さを設定します。
- * @default 100
+ * @default 110
  *
  * @param faceSize
  * @parent groupLayout
@@ -162,6 +201,69 @@
  * @desc ゲージ値のフォントサイズを設定します。
  * @default 18
  *
+ * @param gaugeColorHp1
+ * @parent groupLayout
+ * @text HPゲージ始点の色
+ * @type color
+ * @desc HPゲージ始点の色を設定します。
+ * @default 20
+ *
+ * @param gaugeColorHp1
+ * @parent groupLayout
+ * @text HPゲージ始点の色
+ * @type color
+ * @desc HPゲージ始点の色を設定します。
+ * @default 20
+ *
+ * @param gaugeColorHp2
+ * @parent groupLayout
+ * @text HPゲージ終点の色
+ * @type color
+ * @desc HPゲージ終点の色を設定します。
+ * @default 21
+ *
+ * @param gaugeColorMp1
+ * @parent groupLayout
+ * @text MPゲージ始点の色
+ * @type color
+ * @desc MPゲージ始点の色を設定します。
+ * @default 22
+ *
+ * @param gaugeColorMp2
+ * @parent groupLayout
+ * @text MPゲージ終点の色
+ * @type color
+ * @desc MPゲージ終点の色を設定します。
+ * @default 23
+ *
+ * @param gaugeColorTp1
+ * @parent groupLayout
+ * @text TPゲージ始点の色
+ * @type color
+ * @desc TPゲージ始点の色を設定します。
+ * @default 28
+ *
+ * @param gaugeColorTp2
+ * @parent groupLayout
+ * @text TPゲージ終点の色
+ * @type color
+ * @desc TPゲージ終点の色を設定します。
+ * @default 29
+ *
+ * @param gaugeColorExp1
+ * @parent groupLayout
+ * @text Expゲージ始点の色
+ * @type color
+ * @desc Expゲージ始点の色を設定します。
+ * @default 28
+ *
+ * @param gaugeColorExp2
+ * @parent groupLayout
+ * @text Expゲージ終点の色
+ * @type color
+ * @desc Expゲージ終点の色を設定します。
+ * @default 29
+ *
  * @param statusIconSize
  * @parent groupLayout
  * @text ステートアイコンのサイズ
@@ -175,6 +277,13 @@
  * @type number
  * @desc アクター間の余白を設定します。
  * @default 0
+ *
+ * @param labelColor
+ * @parent groupLayout
+ * @text HP,MP,TPラベルの色
+ * @desc HP,MP,TPラベルの色を設定します。
+ * @type color
+ * @default 16
  *
  * @param fontFileForString
  * @parent groupLayout
@@ -228,7 +337,6 @@
  * @desc プレイヤーと重なった時、HUDを半透明にします。処理が重たくなってしまうようだったらfalseにしてください。
  * @default true
  *
- * -------------------------------------------------
  * @command forceNeedsAllShowOn
  * @text 常に表示モードにする
  * @desc HUDを常に表示します。自動表示モードに戻すまで表示し続けます。イベント実行中も表示されます。
@@ -257,9 +365,14 @@
   const showActorClass = parameters['ShowActorClass'] === 'true';
   const showActorFace = parameters['ShowActorFace'] === 'true';
   const showActorHP = parameters['ShowActorHP'] === 'true';
+  const showActorHPDiff = parameters['ShowActorHPDiff'] === 'true';
   const showActorMP = parameters['ShowActorMP'] === 'true';
+  const showActorMPDiff = parameters['ShowActorMPDiff'] === 'true';
   const showActorTP = parameters['ShowActorTP'] === 'true';
+  const showActorTPDiff = parameters['ShowActorTPDiff'] === 'true';
   const showActorState = parameters['ShowActorState'] === 'true';
+  const showActorExp = parameters['ShowActorExp'] === 'true';
+  const showActorExpDiff = parameters['ShowActorExpDiff'] === 'true';
 
   const windowWidth = Number(parameters['windowWidth'] || 220);
   const windowHeight = Number(parameters['windowHeight'] || 100);
@@ -269,6 +382,14 @@
   const gaugeLabelFontSize = Number(parameters['gaugeLabelFontSize'] || 18);
   const gaugeHeight = Number(parameters['gaugeHeight'] || 8);
   const gaugeValueFontSize = Number(parameters['gaugeValueFontSize'] || 18);
+  const gaugeColorHp1 = Number(parameters['gaugeColorHp1'] || 20);
+  const gaugeColorHp2 = Number(parameters['gaugeColorHp2'] || 21);
+  const gaugeColorMp1 = Number(parameters['gaugeColorMp1'] || 22);
+  const gaugeColorMp2 = Number(parameters['gaugeColorMp2'] || 23);
+  const gaugeColorTp1 = Number(parameters['gaugeColorTp1'] || 28);
+  const gaugeColorTp2 = Number(parameters['gaugeColorTp2'] || 29);
+  const gaugeColorExp1 = Number(parameters['gaugeColorExp1'] || 28);
+  const gaugeColorExp2 = Number(parameters['gaugeColorExp2'] || 29);
   const statusIconSize = Number(parameters['statusIconSize'] || 24);
   const marginOfEachActor = Number(parameters['marginOfEachActor'] || 0);
   const windowOffsetX = Number(parameters['windowOffsetX'] || 0);
@@ -277,6 +398,7 @@
   const hudHideCount = Number(parameters['hudHideCount'] || 600);
   const fontFileForString = String(parameters.fontFileForString || '');
   const fontFileForNumber = String(parameters.fontFileForNumber || '');
+  const labelColor = Number(parameters['labelColor'] || 16);
 
   const needsCheckPlayerCollide = parameters['needsCheckPlayerCollide'] === 'true';
 
@@ -528,18 +650,26 @@
   }
 
   class Sprite_Gauge_MapStatusHud extends Sprite_Gauge {
+    initialize() {
+      super.initialize();
+      this._displayedValue = 0; // 初期化時点ではまだ値がないため、0で初期化
+    }
+
     bitmapWidth() {
       return windowWidth / 2 - WINDOW_PADDING * 2;
     }
     bitmapHeight() {
       return gaugeHeight + 20;
     }
+
     textHeight() {
       return Math.max(gaugeLabelFontSize, gaugeValueFontSize);
     }
+
     gaugeHeight() {
       return gaugeHeight;
     }
+
     gaugeX() {
       if (this._statusType === 'time') {
         return 0;
@@ -549,6 +679,7 @@
       }
     }
 
+    // ゲージの描画
     drawGaugeRect(x, y, width, height) {
       const rate = this.gaugeRate();
       const fillW = Math.floor((width - 2) * rate);
@@ -582,8 +713,23 @@
     labelFontFace() {
       return fontFileForString ? $gameSystem.mapHudFontForString() : $gameSystem.mainFontFace();
     }
+
     labelFontSize() {
       return gaugeLabelFontSize;
+    }
+
+    labelColor() {
+      // 16
+      return ColorManager.textColor(labelColor);
+    }
+
+    labelOutlineColor() {
+      //     return "rgba(0, 0, 0, 0.6)";
+      return ColorManager.outlineColor();
+    }
+
+    labelOutlineWidth() {
+      return 3;
     }
 
     valueFontFace() {
@@ -592,6 +738,332 @@
 
     valueFontSize() {
       return gaugeValueFontSize;
+    }
+
+    gaugeColor1() {
+      switch (this._statusType) {
+        case 'hp':
+          return ColorManager.textColor(gaugeColorHp1);
+        case 'mp':
+          return ColorManager.textColor(gaugeColorMp1);
+        case 'tp':
+          return ColorManager.textColor(gaugeColorTp1);
+        case 'exp':
+          return ColorManager.textColor(gaugeColorExp1);
+        case 'time':
+          return ColorManager.ctGaugeColor1();
+        default:
+          return ColorManager.normalColor();
+      }
+    }
+
+    gaugeColor2() {
+      switch (this._statusType) {
+        case 'hp':
+          return ColorManager.textColor(gaugeColorHp2);
+        case 'mp':
+          return ColorManager.textColor(gaugeColorMp2);
+        case 'tp':
+          return ColorManager.textColor(gaugeColorTp2);
+        case 'exp':
+          return ColorManager.textColor(gaugeColorExp2);
+        case 'time':
+          return ColorManager.ctGaugeColor2();
+        default:
+          return ColorManager.normalColor();
+      }
+    }
+
+    // setupが呼ばれたときにアニメーション用の値を初期化
+    setup(battler, statusType) {
+      super.setup(battler, statusType);
+      this._displayedValue = this._value; // setup時に現在の値で初期化
+    }
+
+    // 更新処理を追加
+    update() {
+      super.update();
+      this.updateDisplayedValue(); // ゲージの表示値を更新
+    }
+
+    // HP/MP/TPの表示をアニメーションで更新
+    updateDisplayedValue() {
+      const realValue = this._value; // ゲージの現在の目標値（_value）
+      if (this._displayedValue !== realValue) {
+        const changeSpeed = Math.abs(realValue - this._displayedValue) / 10; // 調整可能な速度
+        if (this._displayedValue < realValue) {
+          this._displayedValue = Math.min(this._displayedValue + changeSpeed, realValue);
+        } else {
+          this._displayedValue = Math.max(this._displayedValue - changeSpeed, realValue);
+        }
+        this.redraw(); // 値が変わったら再描画
+      }
+    }
+
+    // 数字もアニメーション用の値で描画
+    drawValue() {
+      const currentValue = Math.floor(this._displayedValue); // アニメーション用の値を使用
+      const width = this.bitmapWidth();
+      const height = this.textHeight();
+      this.setupValueFont();
+      this.bitmap.drawText(currentValue, 0, 0, width, height, 'right');
+    }
+
+    // フォント設定
+    setupValueFont() {
+      this.bitmap.fontFace = this.valueFontFace();
+      this.bitmap.fontSize = this.valueFontSize();
+      this.bitmap.textColor = this.valueColor();
+      this.bitmap.outlineColor = this.valueOutlineColor();
+      this.bitmap.outlineWidth = this.valueOutlineWidth();
+    }
+  }
+
+  class Sprite_GaugeCircle_MapStatusHud extends Sprite_Gauge_MapStatusHud {
+    initialize() {
+      super.initialize();
+      this._displayedValue = 0; // 初期化時点ではまだ値がないため、0で初期化
+      this.opacity = 200;
+    }
+
+    bitmapWidth() {
+      return ImageManager.faceWidth;
+    }
+
+    bitmapHeight() {
+      return ImageManager.faceHeight;
+    }
+
+    textHeight() {
+      return Math.max(gaugeLabelFontSize, gaugeValueFontSize);
+    }
+
+    gaugeHeight() {
+      return this._gaugeHeight;
+    }
+
+    gaugeX() {
+      if (this._statusType === 'time') {
+        return 0;
+      } else {
+        // return this.measureLabelWidth() + 6;
+        return 0;
+      }
+    }
+
+    currentValue() {
+      if (this._battler) {
+        switch (this._statusType) {
+          case 'hp':
+            return this._battler.hp;
+          case 'mp':
+            return this._battler.mp;
+          case 'tp':
+            return this._battler.tp;
+          case 'time':
+            return this._battler.tpbChargeTime();
+          case 'exp':
+            // return this._battler.nextRequiredExp()
+            return this._battler.currentExp() - this._battler.currentLevelExp();
+        }
+      }
+      return NaN;
+    }
+
+    currentMaxValue() {
+      if (this._battler) {
+        switch (this._statusType) {
+          case 'hp':
+            return this._battler.mhp;
+          case 'mp':
+            return this._battler.mmp;
+          case 'tp':
+            return this._battler.maxTp();
+          case 'time':
+            return 1;
+          case 'exp':
+            return this._battler.nextLevelExp() - this._battler.currentLevelExp();
+        }
+      }
+      return NaN;
+    }
+
+    label() {
+      switch (this._statusType) {
+        case 'hp':
+          return TextManager.hpA;
+        case 'mp':
+          return TextManager.mpA;
+        case 'tp':
+          return TextManager.tpA;
+        default:
+          return '';
+      }
+    }
+
+    drawGauge() {
+      this.drawCircularGauge(0, 0, ImageManager.faceWidth, ImageManager.faceHeight);
+    }
+
+    // 円形ゲージを描画（中を透明、背景も描画、時計回りになるよう修正）
+    drawCircularGauge(x, y, width, height) {
+      const rate = this.gaugeRate(); // ゲージの進捗率
+      const radius = Math.min(width, height) / 2 - 2; // 外側の円の半径
+      const centerX = x + radius + 2; // 円の中心のX座標
+      const centerY = y + radius + 2; // 円の中心のY座標
+      const startAngle = -Math.PI / 2; // 上部を開始点とする（-90度）
+      const endAngle = startAngle + rate * 2 * Math.PI; // ゲージの進捗度に応じた終了角度（時計回り）
+
+      const ctx = this.bitmap.context;
+      ctx.save();
+
+      // 背景を描画（円の背景）
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI); // 完全な円を描画
+      ctx.lineWidth = gaugeHeight - 2; // 円弧の太さ
+      ctx.strokeStyle = this.gaugeBackColor(); // 背景色
+      ctx.stroke();
+
+      // 円形ゲージを描画
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle, false); // 時計回りに描画
+      ctx.lineWidth = gaugeHeight - 4; // ゲージの太さ
+      const grad = ctx.createLinearGradient(x, y, x + width, y);
+      grad.addColorStop(0, this.gaugeColor1());
+      grad.addColorStop(1, this.gaugeColor2());
+      ctx.strokeStyle = grad;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // setupが呼ばれたときにアニメーション用の値を初期化
+    setup(battler, statusType, scale) {
+      super.setup(battler, statusType);
+      // this._displayedValue = this._value;
+      this._displayedValue = Math.max(this._battler.nextRequiredExp(), 0);
+      const innerWidth = faceSize || windowWidth / 2 - WINDOW_PADDING * 2;
+      this._baseScale = scale ?? 1 * (innerWidth / ImageManager.faceWidth);
+      this.scale.x = this._baseScale;
+      this.scale.y = this._baseScale;
+    }
+
+    updateDisplayedValue() {
+      // const realValue = this._value;
+      const realValue = Math.max(this._battler.nextRequiredExp(), 0);
+      if (this._displayedValue !== realValue) {
+        const changeSpeed = Math.abs(realValue - this._displayedValue) / 10; // 調整可能な速度
+        if (this._displayedValue < realValue) {
+          this._displayedValue = Math.min(this._displayedValue + changeSpeed, realValue);
+        } else {
+          this._displayedValue = Math.max(this._displayedValue - changeSpeed, realValue);
+        }
+        this.redraw(); // 値が変わったら再描画
+      }
+    }
+
+    // 数字もアニメーション用の値で描画
+    drawValue() {
+      return;
+      /**
+       * @remarks レイアウトが難しいため、EXPの値表示は見送り...
+       */
+    }
+  }
+
+  // ステータスが変化した際にポップアップを表示する処理
+  class Sprite_StatusPopup extends Sprite {
+    constructor() {
+      super();
+      this.initMembers();
+    }
+
+    initMembers() {
+      this._value = 0;
+      this._duration = 30; // ポップアップの表示時間
+      this._popupType = ''; // 表示するポップアップの種類（HP, MP, TPなど）
+      this._fadeDuration = 30; // フェードアウトの期間
+    }
+
+    setup(value, type, position) {
+      this._value = value;
+      this._popupType = type;
+      const width = windowWidth / 2 - WINDOW_PADDING;
+      const height = gaugeHeight + 20;
+      this.bitmap = new Bitmap(width, height);
+      this.setupFont();
+
+      this.anchor.x = 0;
+      this.anchor.y = -0.4;
+      this.x = position.x;
+      this.y = position.y;
+      this.opacity = 255; // 初期透明度は完全に表示
+      this.drawPopup();
+    }
+
+    setupFont() {
+      this.bitmap.fontFace = this.fontFace();
+      this.bitmap.fontSize = this.fontSize();
+      this.bitmap.textColor = this.textColor();
+      this.bitmap.outlineColor = this.outlineColor();
+      this.bitmap.outlineWidth = this.outlineWidth();
+    }
+
+    fontFace() {
+      return $gameSystem.numberFontFace();
+    }
+
+    fontSize() {
+      return gaugeValueFontSize - 2;
+    }
+
+    textColor() {
+      return ColorManager.hpColor(this._battler);
+    }
+
+    outlineColor() {
+      return ColorManager.outlineColor();
+    }
+
+    outlineWidth() {
+      return 3;
+    }
+
+    drawPopup() {
+      let text = '';
+      const getSuffix = (popType) => {
+        if (popType === 'hp') return TextManager.hpA;
+        if (popType === 'mp') return TextManager.mpA;
+        if (popType === 'tp') return TextManager.tpA;
+        if (popType === 'exp') return TextManager.expA;
+        return '';
+      };
+      if (this._value > 0) {
+        text = `+${this._value} ${getSuffix(this._popupType)}`;
+        this.bitmap.textColor = ColorManager.powerUpColor();
+      } else {
+        text = `${this._value} ${getSuffix(this._popupType)}`;
+        this.bitmap.textColor = ColorManager.powerDownColor();
+      }
+      this.bitmap.drawText(text, 0, 0, this.bitmap.width, this.bitmap.height, 'right');
+    }
+
+    update() {
+      super.update();
+
+      // _durationが残っている場合はポップアップを表示
+      if (this._duration > 0) {
+        this._duration--; // _durationを減少させていく
+      } else {
+        this.y -= 1;
+        // _durationが0になったらフェードアウトを開始
+        if (this._fadeDuration > 0) {
+          this._fadeDuration--;
+          this.opacity = 255 * (this._fadeDuration / 30); // 残り時間に応じて透明度を減少
+        } else {
+          this.parent.removeChild(this); // フェードアウトが終わったら削除
+        }
+      }
     }
   }
 
@@ -683,6 +1155,14 @@
     const key = 'actor%1-gaugeMapStatusHud-%2'.format(actor.actorId(), type);
     const sprite = this.createInnerSprite(key, Sprite_Gauge_MapStatusHud);
     sprite.setup(actor, type);
+    sprite.move(x, y);
+    sprite.show();
+  };
+
+  Window_StatusBase.prototype.placeGaugeCircleMapStatusHud = function (actor, type, x, y, scale) {
+    const key = 'actor%1-gaugeCircleMapStatusHud-%2'.format(actor.actorId(), type);
+    const sprite = this.createInnerSprite(key, Sprite_GaugeCircle_MapStatusHud);
+    sprite.setup(actor, type, scale);
     sprite.move(x, y);
     sprite.show();
   };
@@ -785,8 +1265,18 @@
       this._oldLevel = null;
       this._oldClassId = null;
       this._oldStates = null;
+      this._oldExp = null;
       this._targetOpacity = 255; // 目標の透明度（ウィンドウ内のコンテンツの透明度）
       this._fadeSpeed = 10; // フェードの速さ
+
+      this._oldHpForPopup = null;
+      this._hpPosition = new Point(0, 0);
+      this._oldMpForPopup = null;
+      this._mpPosition = new Point(0, 0);
+      this._oldTpForPopup = null;
+      this._tpPosition = new Point(0, 0);
+      this._oldExpForPopup = null;
+      this._expPosition = new Point(0, 0);
       this.initialize(rect);
     }
 
@@ -809,6 +1299,13 @@
         this.placeActorFaceMapStatusHud(this._actor, x, y);
       }
 
+      if (showActorExp) {
+        x = 0;
+        y = 0;
+        this._expPosition = new Point(x, y + this.height / 2);
+        this.placeGaugeCircleMapStatusHud(actor, 'exp', x, y);
+      }
+
       if (showActorName) {
         this.placeActorNameMapStatusHud(actor, x, y);
       }
@@ -821,26 +1318,33 @@
       y = lineHeight;
       if (showActorHP) {
         this.placeGaugeMapStatusHud(actor, 'hp', x, y);
+        this._hpPosition = new Point(x, y);
         y += lineHeight;
       }
       if (showActorMP) {
         this.placeGaugeMapStatusHud(actor, 'mp', x, y);
+        this._mpPosition = new Point(x, y);
         y += lineHeight;
       }
       if (showActorTP) {
         this.placeGaugeMapStatusHud(actor, 'tp', x, y);
+        this._tpPosition = new Point(x, y);
         y += lineHeight;
       }
       const iconOffset = statusIconSize / 2;
       x = 0 + iconOffset;
-      // 下を起点にする
-      y = windowHeight - WINDOW_PADDING - statusIconSize;
+      // 顔グラフィックの下か、ウィンドウの下のどちらか
+      const faceUnderY = faceSize || windowWidth / 2 - WINDOW_PADDING * 2;
+      const windowUnderY = windowHeight - WINDOW_PADDING - statusIconSize;
+      const stateIconY = Math.min(faceUnderY, windowUnderY);
+
       if (showActorState) {
         /**
          * @remarks 1pxずらしたほうが見た目がよかった
          */
-        this.placeStateIconMapStatusHud(actor, x + 1, y);
+        this.placeStateIconMapStatusHud(actor, x + 1, stateIconY);
       }
+
       this.allShow();
     }
 
@@ -856,6 +1360,7 @@
         this.checkPlayerCollision();
         this.updateOpacity();
       }
+      this.createPopup();
     }
 
     updateHide() {
@@ -905,43 +1410,53 @@
       //   this._hideCount = this.constructor.HIDE_COUNT;
       //   return true;
       // }
+      const actor = this._actor;
+      if (!actor) return false;
       // HPが変わったとき
-      if (showActorHP && this._oldHp !== this._actor.hp) {
-        this._oldHp = this._actor.hp;
+      if (showActorHP && this._oldHp !== actor.hp) {
+        this._oldHp = actor.hp;
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
       // MPが変わったとき
-      if (showActorMP && this._oldMp !== this._actor.mp) {
-        this._oldMp = this._actor.mp;
+      if (showActorMP && this._oldMp !== actor.mp) {
+        this._oldMp = actor.mp;
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
       // TPが変わったとき
-      if (showActorTP && this._oldTp !== this._actor.tp) {
-        this._oldTp = this._actor.tp;
+      if (showActorTP && this._oldTp !== actor.tp) {
+        this._oldTp = actor.tp;
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
       // Levelが変わったとき
-      if (showActorLevel && this._oldLevel !== this._actor.level) {
-        this._oldLevel = this._actor.level;
+      if (showActorLevel && this._oldLevel !== actor.level) {
+        this._oldLevel = actor.level;
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
       // 職業が変わったとき
-      if (showActorClass && this._oldClassId !== this._actor.classId) {
-        this._oldClassId = this._actor.classId;
+      if (showActorClass && this._oldClassId !== actor.classId) {
+        this._oldClassId = actor.classId;
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
       // ステートが変わったとき 配列をjoinして文字列で比較
-      const currentActorStatesJoin = this._actor._states.join();
+      const currentActorStatesJoin = actor._states.join();
       if (showActorState && this._oldStates !== currentActorStatesJoin) {
         this._oldStates = currentActorStatesJoin;
         this._hideCount = this.constructor.HIDE_COUNT;
         return true;
       }
+
+      // Expが変わったとき
+      if (showActorExp && this._oldExp !== actor.currentExp()) {
+        this._oldExp = actor.currentExp();
+        this._hideCount = this.constructor.HIDE_COUNT;
+        return true;
+      }
+
       return false;
     }
 
@@ -1049,6 +1564,86 @@
         rect1.y < rect2.y + rect2.height &&
         rect1.y + rect1.height > rect2.y
       );
+    }
+
+    createPopup() {
+      if (showActorHP && showActorHPDiff) {
+        this.checkHpPopup();
+      }
+
+      if (showActorMP && showActorMPDiff) {
+        this.checkMpPopup();
+      }
+
+      if (showActorTP && showActorTPDiff) {
+        this.checkTpPopup();
+      }
+
+      if (showActorExp && showActorExpDiff) {
+        this.checkExpPopup();
+      }
+    }
+
+    checkHpPopup() {
+      const actor = this._actor;
+      if (!actor) return;
+      if (this._oldHpForPopup === actor.hp) return;
+      // 初回表示時は、変化を出さないため
+      if (this._oldHpForPopup === null) {
+        this._oldHpForPopup = actor.hp;
+        return;
+      }
+      const diff = actor.hp - this._oldHpForPopup;
+      this._oldHpForPopup = actor.hp;
+      this.showPopup(diff, 'hp', this._hpPosition);
+    }
+
+    checkMpPopup() {
+      const actor = this._actor;
+      if (!actor) return;
+      if (this._oldMpForPopup === actor.mp) return;
+      // 初回表示時は、変化を出さないため
+      if (this._oldMpForPopup === null) {
+        this._oldMpForPopup = actor.mp;
+        return;
+      }
+      const diff = actor.mp - this._oldMpForPopup;
+      this._oldMpForPopup = actor.mp;
+      this.showPopup(diff, 'mp', this._mpPosition);
+    }
+
+    checkTpPopup() {
+      const actor = this._actor;
+      if (!actor) return;
+      if (this._oldTpForPopup === actor.tp) return;
+      // 初回表示時は、変化を出さないため
+      if (this._oldTpForPopup === null) {
+        this._oldTpForPopup = actor.tp;
+        return;
+      }
+      const diff = actor.tp - this._oldTpForPopup;
+      this._oldTpForPopup = actor.tp;
+      this.showPopup(diff, 'tp', this._tpPosition);
+    }
+
+    checkExpPopup() {
+      const actor = this._actor;
+      if (!actor) return;
+      if (this._oldExpForPopup === actor.currentExp()) return;
+      // 初回表示時は、変化を出さないため
+      if (this._oldExpForPopup === null) {
+        this._oldExpForPopup = actor.currentExp();
+        return;
+      }
+      const diff = actor.currentExp() - this._oldExpForPopup;
+      this._oldExpForPopup = actor.currentExp();
+      this.showPopup(diff, 'exp', this._expPosition);
+    }
+
+    showPopup(value, type, position) {
+      const popup = new Sprite_StatusPopup();
+      popup.setup(value, type, position);
+      this.addChild(popup); // HUDウィンドウにポップアップを追加
     }
   }
 
