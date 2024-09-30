@@ -23,8 +23,28 @@
 ### エネミーの名前とHPゲージ、タイムゲージが表示されるようになる
 ### アクターが待機時に武器を構えるようになる
 ### エネミーが息づいたような動きになる
-### スキル表示はオンオフ指定ができる。オフにするとRPGツクールMZデフォルトの表示になる `v1.6`
+### スキル表示はオンオフ指定ができる。オフにするとRPGツクールMZデフォルトの表示になる（これにより他プラグインをお使いで邪魔されたくない場合に対応できます） `ver1.6`
 ![alt text](image-4.png)
+
+#### 参考
+  この設定をオフにして、別プラグイン `MNKR_SimpleMsgSideViewMZ.js` を使うと、シンプルなスキル名表示だけになり戦闘のテンポがよくなっていい感じなのでご紹介します。
+
+  > MNKR_SimpleMsgSideViewMZ.js
+  > 
+  > author 神無月サスケさま　munokuraさま 改変 Copyright (c) 2021 Munokura Ver.0.0.4 MIT license
+
+  ![alt text](image-5.png)
+
+  [https://github.com/munokura/MNKR-MZ-plugins/blob/master/MNKR_SimpleMsgSideViewMZ.js](https://github.com/munokura/MNKR-MZ-plugins/blob/master/MNKR_SimpleMsgSideViewMZ.js)
+
+  `Sakura_SvBattleExtend` より、`MNKR_SimpleMsgSideViewMZ` を下に配置してください。
+
+## 今後の予定
+ver1.0までに以下を対応予定です。
+
+- [x] スキル表示の全体オフ機能追加 `ver1.6で対応済み`
+- [ ] 敵ごとに個別に相手の前にジャンプしない設定、HPゲージ非表示設定をできるように
+- [ ] スキルごとに個別にスキル表示をしない設定をできるように
 
 ## プラグインパラメータ
 🚧執筆中
