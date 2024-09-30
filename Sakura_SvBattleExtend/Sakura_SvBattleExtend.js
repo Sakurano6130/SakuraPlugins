@@ -12,6 +12,11 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/09/30 0.6.0 敵画像の上に線が出ていた不具合の対応
+ *                  スキル表示のフキダシをオンオフにできるように
+ *                  オフにするとツクールMZデフォルトのバトルログの
+ *                  レイアウトになる
+ *                  これにより他のプラグインの挙動を邪魔しないようにする
  * 2024/09/29 0.5.0 β版公開
  * -------------------------------------------------
  *
@@ -242,6 +247,13 @@
  * @param skillDisplay
  * @text ⚡ ｽｷﾙ表示設定 ---
  *
+ * @param showSkillNameExtend
+ * @parent skillDisplay
+ * @text ｽｷﾙ表示のｵﾝｵﾌ
+ * @desc ｽｷﾙ表示拡張機能のｵﾝｵﾌです。ｵﾌにするとﾃﾞﾌｫﾙﾄのﾛｸﾞ表示になります。他ﾌﾟﾗｸﾞｲﾝをお使いで邪魔されたくない方はｵﾌにしてください。
+ * @type boolean
+ * @default true
+ *
  * @param skillDisplayFontSize
  * @parent skillDisplay
  * @text ｽｷﾙ表示のﾌｫﾝﾄｻｲｽﾞ
@@ -459,6 +471,7 @@
     },
   ];
 
+  const showSkillNameExtend = parameters['showSkillNameExtend'] === 'true';
   const skillDisplayFontSize = Number(parameters['skillDisplayFontSize'] || 16);
   const skillDisplayFontColorByEnemy = Number(parameters['skillDisplayFontColorByEnemy'] || 20);
   const skillDisplayFontColorForAttack = Number(parameters['skillDisplayFontColorForAttack'] || 0);
@@ -1437,7 +1450,9 @@
       return action.isForOne();
     };
 
-    this.showSkillAndTargetInChatBubble(subject, action, targets); // チャットバブルでスキルを表示
+    if (showSkillNameExtend) {
+      this.showSkillAndTargetInChatBubble(subject, action, targets); // チャットバブルでスキルを表示
+    }
 
     const subjectSprite = SceneManager._scene._spriteset.findTargetSprite(subject);
     if (subjectSprite) {
@@ -1537,7 +1552,11 @@
    *
    * @returns {number} 最大表示行数
    */
+  const _Window_BattleLog_prototype_maxLines = Window_BattleLog.prototype.maxLines;
   Window_BattleLog.prototype.maxLines = function () {
+    if (!showSkillNameExtend) {
+      return _Window_BattleLog_prototype_maxLines.call(this);
+    }
     return 5; // 5行まで表示
   };
 
@@ -1546,7 +1565,11 @@
    *
    * @returns {number} 背景の不透明度（0で完全な透明）
    */
+  const _Window_BattleLog_prototype_backPaintOpacity = Window_BattleLog.prototype.backPaintOpacity;
   Window_BattleLog.prototype.backPaintOpacity = function () {
+    if (!showSkillNameExtend) {
+      return _Window_BattleLog_prototype_backPaintOpacity.call(this);
+    }
     return 0; // 背景を透明に設定
   };
 
@@ -1555,7 +1578,11 @@
    *
    * @returns {number} 行の高さ（ピクセル単位）
    */
+  const _Window_BattleLog_prototype_lineHeight = Window_BattleLog.prototype.lineHeight;
   Window_BattleLog.prototype.lineHeight = function () {
+    if (!showSkillNameExtend) {
+      return _Window_BattleLog_prototype_lineHeight.call(this);
+    }
     return 26; // 各行の高さを26ピクセルに設定
   };
 
@@ -1564,7 +1591,11 @@
    *
    * @returns {number} 項目の高さ（ピクセル単位）
    */
+  const _Window_BattleLog_prototype_itemHeight = Window_BattleLog.prototype.itemHeight;
   Window_BattleLog.prototype.itemHeight = function () {
+    if (!showSkillNameExtend) {
+      return _Window_BattleLog_prototype_itemHeight.call(this);
+    }
     return 26; // 各項目の高さも26ピクセルに設定
   };
 
@@ -1573,14 +1604,24 @@
    *
    * @returns {number} 内側の余白（ピクセル単位）
    */
+  const _Window_BattleLog_prototype_itemPadding = Window_BattleLog.prototype.itemPadding;
   Window_BattleLog.prototype.itemPadding = function () {
+    if (!showSkillNameExtend) {
+      return _Window_BattleLog_prototype_itemPadding.call(this);
+    }
     return 8; // 各項目の内側の余白を8ピクセルに設定
   };
 
   /**
    * フォント設定をリセットし、デフォルトのフォントに戻す。
    */
+  const _Window_BattleLog_prototype_resetFontSettings =
+    Window_BattleLog.prototype.resetFontSettings;
   Window_BattleLog.prototype.resetFontSettings = function () {
+    if (!showSkillNameExtend) {
+      _Window_BattleLog_prototype_resetFontSettings.call(this);
+      return;
+    }
     this.contents.fontFace = $gameSystem.mainFontFace(); // メインフォントの設定
     this.contents.fontSize = 16; // フォントサイズを16ピクセルに設定
     this.contents.fontBold = false; // 太字を無効化
@@ -1592,7 +1633,13 @@
    *
    * @param {string} text - バトルログに追加するテキスト
    */
+  const _Window_BattleLog_prototype_addText = Window_BattleLog.prototype.addText;
   Window_BattleLog.prototype.addText = function (text) {
+    if (!showSkillNameExtend) {
+      _Window_BattleLog_prototype_addText.call(this, text);
+      return;
+    }
+
     this._lines.push(text);
 
     // 5行以上になったら古い行を削除する
@@ -2914,7 +2961,11 @@
    *
    * @returns {Rectangle} バトルログウィンドウの矩形
    */
+  const _Scene_Battle_prototype_logWindowRect = Scene_Battle.prototype.logWindowRect;
   Scene_Battle.prototype.logWindowRect = function () {
+    if (!showSkillNameExtend) {
+      return _Scene_Battle_prototype_logWindowRect.call(this);
+    }
     const wx = 0;
     const wy = 0;
     const ww = (Graphics.width / 3) * 2;
@@ -3292,5 +3343,15 @@
    */
   Game_System.prototype.damagePopFontFace = function () {
     return 'rmmz-damagePopFont, ' + $dataSystem.advanced.fallbackFonts;
+  };
+
+  /**
+   * 敵画像の拡大縮小時に上部に線が出てしまうのを回避する
+   * @see https://forum.tkool.jp/index.php?threads/%E3%80%90%E8%A7%A3%E6%B1%BA%E3%80%91%E5%8A%A9%E8%A8%80%E9%A1%98%E3%81%84%EF%BC%9A%E3%83%90%E3%83%88%E3%83%A9%E3%83%BC%E8%A1%A8%E7%A4%BA%E6%8B%A1%E5%BC%B5%E3%81%AE%E3%82%B9%E3%83%86%E3%83%BC%E3%82%BF%E3%82%B9%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3%E3%82%92%E4%BF%AE%E6%AD%A3%E3%81%97%E3%81%9F%E3%81%84.4504/#post-26371
+   */
+  const _Sprite_Enemy_initialize = Sprite_Enemy.prototype.initialize;
+  Sprite_Enemy.prototype.initialize = function (battler) {
+    _Sprite_Enemy_initialize.call(this, battler);
+    this._stateIconSprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   };
 })();
