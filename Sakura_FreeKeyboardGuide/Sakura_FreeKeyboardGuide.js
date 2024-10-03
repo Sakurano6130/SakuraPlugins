@@ -13,6 +13,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/03 1.2.0 表示するウィンドウの幅と高さを指定できるように
  * 2024/09/18 1.1.1 プラグインパラメータの説明文の誤り修正（処理変更なし）
  * 2024/09/18 1.1.0 表示できるSceneを拡大。
  *                  外部ﾌﾟﾗｸﾞｲﾝ等任意のSceneでも表示できるように。（ただしそのﾌﾟﾗｸﾞｲﾝ次第
@@ -47,7 +48,7 @@
  * @text シーン別キー設定
  * @type struct<SceneKeySetting>[]
  * @desc 各シーンにおけるキーとその説明を定義します。設定されたスイッチによって表示内容が変わります。
- * @default ["{\"SceneName\":\"Scene_Map\",\"KeyDescriptions\":\"[\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"←\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowLeft\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"↑\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowUp\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"→\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowRight\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"↓\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"移動\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowDown\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"Enter\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"決定/アクション\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"Enter\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"Esc\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"メニューを開く\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"Escape\\\\\\\"}\\\"]\",\"WindowPosition\":\"left-bottom\",\"WindowOffsetX\":\"0\",\"WindowOffsetY\":\"0\",\"ShowDimmer\":\"true\",\"GameSwitch\":\"\"}"]
+ * @default ["{\"SceneName\":\"Scene_Map\",\"KeyDescriptions\":\"[\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"←\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowLeft\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"↑\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowUp\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"→\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowRight\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"↓\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"移動\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"ArrowDown\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"Enter\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"決定/アクション\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"Enter\\\\\\\"}\\\",\\\"{\\\\\\\"KeyName\\\\\\\":\\\\\\\"Esc\\\\\\\",\\\\\\\"Description\\\\\\\":\\\\\\\"メニューを開く\\\\\\\",\\\\\\\"TriggerKey\\\\\\\":\\\\\\\"Escape\\\\\\\"}\\\"]\",\"WindowPosition\":\"left-bottom\",\"WindowOffsetX\":\"0\",\"WindowOffsetY\":\"0\",\"WindowWidth\":\"0\",\"WindowHeight\":\"0\",\"ShowDimmer\":\"true\",\"GameSwitch\":\"\",\"showIfEventRunning\":\"false\"}"]
  *
  * @param GlobalHideSwitch
  * @text 全体非表示スイッチ
@@ -118,7 +119,7 @@
  * @type number
  * @min -40
  * @max 40
- * @desc メッセージウィンドウ内でボタンを描画する際のY軸のオフセット。正の値で下に、負の値で上に移動します。別プラグインでルビを振る際に高さを揃えるために調整してください。
+ * @desc ﾒｯｾｰｼﾞｳｨﾝﾄﾞｳ内でﾎﾞﾀﾝを描画する際のY軸のｵﾌｾｯﾄ。正の値で下、負の値で上。別ﾌﾟﾗｸﾞｲﾝでﾙﾋﾞを振る際に高さ調整してください。
  * @default 0
  *
  * @param ButtonNameOffsetYInWindowMessage
@@ -126,7 +127,7 @@
  * @type number
  * @min -40
  * @max 40
- * @desc ボタン内のテキストを描画する際のY軸のオフセット。正の値で下に、負の値で上に移動します。フォントによってうまく真ん中に収まらない場合に調整してください。
+ * @desc ﾎﾞﾀﾝ内のﾃｷｽﾄを描画する際のY軸のｵﾌｾｯﾄ。正の値で下に、負の値で上に。ﾌｫﾝﾄによって真ん中に収まらない場合に調整してください。
  * @default 0
  *
  */
@@ -183,6 +184,22 @@
  * @min -9999
  * @max 9999
  * @desc キーボードガイドウィンドウのY軸のオフセット。正の値で下に、負の値で上に移動します。
+ * @default 0
+ *
+ * @param WindowWidth
+ * @text ウィンドウ幅
+ * @type number
+ * @min 0
+ * @max 9999
+ * @desc キーボードガイドウィンドウの幅。0だと自動調整されます
+ * @default 0
+ *
+ * @param WindowHeight
+ * @text ウィンドウ高さ
+ * @type number
+ * @min 0
+ * @max 9999
+ * @desc キーボードガイドウィンドウの高さ。0だと自動調整されます
  * @default 0
  *
  * @param ShowDimmer
@@ -335,6 +352,8 @@
       windowPosition: parsedSetting.WindowPosition || 'left-bottom',
       windowOffsetX: Number(parsedSetting.WindowOffsetX || 0),
       windowOffsetY: Number(parsedSetting.WindowOffsetY || 0),
+      windowWidth: Number(parsedSetting.WindowWidth || 0),
+      windowHeight: Number(parsedSetting.WindowHeight || 0),
       showDimmer: String(parsedSetting.ShowDimmer) === 'true',
       gameSwitch: Number(parsedSetting.GameSwitch || 0),
       showIfEventRunning: String(parsedSetting.showIfEventRunning) === 'true',
@@ -666,6 +685,8 @@
      * @param {String} position - ウィンドウの位置 (left-bottom, right-bottom, left-top, right-top)
      * @param {number} offsetX - X座標のオフセット
      * @param {number} offsetY - Y座標のオフセット
+     * @param {number} fixedWidth - 指定された幅
+     * @param {number} fixedHeight - 指定された高さ
      * @param {Array} keyDescriptions - キーとその説明のリスト
      * @param {boolean} showDimmer - 背景を暗くするか
      * @param {number} gameSwitchForVisible - 表示/非表示を制御するゲームスイッチID
@@ -675,6 +696,8 @@
       position,
       offsetX,
       offsetY,
+      fixedWidth,
+      fixedHeight,
       keyDescriptions,
       showDimmer,
       gameSwitchForVisible,
@@ -685,6 +708,8 @@
       this._position = position;
       this._offsetX = offsetX;
       this._offsetY = offsetY;
+      this._fixedWidth = fixedWidth;
+      this._fixedHeight = fixedHeight;
       this._keyDescriptions = keyDescriptions;
       this._showDimmer = showDimmer;
       this._gameSwitchForVisible = gameSwitchForVisible;
@@ -777,14 +802,16 @@
      * @returns {number} - ウィンドウの幅
      */
     windowWidth() {
+      // 指定された幅がある場合はそれを返す
+      if (this._fixedWidth) {
+        return this._fixedWidth;
+      }
+
       let width = 0;
 
       this._keyDescriptions.forEach((keyDesc) => {
-        const keys = keyDesc.KeyName.split(',').map((keyText) => keyText.trim());
-        keys.forEach((keyText) => {
-          const textWidth = this.textWidth(keyText);
-          width += textWidth + buttonPaddingX * 2 + buttonMarginX;
-        });
+        width += this.textWidth(keyDesc.KeyName);
+        +buttonPaddingX * 2 + buttonMarginX;
 
         const descriptionWidth = this.textWidth(keyDesc.Description) + buttonMarginX;
         width += descriptionWidth + buttonMarginX;
@@ -798,6 +825,11 @@
      * @returns {number} - ウィンドウの高さ
      */
     windowHeight() {
+      // 指定された高さがある場合はそれを返す
+      if (this._fixedHeight) {
+        return this._fixedHeight;
+      }
+
       return buttonHeight + buttonMarginY;
     }
 
@@ -875,6 +907,8 @@
       const windowPosition = sceneSetting.windowPosition || 'left-bottom';
       const windowOffsetX = sceneSetting.windowOffsetX || 0;
       const windowOffsetY = sceneSetting.windowOffsetY || 0;
+      const windowWidth = sceneSetting.windowWidth || 0;
+      const windowHeight = sceneSetting.windowHeight || 0;
       const keyDescriptions = sceneSetting.keyDescriptions;
       const showDimmer = sceneSetting.showDimmer;
       const gameSwitchForVisible = sceneSetting.gameSwitch;
@@ -884,6 +918,8 @@
         windowPosition,
         windowOffsetX,
         windowOffsetY,
+        windowWidth,
+        windowHeight,
         keyDescriptions,
         showDimmer,
         gameSwitchForVisible,
