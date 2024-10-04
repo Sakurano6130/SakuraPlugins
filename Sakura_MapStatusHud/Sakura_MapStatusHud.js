@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/04 1.3.1 経験値の始点と終点の色表示が逆になっていたので修正
  * 2024/09/30 1.3.0 経験値の表示を追加
  *                  各ゲージの色をプラグインパラメータで変えられる機能を追加
  *                  HP,MP,TP,経験値に変化があった場合に差分をポップアップ表示する機能を追加
@@ -929,8 +930,9 @@
       ctx.arc(centerX, centerY, radius, startAngle, endAngle, false); // 時計回りに描画
       ctx.lineWidth = gaugeHeight - 4; // ゲージの太さ
       const grad = ctx.createLinearGradient(x, y, x + width, y);
-      grad.addColorStop(0, this.gaugeColor1());
-      grad.addColorStop(1, this.gaugeColor2());
+      // 逆になるので注意
+      grad.addColorStop(0, this.gaugeColor2());
+      grad.addColorStop(1, this.gaugeColor1());
       ctx.strokeStyle = grad;
       ctx.stroke();
 
