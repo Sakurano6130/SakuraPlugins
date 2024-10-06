@@ -1,11 +1,8 @@
 # Sakura_SvBattleExtend
-ｻｲﾄﾞﾋﾞｭｰﾊﾞﾄﾙいい感じプラグイン
+💥サイドビューバトルいい感じプラグイン
 
 ![alt text](image.png)
 
-<div>
-<iframe width="600" height="400" src="https://youtu.be/2dQbGTHGkeg"></iframe>
-</div>
 
 ## ダウンロード
 [Sakura_SvBattleExtend.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtend/Sakura_SvBattleExtend.js)
@@ -50,9 +47,9 @@
 
 ```mermaid
 graph TD;
-    style A fill:#FFCCFF,stroke:#FF99CC,stroke-width:2px;
-    style B fill:#FFEEFF,stroke:#FF99CC,stroke-width:2px;
-    style C fill:#FFEEFF,stroke:#FF99CC,stroke-width:2px;
+    style A fill:#CCEEFF,stroke:#66CCFF,stroke-width:2px;
+    style B fill:#E6F7FF,stroke:#66CCFF,stroke-width:2px;
+    style C fill:#E6F7FF,stroke:#66CCFF,stroke-width:2px;
     
     A[Sakura_SvBattleExtend.js<br>💥 SVバトルいい感じプラグイン] --> B[Sakura_ShowComboDamage.js<br>✨ コンボダメージ表示プラグイン];
     A[Sakura_SvBattleExtend.js<br>💥 SVバトルいい感じプラグイン] --> C[Sakura_EnemyHud.js<br>❤️ 敵ステータス表示プラグイン];
@@ -61,8 +58,8 @@ graph TD;
     B:::normal;
     C:::normal;
     
-    classDef highlight fill:#FFCCFF,stroke:#FF99CC,stroke-width:3px,font-size:16px,color:#993366;
-    classDef normal fill:#FFEEFF,stroke:#FF99CC,stroke-width:2px,font-size:14px,color:#993366;
+    classDef highlight fill:#CCEEFF,stroke:#66CCFF,stroke-width:3px,font-size:16px,color:#336699;
+    classDef normal fill:#E6F7FF,stroke:#66CCFF,stroke-width:2px,font-size:14px,color:#336699;
 
 ```
 
