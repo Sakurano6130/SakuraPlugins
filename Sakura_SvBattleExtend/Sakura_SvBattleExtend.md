@@ -1,10 +1,9 @@
 # Sakura_SvBattleExtend
-サイドビュー戦闘をいい感じにします✨  β版
+ｻｲﾄﾞﾋﾞｭｰﾊﾞﾄﾙいい感じプラグイン
 
 ![alt text](image.png)
 
-<iframe width="560" height="315" src="https://youtu.be/2dQbGTHGkeg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+[!['ｻｲﾄﾞﾋﾞｭｰﾊﾞﾄﾙいい感じプラグイン']('image.png')]('https://youtu.be/2dQbGTHGkeg')
 
 ## ダウンロード
 [Sakura_SvBattleExtend.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtend/Sakura_SvBattleExtend.js)
