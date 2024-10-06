@@ -1,7 +1,11 @@
 # Sakura_SvBattleExtend
 ｻｲﾄﾞﾋﾞｭｰﾊﾞﾄﾙいい感じプラグイン
 
-[!['ｻｲﾄﾞﾋﾞｭｰﾊﾞﾄﾙいい感じプラグイン'](image.png)](https://youtu.be/2dQbGTHGkeg)
+![alt text](image.png)
+
+<div>
+<iframe width="600" height="400" src="https://youtu.be/2dQbGTHGkeg"></iframe>
+</div>
 
 ## ダウンロード
 [Sakura_SvBattleExtend.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtend/Sakura_SvBattleExtend.js)
