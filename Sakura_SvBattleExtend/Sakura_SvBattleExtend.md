@@ -3,7 +3,8 @@
 
 ![alt text](image.png)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/2dQbGTHGkeg?si=ToZAA968bO1FTrwJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://youtu.be/2dQbGTHGkeg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
 ## ダウンロード
 [Sakura_SvBattleExtend.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtend/Sakura_SvBattleExtend.js)
@@ -48,8 +49,20 @@
 
 ```mermaid
 graph TD;
-    A[Sakura_SvBattleExtend.js<br>SVバトルいい感じプラグイン] --> B[Sakura_ShowComboDamage.js<br>コンボダメージ表示プラグイン];
-    A[Sakura_SvBattleExtend.js<br>SVバトルいい感じプラグイン] --> C[Sakura_EnemyHud.js<br>敵ステータス表示プラグイン];
+    style A fill:#FFCCFF,stroke:#FF99CC,stroke-width:2px;
+    style B fill:#FFEEFF,stroke:#FF99CC,stroke-width:2px;
+    style C fill:#FFEEFF,stroke:#FF99CC,stroke-width:2px;
+    
+    A[Sakura_SvBattleExtend.js<br>💥 SVバトルいい感じプラグイン] --> B[Sakura_ShowComboDamage.js<br>✨ コンボダメージ表示プラグイン];
+    A[Sakura_SvBattleExtend.js<br>💥 SVバトルいい感じプラグイン] --> C[Sakura_EnemyHud.js<br>❤️ 敵ステータス表示プラグイン];
+    
+    A:::highlight;
+    B:::normal;
+    C:::normal;
+    
+    classDef highlight fill:#FFCCFF,stroke:#FF99CC,stroke-width:3px,font-size:16px,color:#993366;
+    classDef normal fill:#FFEEFF,stroke:#FF99CC,stroke-width:2px,font-size:14px,color:#993366;
+
 ```
 
 
