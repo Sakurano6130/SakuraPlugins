@@ -219,25 +219,6 @@
 
   const fontFile = String(parameters['fontFile'] || '');
 
-  // ---------------------------------------------------------------------
-  // 共通関数
-  // ---------------------------------------------------------------------
-  /**
-   * UIエリアのマージンを取得します。
-   *
-   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
-   *
-   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
-   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
-   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
-   */
-  const getMarginOfUIArea = () => {
-    return {
-      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
-      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
-    };
-  };
-
   // ----------------------------------------------------------------------------
   // TweenAnime実装処理
   // ----------------------------------------------------------------------------
@@ -551,14 +532,12 @@
      * コンストラクタ
      */
     constructor() {
-      const { uiMarginX, uiMarginY } = getMarginOfUIArea();
-
       const width = 300;
       const height = 240;
-      const sx = -uiMarginX + Graphics.width;
-      const sy = -uiMarginY + 20;
-      const dx = -uiMarginX + Graphics.width - width + windowOffsetX;
-      const dy = -uiMarginY + sy + windowOffsetY;
+      const sx = Graphics.width;
+      const sy = 20;
+      const dx = Graphics.width - width + windowOffsetX;
+      const dy = sy + windowOffsetY;
       const rect = new Rectangle(sx, sy, width, height);
       super(rect);
 

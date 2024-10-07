@@ -118,22 +118,6 @@
   // 共通関数
   // ---------------------------------------------------------------------
   /**
-   * UIエリアのマージンを取得します。
-   *
-   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
-   *
-   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
-   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
-   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
-   */
-  const getMarginOfUIArea = () => {
-    return {
-      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
-      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
-    };
-  };
-
-  /**
    * 六角形の背景を描画する関数
    *
    * @param {Object} params - 描画に使用するパラメータオブジェクト
@@ -657,7 +641,6 @@
    * ウィンドウの透明度や位置を調整する。
    */
   Scene_Battle.prototype.updateEnemyStatusWindows = function () {
-    const { uiMarginX, uiMarginY } = getMarginOfUIArea();
     const fadeSpeed = 0.05; // フェード速度
 
     $gameTroop.members().forEach((enemy, index) => {
@@ -674,8 +657,8 @@
               child.alpha = Math.min(1, child.alpha + fadeSpeed);
 
               // ウィンドウの位置を更新
-              const x = -uiMarginX + sprite.x - window.width / 2;
-              const y = -uiMarginY + sprite.y - window.height - sprite.height;
+              const x = sprite.x - window.width / 2;
+              const y = sprite.y - window.height - sprite.height;
               window.updatePosition(x, y); // 新しい位置に更新
             }
           });
