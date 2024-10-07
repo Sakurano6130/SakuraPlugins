@@ -1,7 +1,7 @@
 # Sakura_SvBattleExtend
 💥サイドビューバトルいい感じプラグイン
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 
 ## ダウンロード
@@ -18,9 +18,9 @@
 ## 機能説明
 ### 💥ダメージ判定とダメージポップをMZアニメーションのフラッシュのタイミングに合わせて行う（これにより多段ヒットするダメージの表現ができる）
 
-![alt text](image-12.png)
+![alt text](images/image-12.png)
 
-![alt text](image-13.png)
+![alt text](images/image-13.png)
 
 - フラッシュのタイミングで複数回ダメージ判定が入るようになるため、ゲームバランスにご注意を。
 - 1回しかダメージさせたくないときは、フラッシュが1回だけになるように、アニメーションを直してください。
@@ -30,7 +30,7 @@
   <summary>🌟ダメージポップの細かい調整について</summary>
   ダメージポップの細かい調整は、プラグインパラメータで設定できます。デフォルトで良ければ触る必要はありません。
 
-  ![alt text](image-18.png)
+  ![alt text](images/image-18.png)
 
 </details>
 
@@ -38,15 +38,15 @@
 
 ### ⚔️アクターが待機時に武器を構えるようになる
 
-  ![alt text](image-8.png)
+  ![alt text](images/image-8.png)
 
 <details>
   <summary>🌟武器の細かい位置調整について</summary>
   武器の細かい位置は、プラグインパラメータで設定できます。デフォルトで良ければ触る必要はありません。
 
-  ![alt text](image-15.png) 
+  ![alt text](images/image-15.png) 
 
-  ![alt text](image-16.png)
+  ![alt text](images/image-16.png)
 </details>
 
 ---
@@ -58,7 +58,7 @@
   <summary>🌟敵毎の個別設定について</summary>
   敵毎に個別に息づかせたくない場合は、以下の記述をすることで息をしなくなります。
 
-  ![alt text](image-21.png)
+  ![alt text](images/image-21.png)
 
   メモ欄記載例
   ```
@@ -70,7 +70,7 @@
 ---
 ### 🦘アクターやエネミーが行動時に相手の前に移動するようになる。
 
-![alt text](image-9.png)
+![alt text](images/image-9.png)
 
 <details>
   <summary>🌟相手の前に出る条件について</summary>
@@ -108,13 +108,13 @@ graph TD;
     E -->|いいえ| M;
     D -->|いいえ| F[攻撃モーションが<br>射撃か？];
     F -->|はい| M;
-    F -->|いいえ| G[魔法か？];
-    G -->|はい| H[対象が味方か？];
+    C -->|いいえ| G[魔法か？];
+    G -->|魔法| H[対象が味方か？];
     H -->|はい| I[範囲が単体か？];
     I -->|はい| L;
     I -->|いいえ| M;
     H -->|いいえ| M;
-    G -->|いいえ| J[範囲が単体か？];
+    G -->|物理| J[範囲が単体か？];
     J -->|はい| L;
     J -->|いいえ| M;
 
@@ -127,13 +127,13 @@ graph TD;
 
 ### 💬使用するスキルと相手が表示されるようになる。
 
-![alt text](image-11.png)
+![alt text](images/image-11.png)
 
 <details>
   <summary>🌟スキルごとの表示設定について</summary>
   例えば、通常攻撃は表示させたくない場合など、スキルごとに個別に非表示にしたい場合は、スキルのメモ欄に `<名前表示しない>` と記述することで非表示にすることができます。
 
-  ![alt text](image-19.png)
+  ![alt text](images/image-19.png)
 
   メモ欄記載例
   ```
@@ -145,7 +145,7 @@ graph TD;
   <summary>🌟スキル表示の全体オフについて</summary>
   スキル表示は全体的にオンオフ指定ができます。オフにするとRPGツクールMZデフォルトの表示になる（これにより他プラグインをお使いで邪魔されたくない場合に対応できます）
 
-  ![alt text](image-4.png)
+  ![alt text](images/image-4.png)
 
 #### 参考
   この設定をオフにして、別プラグイン `MNKR_SimpleMsgSideViewMZ.js` を使うと、シンプルなスキル名表示だけになり戦闘のテンポがよくなっていい感じなのでご紹介します。
@@ -154,7 +154,7 @@ graph TD;
   > 
   > author 神無月サスケさま　munokuraさま 改変 Copyright (c) 2021 Munokura Ver.0.0.4 MIT license
 
-  ![alt text](image-5.png)
+  ![alt text](images/image-5.png)
 
   [https://github.com/munokura/MNKR-MZ-plugins/blob/master/MNKR_SimpleMsgSideViewMZ.js](https://github.com/munokura/MNKR-MZ-plugins/blob/master/MNKR_SimpleMsgSideViewMZ.js)
 
@@ -190,7 +190,7 @@ graph TD;
 
   [Sakura_ShowComboDamage](../Sakura_ShowComboDamage/Sakura_ShowComboDamage.md)
 
-  ![alt text](image-22.png)
+  ![alt text](images/image-22.png)
 
 </details>
 
@@ -200,7 +200,7 @@ graph TD;
 
   [Sakura_EnemyHud](../Sakura_EnemyHud/Sakura_EnemyHud.md)
 
-  ![alt text](image-23.png)
+  ![alt text](images/image-23.png)
 
 </details>
 
@@ -211,7 +211,7 @@ graph TD;
 ---
 ### 📝スキルごとに個別にアクションを指定することができる。アクションは自由に編集、作成することができる。
 
-![alt text](image-14.png)
+![alt text](images/image-14.png)
 
 <details>
   <summary>🌟詳しいやり方はこちら</summary>
@@ -244,12 +244,12 @@ graph TD;
   - ご自身のプロジェクトをRPGツクールMZで開いた状態で、サンプルプロジェクトを多重起動してください。
   - `いい感じアクションテンプレ`という名前のマップをコピーして、ご自身のプロジェクトにコピーしてください。
 
-    ![alt text](image-24.png)
+    ![alt text](images/image-24.png)
 
   - `/img/characters` の中にある矢の画像 `$Arrow01.png` をご自身のプロジェクトの `/img/characters` の中にコピーしてください。
   - 注）この画像は、ツクールMZに最初から入っている弓矢の画像から、矢の部分を取り出したものです。なのでRPGツクールMZ正規ユーザーしか使えません。詳細はRPGツクールMZ規約を参照ください。
 
-    ![alt text](image-33.png)
+    ![alt text](images/image-33.png)
 
   ### サンプルプロジェクトの役目はこれで終わりです。
 
@@ -257,15 +257,17 @@ graph TD;
 
   - プラグインパラメータを開き、ご自身のプロジェクトにコピーされた `いい感じアクションテンプレ` のマップIDを選択してください。(コピーしたら自動的にマップIDが採番されると思うので、そのIDを指定してください。)
 
-    ![alt text](image-27.png)    
+    ![alt text](images/image-27.png)    
+
+    ![alt text](images/image-36.png)
 
   ### アクション適用
   - `いい感じアクションテンプレ` のイベント名に合わせて、スキルのメモ欄に `<アクション:イベント名>` と記述します。これで、スキルとアクションが紐づきます。
   - 注）`<` `>` `:` これらは半角じゃないとだめです。
 
-  ![alt text](image-28.png)
+  ![alt text](images/image-28.png)
 
-  ![alt text](image-29.png)
+  ![alt text](images/image-29.png)
 
   メモ欄記述例
 
@@ -303,25 +305,29 @@ graph TD;
 
   ### アクション編集
   - `いい感じアクションテンプレ` のイベントの中身を編集することで、自由にアクションを編集することができます。
-  - 読み取られるのは、Sakura_SvBattleExtendのプラグインコマンドとピクチャの処理（赤枠部分）だけです。
-  - それ以外のイベントコマンドは、無視されます。
+  - 読み取られるのは、 `Sakura_SvBattleExtendのプラグインコマンド` と `ピクチャの処理（赤枠部分）` だけです。
+  - それ以外のイベントコマンドは、無視されます。（ここも大事です！）
 
-    ![alt text](image-30.png)
+    ![alt text](images/image-30.png)
 
-    ![alt text](image-31.png)
+    ![alt text](images/image-31.png)
 
   - 事前に用意されたイベントだけでなく、新しくイベントを作って、その`イベント名`とスキルのメモ欄に `<アクション:イベント名>` をそろえれば、いくつでもアクションを作ることができます。
 
   ### イベントの画像について
   - イベントに画像をつけておくと、ﾌﾟﾗｸﾞｲﾝｺﾏﾝﾄﾞ`投げる`のときに、その画像が表示されます。
   
-    ![alt text](image-34.png)
+    ![alt text](images/image-34.png)
 
   ### イベントのページについて
   - イベントを複数ページにしておくと、その条件にあったページの内容が実行されます。
   - スイッチが変わったら画像やアクションが変わるなどの演出ができます。
 
-    ![alt text](image-35.png)
+    ![alt text](images/image-35.png)
+
+
+  ### 他ｱｸｼｮﾝ呼び出しをするときは、無限ループにご注意を！
+  - 
 
 </details>
 
