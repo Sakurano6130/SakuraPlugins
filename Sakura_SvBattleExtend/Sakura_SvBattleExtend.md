@@ -188,6 +188,8 @@ graph TD;
   <summary>✨コンボ表示プラグイン</summary>
   合計ヒット数、ダメージを表示できます。このプラグイン単独でも動作します。
 
+  [Sakura_ShowComboDamage](../Sakura_ShowComboDamage/Sakura_ShowComboDamage.md)
+
   ![alt text](image-22.png)
 
 </details>
@@ -195,6 +197,8 @@ graph TD;
 <details>
   <summary>❤️敵ステータス表示プラグイン</summary>
   敵の名前、HPゲージ、タイムゲージを表示できます。このプラグイン単独でも動作します。
+
+  [Sakura_EnemyHud](../Sakura_EnemyHud/Sakura_EnemyHud.md)
 
   ![alt text](image-23.png)
 
