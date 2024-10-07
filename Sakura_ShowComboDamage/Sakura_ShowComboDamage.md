@@ -1,7 +1,7 @@
 # Sakura_ShowComboDamage
 ✨ コンボダメージ表示プラグイン
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 ## ダウンロード
 [Sakura_ShowComboDamage.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_ShowComboDamage/Sakura_ShowComboDamage.js)
@@ -18,7 +18,78 @@
 
 ## プラグインパラメータ
 
-![alt text](image-1.png)
+![alt text](images/image-3.png)
+
+### ｳｨﾝﾄﾞｳﾎﾟｼﾞｼｮﾝ
+
+- **windowOffsetX** 
+  - X軸ｵﾌｾｯﾄです
+
+- **windowOffsetY** 
+  - Y軸ｵﾌｾｯﾄです
+
+### HIT数のﾌｫﾝﾄ設定
+
+- **fontSizeHitCount** 
+  - HIT数ののﾌｫﾝﾄｻｲｽﾞです
+
+- **textColorHitCount** 
+  - HIT数の文字色です
+
+- **outlineColorHitCount** 
+  - HIT数の文字の縁取り色です
+
+- **outlineWidthHitCount** 
+  - HIT数の文字の縁取り幅です
+
+### HITﾗﾍﾞﾙのﾌｫﾝﾄ設定
+
+- **fontSizeLabel** 
+  - HITﾗﾍﾞﾙののﾌｫﾝﾄｻｲｽﾞです
+
+- **textColorLabel** 
+  - HITﾗﾍﾞﾙの文字色です
+
+- **outlineColorLabel** 
+  - HITﾗﾍﾞﾙの文字の縁取り色です
+
+- **outlineWidthLabel** 
+  - HITﾗﾍﾞﾙの文字の縁取り幅です
+
+### ﾀﾞﾒｰｼﾞ合計のﾌｫﾝﾄ設定
+
+- **fontSizeDamageSummary** 
+  - ﾀﾞﾒｰｼﾞ合計ののﾌｫﾝﾄｻｲｽﾞです
+
+- **textColorDamageSummary** 
+  - ﾀﾞﾒｰｼﾞ合計の文字色です
+
+- **outlineColorDamageSummary** 
+  - ﾀﾞﾒｰｼﾞ合計の文字の縁取り色です
+
+- **outlineWidthDamageSummary** 
+  - ﾀﾞﾒｰｼﾞ合計の文字の縁取り幅です
+
+### ﾀﾞﾒｰｼﾞﾗﾍﾞﾙのﾌｫﾝﾄ設定
+
+- **fontSizeForDamageLabel** 
+  - ﾀﾞﾒｰｼﾞﾗﾍﾞﾙののﾌｫﾝﾄｻｲｽﾞです
+
+- **textColorForDamageLabel** 
+  - ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字色です
+
+- **outlineColorForDamageLabel** 
+  - ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字の縁取り色です
+
+- **outlineWidthForDamageLabel** 
+  - ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字の縁取り幅です
+
+### 時間設定
+
+- **durationForHitCount** 
+  - ｺﾝﾎﾞｶｳﾝﾄｱｯﾌﾟする時間(ﾌﾚｰﾑ)です
+
+### ﾌｫﾝﾄﾌｧｲﾙ設定
 
 - **fontFile** 
   - 使用するﾌｫﾝﾄのﾌｧｲﾙ名（拡張子.ttfまで含みます）

@@ -18,7 +18,166 @@
  * 使用方法:
  * https://github.com/Sakurano6130/SakuraPlugins/blob/main/Sakura_ShowComboDamage/Sakura_ShowComboDamage.md
  *
+ * @param windowPosition
+ * @text ｳｨﾝﾄﾞｳﾎﾟｼﾞｼｮﾝ ---
+ *
+ * @param windowOffsetX
+ * @parent windowPosition
+ * @desc X軸ｵﾌｾｯﾄ
+ * @text X軸ｵﾌｾｯﾄです
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @default 0
+ *
+ * @param windowOffsetY
+ * @parent windowPosition
+ * @desc Y軸ｵﾌｾｯﾄ
+ * @text Y軸ｵﾌｾｯﾄです
+ * @type number
+ * @min -9999
+ * @max 9999
+ * @default 0
+ *
+ * @param fontSettingsForHitCount
+ * @text HIT数のﾌｫﾝﾄ設定 ---
+ *
+ * @param fontSizeHitCount
+ * @parent fontSettingsForHitCount
+ * @text HIT数ののﾌｫﾝﾄｻｲｽﾞ
+ * @desc HIT数ののﾌｫﾝﾄｻｲｽﾞです
+ * @type number
+ * @default 36
+ *
+ * @param textColorHitCount
+ * @parent fontSettingsForHitCount
+ * @text HIT数の文字色
+ * @desc HIT数の文字色です
+ * @type string
+ * @default #FFFFFF
+ *
+ * @param outlineColorHitCount
+ * @parent fontSettingsForHitCount
+ * @text HIT数の文字の縁取り色
+ * @desc HIT数の文字の縁取り色です
+ * @type string
+ * @default #000000
+ *
+ * @param outlineWidthHitCount
+ * @parent fontSettingsForHitCount
+ * @text HIT数の文字の縁取り幅
+ * @desc HIT数の文字の縁取り幅です
+ * @type number
+ * @default 6
+ *
+ * @param fontSettingsForHitLabel
+ * @text HITﾗﾍﾞﾙのﾌｫﾝﾄ設定 ---
+ *
+ * @param fontSizeHitLabel
+ * @parent fontSettingsForHitLabel
+ * @text HITﾗﾍﾞﾙののﾌｫﾝﾄｻｲｽﾞ
+ * @desc HITﾗﾍﾞﾙののﾌｫﾝﾄｻｲｽﾞです
+ * @type number
+ * @default 18
+ *
+ * @param textColorHitLabel
+ * @parent fontSettingsForHitLabel
+ * @text HITﾗﾍﾞﾙの文字色
+ * @desc HITﾗﾍﾞﾙの文字色です
+ * @type string
+ * @default #FFD700
+ *
+ * @param outlineColorHitLabel
+ * @parent fontSettingsForHitLabel
+ * @text HITﾗﾍﾞﾙの文字の縁取り色
+ * @desc HITﾗﾍﾞﾙの文字の縁取り色です
+ * @type string
+ * @default #000000
+ *
+ * @param outlineWidthHitLabel
+ * @parent fontSettingsForHitLabel
+ * @text HITﾗﾍﾞﾙの文字の縁取り幅
+ * @desc HITﾗﾍﾞﾙの文字の縁取り幅です
+ * @type number
+ * @default 4
+ *
+ * @param fontSettingsForDamageSummary
+ * @text ﾀﾞﾒｰｼﾞ合計のﾌｫﾝﾄ設定 ---
+ *
+ * @param fontSizeDamageSummary
+ * @parent fontSettingsForDamageSummary
+ * @text ﾀﾞﾒｰｼﾞ合計ののﾌｫﾝﾄｻｲｽﾞ
+ * @desc ﾀﾞﾒｰｼﾞ合計ののﾌｫﾝﾄｻｲｽﾞです
+ * @type number
+ * @default 36
+ *
+ * @param textColorDamageSummary
+ * @parent fontSettingsForDamageSummary
+ * @text ﾀﾞﾒｰｼﾞ合計の文字色
+ * @desc ﾀﾞﾒｰｼﾞ合計の文字色です
+ * @type string
+ * @default #FFFFFF
+ *
+ * @param outlineColorDamageSummary
+ * @parent fontSettingsForDamageSummary
+ * @text ﾀﾞﾒｰｼﾞ合計の文字の縁取り色
+ * @desc ﾀﾞﾒｰｼﾞ合計の文字の縁取り色です
+ * @type string
+ * @default #000000
+ *
+ * @param outlineWidthDamageSummary
+ * @parent fontSettingsForDamageSummary
+ * @text ﾀﾞﾒｰｼﾞ合計の文字の縁取り幅
+ * @desc ﾀﾞﾒｰｼﾞ合計の文字の縁取り幅です
+ * @type number
+ * @default 6
+ *
+ * @param fontSettingsForDamageLabel
+ * @text ﾀﾞﾒｰｼﾞﾗﾍﾞﾙのﾌｫﾝﾄ設定 ---
+ *
+ * @param fontSizeDamageLabel
+ * @parent fontSettingsForDamageLabel
+ * @text ﾀﾞﾒｰｼﾞﾗﾍﾞﾙののﾌｫﾝﾄｻｲｽﾞ
+ * @desc ﾀﾞﾒｰｼﾞﾗﾍﾞﾙののﾌｫﾝﾄｻｲｽﾞです
+ * @type number
+ * @default 18
+ *
+ * @param textColorDamageLabel
+ * @parent fontSettingsForDamageLabel
+ * @text ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字色
+ * @desc ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字色です
+ * @type string
+ * @default #FFD700
+ *
+ * @param outlineColorDamageLabel
+ * @parent fontSettingsForDamageLabel
+ * @text ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字の縁取り色
+ * @desc ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字の縁取り色です
+ * @type string
+ * @default #000000
+ *
+ * @param outlineWidthDamageLabel
+ * @parent fontSettingsForDamageLabel
+ * @text ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字の縁取り幅
+ * @desc ﾀﾞﾒｰｼﾞﾗﾍﾞﾙの文字の縁取り幅です
+ * @type number
+ * @default 4
+ *
+ * @param durationSetting
+ * @text 時間設定 ---
+ *
+ * @param durationForHitCount
+ * @parent durationSetting
+ * @desc ｺﾝﾎﾞｶｳﾝﾄｱｯﾌﾟする時間(ﾌﾚｰﾑ)
+ * @text ｺﾝﾎﾞｶｳﾝﾄｱｯﾌﾟする時間(ﾌﾚｰﾑ)です
+ * @type number
+ * @default 240
+ *
+ * @param fontFileSetting
+ * @text ﾌｫﾝﾄﾌｧｲﾙ設定 ---
+ *
  * @param fontFile
+ * @parent fontFileSetting
  * @desc 使用するﾌｫﾝﾄのﾌｧｲﾙ名
  * @text 使用するﾌｫﾝﾄのﾌｧｲﾙ名（拡張子.ttfまで含みます）
  * @type string
@@ -33,6 +192,31 @@
   // プラグインパラメータの取得
   // ---------------------------------------------------------------------
   const parameters = PluginManager.parameters(pluginName);
+  const windowOffsetX = Number(parameters['windowOffsetX'] || 0);
+  const windowOffsetY = Number(parameters['windowOffsetY'] || 0);
+
+  const fontSizeHitCount = Number(parameters['fontSizeHitCount'] || 36);
+  const textColorHitCount = String(parameters['textColorHitCount'] || '#FFFFFF');
+  const outlineColorHitCount = String(parameters['outlineColorHitCount'] || '#000000');
+  const outlineWidthHitCount = Number(parameters['outlineWidthHitCount'] || 6);
+
+  const fontSizeHitLabel = Number(parameters['fontSizeHitLabel'] || 18);
+  const textColorHitLabel = String(parameters['textColorHitLabel'] || '#FFD700');
+  const outlineColorHitLabel = String(parameters['outlineColorHitLabel'] || '#000000');
+  const outlineWidthHitLabel = Number(parameters['outlineWidthHitLabel'] || 4);
+
+  const fontSizeDamageSummary = Number(parameters['fontSizeDamageSummary'] || 36);
+  const textColorDamageSummary = String(parameters['textColorDamageSummary'] || '#FFFFFF');
+  const outlineColorDamageSummary = String(parameters['outlineColorDamageSummary'] || '#000000');
+  const outlineWidthDamageSummary = Number(parameters['outlineWidthDamageSummary'] || 6);
+
+  const fontSizeDamageLabel = Number(parameters['fontSizeDamageLabel'] || 18);
+  const textColorDamageLabel = String(parameters['textColorDamageLabel'] || '#FFD700');
+  const outlineColorDamageLabel = String(parameters['outlineColorDamageLabel'] || '#000000');
+  const outlineWidthDamageLabel = Number(parameters['outlineWidthDamageLabel'] || 4);
+
+  const durationForHitCount = Number(parameters['durationForHitCount'] || 240);
+
   const fontFile = String(parameters['fontFile'] || '');
 
   // ----------------------------------------------------------------------------
@@ -350,10 +534,10 @@
     constructor() {
       const width = 300;
       const height = 240;
-      const sx = Graphics.boxWidth;
+      const sx = Graphics.width;
       const sy = 20;
-      const dx = Graphics.boxWidth - width;
-      const dy = sy;
+      const dx = Graphics.width - width + windowOffsetX;
+      const dy = sy + windowOffsetY;
       const rect = new Rectangle(sx, sy, width, height);
       super(rect);
 
@@ -422,7 +606,7 @@
      */
     refresh() {
       this._oldCount = $gameSystem.comboCount(); // 現在のコンボ数を保存
-      this._updateCount = 240; // 240フレーム後にリセット
+      this._updateCount = durationForHitCount; // durationForHitCountフレーム後にリセット
       this.forceTweenMoveTo({ x: this._dx, y: this._dy, count: 20 });
       this._comboText.bitmap.clear(); // 表示内容をクリア
 
@@ -432,32 +616,32 @@
       const h = 100;
 
       // --- コンボ数の表示（HIT数） ---
-      this._comboText.bitmap.fontSize = 36; // フォントサイズを設定
-      this._comboText.bitmap.textColor = '#FFFFFF'; // 文字色を白に設定
-      this._comboText.bitmap.outlineColor = '#000000'; // アウトラインを黒に設定
-      this._comboText.bitmap.outlineWidth = 6; // アウトラインの幅を設定
+      this._comboText.bitmap.fontSize = fontSizeHitCount; // フォントサイズを設定
+      this._comboText.bitmap.textColor = textColorHitCount; // 文字色を白に設定
+      this._comboText.bitmap.outlineColor = outlineColorHitCount; // アウトラインを黒に設定
+      this._comboText.bitmap.outlineWidth = outlineWidthHitCount; // アウトラインの幅を設定
       this._comboText.bitmap.drawText($gameSystem.comboCount(), x, y, 150, h, 'right'); // コンボ数を表示
 
       // "Hits"テキストの表示
-      this._comboText.bitmap.fontSize = 18;
-      this._comboText.bitmap.textColor = '#FFD700'; // ゴールド色で表示
-      this._comboText.bitmap.outlineColor = '#000000';
-      this._comboText.bitmap.outlineWidth = 4;
+      this._comboText.bitmap.fontSize = fontSizeHitLabel;
+      this._comboText.bitmap.textColor = textColorHitLabel; // ゴールド色で表示
+      this._comboText.bitmap.outlineColor = outlineColorHitLabel;
+      this._comboText.bitmap.outlineWidth = outlineWidthHitLabel;
       const hitText = $gameSystem.comboCount() < 2 ? 'Hit' : 'Hits';
       this._comboText.bitmap.drawText(` ${hitText}`, x + 150, y + 10, w, h, 'left'); // "Hits"を表示
 
       // --- ダメージの表示 ---
-      this._comboText.bitmap.fontSize = 36;
-      this._comboText.bitmap.textColor = '#FFFFFF';
-      this._comboText.bitmap.outlineColor = '#000000';
-      this._comboText.bitmap.outlineWidth = 6;
+      this._comboText.bitmap.fontSize = fontSizeDamageSummary;
+      this._comboText.bitmap.textColor = textColorDamageSummary;
+      this._comboText.bitmap.outlineColor = outlineColorDamageSummary;
+      this._comboText.bitmap.outlineWidth = outlineWidthDamageSummary;
       this._comboText.bitmap.drawText($gameSystem.comboDamage(), x, y + 50, 150, h, 'right'); // ダメージ表示
 
       // "Damage"テキストの表示
-      this._comboText.bitmap.fontSize = 18;
-      this._comboText.bitmap.textColor = '#FFD700';
-      this._comboText.bitmap.outlineColor = '#000000';
-      this._comboText.bitmap.outlineWidth = 4;
+      this._comboText.bitmap.fontSize = fontSizeDamageLabel;
+      this._comboText.bitmap.textColor = textColorDamageLabel;
+      this._comboText.bitmap.outlineColor = outlineColorDamageLabel;
+      this._comboText.bitmap.outlineWidth = outlineWidthDamageLabel;
       this._comboText.bitmap.drawText(' Damage', x + 150, y + 60, w, h, 'left'); // "Damage"を表示
 
       // アニメーション設定
