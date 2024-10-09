@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/09 1.0.1 コンボ表示リセット後の１ヒット目の表示ができていなかったため、
+ *                  リセットする処理の見直し
  * 2024/10/07 1.0.0 公開
  * -------------------------------------------------
  *
@@ -482,6 +484,7 @@
   Game_System.prototype.resetCombo = function () {
     this.resetComboCount();
     this.resetComboDamage();
+    this._oldComboCount = 0;
   };
 
   /**
@@ -547,7 +550,6 @@
       this._dy = dy;
       this._hx = dx + width / 4;
       this._hy = dy;
-      this._oldCount = 0;
       this._updateCount = 0;
 
       this.opacity = 0; // ウィンドウの透明度を0に設定
@@ -605,7 +607,7 @@
      * コンボ数とダメージを更新してウィンドウに表示します。
      */
     refresh() {
-      this._oldCount = $gameSystem.comboCount(); // 現在のコンボ数を保存
+      $gameSystem._oldComboCount = $gameSystem.comboCount(); // 現在のコンボ数を保存
       this._updateCount = durationForHitCount; // durationForHitCountフレーム後にリセット
       this.forceTweenMoveTo({ x: this._dx, y: this._dy, count: 20 });
       this._comboText.bitmap.clear(); // 表示内容をクリア
@@ -657,7 +659,7 @@
      */
     needsRefresh() {
       if ($gameSystem.comboCount() === 0) return false;
-      return this._oldCount !== $gameSystem.comboCount(); // コンボ数が変わった場合に更新
+      return $gameSystem._oldComboCount !== $gameSystem.comboCount(); // コンボ数が変わった場合に更新
     }
   }
 

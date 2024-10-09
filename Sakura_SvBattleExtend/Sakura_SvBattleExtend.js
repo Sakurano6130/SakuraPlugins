@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/09 1.0.1 バトルで投げる動作した直後に戦闘勝利し、その直後にメニューを開いた時に、
+ *                  開いた時に、エラーになってしまうことがあったため修正
  * 2024/10/07 1.0.0 公開
  * 2024/09/30 0.6.0 敵画像の上に線が出ていた不具合の対応
  *                  スキル表示のフキダシをオンオフにできるように
@@ -2680,7 +2682,7 @@
    */
   Window_BattleLog.prototype.removeThrowObject = function (throwObject) {
     setTimeout(() => {
-      if (typeof SceneManager._scene._spriteset.removeThrowObject === 'function') {
+      if (typeof SceneManager?._scene?._spriteset?.removeThrowObject === 'function') {
         SceneManager._scene._spriteset.removeThrowObject(throwObject);
       }
     }, 10000);
