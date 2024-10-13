@@ -239,7 +239,7 @@
  * @text ｽﾄｰﾘｰが進行したときに鳴らす音
  * @desc ｽﾄｰﾘｰが進行したときに鳴らす音です。
  * @type struct<AudioFile>
- * @default
+ * @default {"audioName":"Item3","volume":"80","pitch":"100","pan":"0"}
  *
  * @param groupSceneArchive
  * @text ⚙️ ｱｰｶｲﾌﾞｼｰﾝの設定 ---
