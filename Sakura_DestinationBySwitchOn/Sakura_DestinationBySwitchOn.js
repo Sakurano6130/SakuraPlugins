@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/13 2.1.0 ストーリーが進んだ時に音を鳴らせるように
  * 2024/09/17 2.0.0 子目的表示の追加
  *                  アーカイブシーンの追加
  * 2024/09/09 1.0.3 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
@@ -233,6 +234,13 @@
  * @max 9999
  * @default 120
  *
+ * @param storyProgressAudio
+ * @parent groupMapDisplay
+ * @text ｽﾄｰﾘｰが進行したときに鳴らす音
+ * @desc ｽﾄｰﾘｰが進行したときに鳴らす音です。
+ * @type struct<AudioFile>
+ * @default
+ *
  * @param groupSceneArchive
  * @text ⚙️ ｱｰｶｲﾌﾞｼｰﾝの設定 ---
  *
@@ -383,6 +391,34 @@
  *
  */
 
+/*~struct~AudioFile:
+ * @param audioName
+ * @text 再生するSE
+ * @desc 再生するSEです
+ * @type file
+ * @dir audio/se
+ * @default
+ *
+ * @param volume
+ * @text ﾎﾞﾘｭｰﾑ
+ * @desc ﾎﾞﾘｭｰﾑです
+ * @type number
+ * @default 80
+ *
+ * @param pitch
+ * @text ﾋﾟｯﾁ
+ * @desc ﾋﾟｯﾁです
+ * @type number
+ * @default 100
+ *
+ * @param pan
+ * @text ﾊﾟﾝ
+ * @desc ﾊﾟﾝです
+ * @type number
+ * @default 0
+ *
+ */
+
 (() => {
   const pluginName = 'Sakura_DestinationBySwitchOn';
 
@@ -406,6 +442,14 @@
   const storyProgressText = String(parameters['storyProgressText'] || '');
   const storyProgressTextColor = Number(parameters['storyProgressTextColor'] || 0);
   const storyProgressTextDuration = Number(parameters['storyProgressTextDuration'] || 120);
+
+  const storyProgressAudioRaw = JSON.parse(String(parameters['storyProgressAudio'] || '{}'));
+  const storyProgressAudio = {
+    audioName: storyProgressAudioRaw.audioName,
+    volume: Number(storyProgressAudioRaw.volume || 80),
+    pitch: Number(storyProgressAudioRaw.pitch || 100),
+    pan: Number(storyProgressAudioRaw.pan || 0),
+  };
 
   const paddingInSceneArchive = Number(parameters['paddingInSceneArchive'] || 10);
   const listWindowWidthRate = Number(parameters['listWindowWidthRate'] || 35);
@@ -1190,6 +1234,10 @@ ${outputFilePath}
         this._storyProgressTextDuration = storyProgressTextDuration;
         this.contentsOpacity = 255;
         this.refresh();
+      }
+      if (storyProgressAudio.audioName) {
+        const { audioName, volume, pitch, pan } = storyProgressAudio;
+        AudioManager.playSe({ name: audioName, volume, pitch, pan }); // サウンドエフェクトを再生
       }
     }
 
