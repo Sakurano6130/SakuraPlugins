@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/13 2.1.0 ストーリーが進んだ時に音を鳴らせるように
  * 2024/09/17 2.0.0 子目的表示の追加
  *                  アーカイブシーンの追加
  * 2024/09/09 1.0.3 ツクールのシステム設定で、画面の幅・高さとUIエリアの幅・高さが
@@ -233,6 +234,13 @@
  * @max 9999
  * @default 120
  *
+ * @param storyProgressAudio
+ * @parent groupMapDisplay
+ * @text ｽﾄｰﾘｰが進行したときに鳴らす音
+ * @desc ｽﾄｰﾘｰが進行したときに鳴らす音です。
+ * @type struct<AudioFile>
+ * @default {"audioName":"Item3","volume":"80","pitch":"100","pan":"0"}
+ *
  * @param groupSceneArchive
  * @text ⚙️ ｱｰｶｲﾌﾞｼｰﾝの設定 ---
  *
@@ -383,6 +391,77 @@
  *
  */
 
+/*~struct~AudioFile:
+ * @param audioName
+ * @text 再生するSE
+ * @desc 再生するSEです
+ * @type file
+ * @dir audio/se
+ * @default
+ *
+ * @param volume
+ * @text ﾎﾞﾘｭｰﾑ
+ * @desc ﾎﾞﾘｭｰﾑです
+ * @type select
+ * @default 80
+ * @option 0
+ * @option 5
+ * @option 10
+ * @option 15
+ * @option 20
+ * @option 25
+ * @option 30
+ * @option 35
+ * @option 40
+ * @option 45
+ * @option 50
+ * @option 55
+ * @option 60
+ * @option 65
+ * @option 70
+ * @option 75
+ * @option 80
+ * @option 85
+ * @option 90
+ * @option 95
+ * @option 100
+ *
+ * @param pitch
+ * @text ﾋﾟｯﾁ
+ * @desc ﾋﾟｯﾁです
+ * @type select
+ * @default 100
+ * @option 50
+ * @option 60
+ * @option 70
+ * @option 80
+ * @option 90
+ * @option 100
+ * @option 110
+ * @option 120
+ * @option 130
+ * @option 140
+ * @option 150
+ *
+ * @param pan
+ * @text 位相
+ * @desc 位相です
+ * @type select
+ * @default 0
+ * @option -100
+ * @option -80
+ * @option -60
+ * @option -40
+ * @option -20
+ * @option 0
+ * @option 20
+ * @option 40
+ * @option 60
+ * @option 80
+ * @option 100
+ *
+ */
+
 (() => {
   const pluginName = 'Sakura_DestinationBySwitchOn';
 
@@ -406,6 +485,14 @@
   const storyProgressText = String(parameters['storyProgressText'] || '');
   const storyProgressTextColor = Number(parameters['storyProgressTextColor'] || 0);
   const storyProgressTextDuration = Number(parameters['storyProgressTextDuration'] || 120);
+
+  const storyProgressAudioRaw = JSON.parse(String(parameters['storyProgressAudio'] || '{}'));
+  const storyProgressAudio = {
+    audioName: storyProgressAudioRaw.audioName ?? '',
+    volume: Number(storyProgressAudioRaw.volume ?? 80),
+    pitch: Number(storyProgressAudioRaw.pitch ?? 100),
+    pan: Number(storyProgressAudioRaw.pan ?? 0),
+  };
 
   const paddingInSceneArchive = Number(parameters['paddingInSceneArchive'] || 10);
   const listWindowWidthRate = Number(parameters['listWindowWidthRate'] || 35);
@@ -1190,6 +1277,10 @@ ${outputFilePath}
         this._storyProgressTextDuration = storyProgressTextDuration;
         this.contentsOpacity = 255;
         this.refresh();
+      }
+      if (storyProgressAudio.audioName) {
+        const { audioName, volume, pitch, pan } = storyProgressAudio;
+        AudioManager.playSe({ name: audioName, volume, pitch, pan }); // サウンドエフェクトを再生
       }
     }
 
