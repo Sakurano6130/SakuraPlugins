@@ -402,20 +402,63 @@
  * @param volume
  * @text ﾎﾞﾘｭｰﾑ
  * @desc ﾎﾞﾘｭｰﾑです
- * @type number
+ * @type select
  * @default 80
+ * @option 0
+ * @option 5
+ * @option 10
+ * @option 15
+ * @option 20
+ * @option 25
+ * @option 30
+ * @option 35
+ * @option 40
+ * @option 45
+ * @option 50
+ * @option 55
+ * @option 60
+ * @option 65
+ * @option 70
+ * @option 75
+ * @option 80
+ * @option 85
+ * @option 90
+ * @option 95
+ * @option 100
  *
  * @param pitch
  * @text ﾋﾟｯﾁ
  * @desc ﾋﾟｯﾁです
- * @type number
+ * @type select
  * @default 100
+ * @option 50
+ * @option 60
+ * @option 70
+ * @option 80
+ * @option 90
+ * @option 100
+ * @option 110
+ * @option 120
+ * @option 130
+ * @option 140
+ * @option 150
  *
  * @param pan
- * @text ﾊﾟﾝ
- * @desc ﾊﾟﾝです
- * @type number
+ * @text 位相
+ * @desc 位相です
+ * @type select
  * @default 0
+ * @option -100
+ * @option -80
+ * @option -60
+ * @option -40
+ * @option -20
+ * @option 0
+ * @option 20
+ * @option 40
+ * @option 60
+ * @option 80
+ * @option 100
  *
  */
 
@@ -445,10 +488,10 @@
 
   const storyProgressAudioRaw = JSON.parse(String(parameters['storyProgressAudio'] || '{}'));
   const storyProgressAudio = {
-    audioName: storyProgressAudioRaw.audioName,
-    volume: Number(storyProgressAudioRaw.volume || 80),
-    pitch: Number(storyProgressAudioRaw.pitch || 100),
-    pan: Number(storyProgressAudioRaw.pan || 0),
+    audioName: storyProgressAudioRaw.audioName ?? '',
+    volume: Number(storyProgressAudioRaw.volume ?? 80),
+    pitch: Number(storyProgressAudioRaw.pitch ?? 100),
+    pan: Number(storyProgressAudioRaw.pan ?? 0),
   };
 
   const paddingInSceneArchive = Number(parameters['paddingInSceneArchive'] || 10);
