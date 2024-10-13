@@ -17,9 +17,6 @@
 | <a href="Sakura_EnemyHud/Sakura_EnemyHud.md"><img src="images/image-23.png" alt="alt text"></a>                                                                                                                                                                        | 🎉1.0.0     | なし                                                                        | [Sakura_<br>EnemyHud](Sakura_EnemyHud/Sakura_EnemyHud.md) <br>❤️ 敵ステータス表示プラグイン                                                                                                   |
 | <a href="Sakura_ShowComboDamage/Sakura_ShowComboDamage.md"><img src="images/image-24.png" alt="alt text"></a>                                                                                                                                                          | 🎉1.0.1     | なし                                                                        | [Sakura_<br>ShowComboDamage](Sakura_ShowComboDamage/Sakura_ShowComboDamage.md) <br>✨ コンボダメージ表示プラグイン                                                                            |
 
-![alt text](images/image-25.png)
-![alt text](images/image-26.png)
-
 ---
 - 画像には一部、AIで生成した画像を含みます。
 - 画像には一部、REFMAP様素材を利用させていただいてます。(C) REFMAP
