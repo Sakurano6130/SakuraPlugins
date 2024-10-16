@@ -142,6 +142,11 @@
   // 共通関数
   // ---------------------------------------------------------------------
   /**
+   * 特殊処理を行うシーン名
+   */
+  const SPECIFIC_SCENE_NAMES = ['Scene_Map', 'Scene_Title', 'Scene_Battle'];
+
+  /**
    * 現在のシーン名を取得する関数。
    *
    * @returns {string} 現在のシーンのクラス名。
@@ -157,7 +162,7 @@
    */
   const getAudioSetting = (sceneName) => {
     // マップ、タイトル、バトルシーンの場合はBGM設定を適用しない
-    if (['Scene_Map', 'Scene_Title', 'Scene_Battle'].includes(sceneName)) return null;
+    if (SPECIFIC_SCENE_NAMES.includes(sceneName)) return null;
 
     // シーン名に基づいてBGM設定を検索し、該当するものを返す
     return bgmSettings.find((bgmSetting) => bgmSetting.sceneName === sceneName);
@@ -261,11 +266,13 @@
       return;
     }
 
-    // 現在のシーンのBGMが保存されている場合は再生
+    // 特殊処理を行うシーン名の場合は、保存しておいたBGMを再生
     const currentSceneName = getCurrentSceneName();
-    if ($gameSystem?.isBgmSavedAtScene(currentSceneName)) {
-      const currentBgm = $gameSystem.getBgmAtScene(currentSceneName);
-      AudioManager.replayBgm(currentBgm);
+    if (SPECIFIC_SCENE_NAMES.includes(currentSceneName)) {
+      if ($gameSystem?.isBgmSavedAtScene(currentSceneName)) {
+        const currentBgm = $gameSystem.getBgmAtScene(currentSceneName);
+        AudioManager.replayBgm(currentBgm);
+      }
     }
   };
 
