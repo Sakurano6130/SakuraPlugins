@@ -286,7 +286,7 @@
       if ($gameSystem?.isBgmSavedAtScene(currentSceneName)) {
         const currentBgm = $gameSystem.getBgmAtScene(currentSceneName);
 
-        if ($gameSystem._firstTimeChangeBgmAfterLoaded) {
+        if ($gameSystem?._firstTimeChangeBgmAfterLoaded) {
           // ロード後の初回のBGM再生は最初から再生する
           AudioManager.replayBgm(currentBgm);
         } else {
@@ -316,6 +316,9 @@
     _Scene_Base_prototype_popScene.call(this);
   };
 
+  // ---------------------------------------------------------------------
+  // Scene_Gameover
+  // ---------------------------------------------------------------------
   /**
    * ゲームオーバー時にBGMを再生する処理を拡張。
    * 特定のシーンにBGMが設定されている場合、そのBGMを再生します。
