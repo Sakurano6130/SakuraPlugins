@@ -266,9 +266,9 @@
       return;
     }
 
-    // 特殊処理を行うシーン名の場合は、保存しておいたBGMを再生
+    // マップシーン名の場合は、保存しておいたBGMを再生
     const currentSceneName = getCurrentSceneName();
-    if (SPECIFIC_SCENE_NAMES.includes(currentSceneName)) {
+    if (['Scene_Map'].includes(currentSceneName)) {
       if ($gameSystem?.isBgmSavedAtScene(currentSceneName)) {
         const currentBgm = $gameSystem.getBgmAtScene(currentSceneName);
         AudioManager.replayBgm(currentBgm);
