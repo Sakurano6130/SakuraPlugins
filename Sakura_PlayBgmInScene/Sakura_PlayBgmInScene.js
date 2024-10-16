@@ -213,6 +213,20 @@
     return this._savedBgmList[sceneName]; // 指定されたシーンのBGMを取得
   };
 
+  /**
+   * セーブデータがロードされた後の処理を拡張します。
+   * ロード後は、BGMを最初から再生する必要があるため、フラグをリセットします。
+   * @override
+   */
+  const _Game_System_prototype_onAfterLoad = Game_System.prototype.onAfterLoad;
+  Game_System.prototype.onAfterLoad = function () {
+    // 元のセーブデータロード後の処理を実行
+    _Game_System_prototype_onAfterLoad.call(this);
+
+    // セーブデータがロードされた直後であることを示すフラグを追加し、BGMを最初から再生する設定にする
+    this._firstTimeChangeBgmAfterLoaded = false;
+  };
+
   // ---------------------------------------------------------------------
   // SceneManager
   // ---------------------------------------------------------------------
@@ -271,7 +285,15 @@
     if (['Scene_Map'].includes(currentSceneName)) {
       if ($gameSystem?.isBgmSavedAtScene(currentSceneName)) {
         const currentBgm = $gameSystem.getBgmAtScene(currentSceneName);
-        AudioManager.replayBgm(currentBgm);
+
+        if ($gameSystem._firstTimeChangeBgmAfterLoaded) {
+          // ロード後の初回のBGM再生は最初から再生する
+          AudioManager.replayBgm(currentBgm);
+        } else {
+          // それ以外は途中から再生する
+          AudioManager.playBgm(currentBgm);
+          $gameSystem._firstTimeChangeBgmAfterLoaded = false;
+        }
       }
     }
   };
