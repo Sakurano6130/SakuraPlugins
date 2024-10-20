@@ -1,7 +1,16 @@
 /*:
  * @target MZ
  * @plugindesc フリーコマンドバトル（仮）
+ * @author Sakurano
+ * @url https://github.com/Sakurano6130/SakuraPlugins/
+ * @help
  * フリーコマンドバトル（仮）
+ *
+ * -------------------------------------------------
+ * Sakura_PlayBgmInScene
+ * Copyright (c) 2024 Sakurano
+ * This software is released under the MIT license.
+ * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
  * 2024/10/20 0.0.1 作成
  * -------------------------------------------------
