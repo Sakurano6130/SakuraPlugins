@@ -184,10 +184,7 @@
    */
   Scene_Battle.prototype.commandCancel = function () {
     BattleManager.cancelActorInput(); // 現在のアクターの入力をキャンセル
-    BattleManager.selectPreviousActor(); // 前回選択されていたアクターを選択
-    BattleManager.changeCurrentActor(true); // アクターの切り替え（進む）
     BattleManager._currentActor = null; // 現在のアクターをクリア
-    BattleManager.startActorInput(); // 新たなアクターの入力を開始
   };
 
   // --------------------------------------------------------------------
