@@ -7,9 +7,10 @@
 [Sakura_PlayBgmInScene.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_PlayBgmInScene/Sakura_PlayBgmInScene.js)
 
 ## 更新履歴
-| ver   | 日付       | 説明 |
-| ----- | ---------- | ---- |
-| 1.0.0 | 2024/10/16 | 公開 |
+| ver   | 日付       | 説明                                                                |
+| ----- | ---------- | ------------------------------------------------------------------- |
+| 1.0.1 | 2024/10/20 | メニューなどからマップに戻った時にBGMの途中から再生されるように修正 |
+| 1.0.0 | 2024/10/16 | 公開                                                                |
 
 
 ## 機能説明

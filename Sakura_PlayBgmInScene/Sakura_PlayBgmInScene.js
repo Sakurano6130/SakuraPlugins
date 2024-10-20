@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/20 1.0.1 メニューなどからマップに戻った時にBGMの途中から再生されるように修正
  * 2024/10/16 1.0.0 公開
  * -------------------------------------------------
  *
@@ -224,7 +225,7 @@
     _Game_System_prototype_onAfterLoad.call(this);
 
     // セーブデータがロードされた直後であることを示すフラグを追加し、BGMを最初から再生する設定にする
-    this._firstTimeChangeBgmAfterLoaded = false;
+    this._firstTimeChangeBgmAfterLoaded = true;
   };
 
   // ---------------------------------------------------------------------
@@ -288,11 +289,11 @@
 
         if ($gameSystem?._firstTimeChangeBgmAfterLoaded) {
           // ロード後の初回のBGM再生は最初から再生する
-          AudioManager.replayBgm(currentBgm);
-        } else {
-          // それ以外は途中から再生する
           AudioManager.playBgm(currentBgm);
           $gameSystem._firstTimeChangeBgmAfterLoaded = false;
+        } else {
+          // それ以外は途中から再生する
+          AudioManager.replayBgm(currentBgm);
         }
       }
     }
