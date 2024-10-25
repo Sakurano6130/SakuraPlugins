@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/10/25 1.0.2 スキル使用の対象が自分１人だったときにジャンプしないように修正
  * 2024/10/09 1.0.1 バトルで投げる動作した直後に戦闘勝利し、その直後にメニューを開いた時に、
  *                  開いた時に、エラーになってしまうことがあったため修正
  *                  防御の動きを修正
@@ -2952,9 +2953,13 @@
    * - action._item は Game_Item のインスタンスで、action.item() は $dataItem を指します。
    * - キャラクターやアクションが特定のメタデータ (NOTE.NO_MOVE) を持っている場合、ジャンプは不要になります。
    */
-  const isBattlerNeedJumpToTarget = (subject, action) => {
+  const isBattlerNeedJumpToTarget = (subject, action, targets) => {
     if (subject.isSvBattleExMeta(NOTE.NO_MOVE)) return false;
     if (action._item.isSvBattleExMeta(NOTE.NO_MOVE)) return false;
+
+    if (action.isForOne() && subject === targets[0]) {
+      return false;
+    }
 
     if (action.isAttack()) {
       if (subject.isEnemy()) {
@@ -3590,7 +3595,7 @@
     }
 
     // アクション名が取得できない場合は、ジャンプする必要があるかどうかで分岐
-    if (isBattlerNeedJumpToTarget(subject, action)) {
+    if (isBattlerNeedJumpToTarget(subject, action, targets)) {
       performActions(
         this,
         actionEventManager.getActionListFromDataMapActionEvents(NOTE.NORMAL_ATTACK_JUMP),
