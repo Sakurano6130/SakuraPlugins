@@ -12,6 +12,9 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/02 1.1.0 物理・魔法の判定方法を各スキルの命中タイプを元にするように変更
+ *                  各スキルのメモ欄に<移動する>を書くと物理・魔法に関係なく移動する機能を追加
+ *                  スキル使用時の武器の動きを修正
  * 2024/10/25 1.0.2 スキル使用の対象が自分１人だったときにジャンプしないように修正
  * 2024/10/09 1.0.1 バトルで投げる動作した直後に戦闘勝利し、その直後にメニューを開いた時に、
  *                  開いた時に、エラーになってしまうことがあったため修正
@@ -868,6 +871,7 @@
     NORMAL_ATTACK_JUMP: 'ジャンプ通常攻撃',
     NORMAL_ATTACK_STEP_FORWARD: '前進通常攻撃',
     ACTION: 'アクション',
+    NEED_MOVE: '移動する',
     NO_MOVE: '移動しない',
     NO_BREATHE: '息しない',
     NO_NAME: '名前表示しない',
@@ -1461,7 +1465,11 @@
       this.performAttack();
     } else if (action.isGuard()) {
       this.requestMotion('guard');
-    } else if (action.isMagicSkill()) {
+      /**
+       * ここを変更
+       */
+      // } else if (action.isMagicSkill()) {
+    } else if (action.isMagical()) {
       this.requestMotion('spell');
     } else if (action.isSkill()) {
       /**
@@ -2091,10 +2099,15 @@
         return;
       }
       if (this._spelling) {
-        // スキル使用中の位置設定
-        this.x = this._baseX;
-        this.y = this._baseY;
-        this.rotate(-20); // 左に20度回転
+        // 一瞬遅らせるためにframePatternを見る
+        if (this._framePattern > 0) {
+          // スキル使用中の位置設定
+          this.x = this._baseX - 10;
+          this.y = this._baseY - 6;
+          const angle = 20;
+          this.rotation = this._baseRotation + (angle * Math.PI) / 180;
+        }
+        // this.rotate(-20); // 左に20度回転
         return;
       }
       if (this._waiting) {
@@ -2956,6 +2969,7 @@
   const isBattlerNeedJumpToTarget = (subject, action, targets) => {
     if (subject.isSvBattleExMeta(NOTE.NO_MOVE)) return false;
     if (action._item.isSvBattleExMeta(NOTE.NO_MOVE)) return false;
+    if (action._item.isSvBattleExMeta(NOTE.NEED_MOVE)) return true;
 
     if (action.isForOne() && subject === targets[0]) {
       return false;
@@ -2987,7 +3001,8 @@
       }
     }
 
-    if (action.isMagicSkill()) {
+    // if (action.isMagicSkill()) {
+    if (!action.isPhysical()) {
       if (action.isForFriend()) {
         return action.isForOne();
       }
