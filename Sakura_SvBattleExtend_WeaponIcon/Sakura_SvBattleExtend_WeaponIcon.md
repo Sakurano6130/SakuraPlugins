@@ -9,9 +9,10 @@
 [Sakura_SvBattleExtend_WeaponIcon.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_SvBattleExtend_WeaponIcon/Sakura_SvBattleExtend_WeaponIcon.js)
 
 ## 更新履歴
-| ver   | 日付       | 説明 |
-| ----- | ---------- | ---- |
-| 1.0.0 | 2024/10/13 | 公開 |
+| ver   | 日付       | 説明                           |
+| ----- | ---------- | ------------------------------ |
+| 1.0.1 | 2024/11/02 | スキル使用時の武器の動きを修正 |
+| 1.0.0 | 2024/10/13 | 公開                           |
 
 
 ## 機能説明

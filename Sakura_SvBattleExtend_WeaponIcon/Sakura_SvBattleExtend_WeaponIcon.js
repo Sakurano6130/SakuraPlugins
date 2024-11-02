@@ -14,6 +14,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/02 1.1.0 スキル使用時の武器の動きを修正
  * 2024/10/13 1.0.0 公開
  * -------------------------------------------------
  *
@@ -181,10 +182,15 @@
         return;
       }
       if (this._spelling) {
-        // スキル使用中の位置設定
-        this.x = this._baseX;
-        this.y = this._baseY;
-        this.rotate(-20); // 左に20度回転
+        // 一瞬遅らせるためにframePatternを見る
+        if (this._framePattern > 0) {
+          // スキル使用中の位置設定
+          this.x = this._baseX - 13;
+          this.y = this._baseY - 8;
+          const angle = 20;
+          this.rotation = this._baseRotation + (angle * Math.PI) / 180;
+        }
+        // this.rotate(-20); // 左に20度回転
         return;
       }
       if (this._waiting) {
