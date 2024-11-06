@@ -12,6 +12,9 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/06 2.1.3 アーカイブシーンのコマンドウィンドウの位置調整機能を追加
+ * 2024/11/06 2.1.2 アーカイブシーンのコマンドウィンドウ背景を黒表示から通常のウィンドウに変更
+ *                  アーカイブシーンのコマンドウィンドウが達成済みでも選択できてしまったため修正
  * 2024/11/06 2.1.1 アーカイブシーンのコマンドウィンドウ背景が透過しないように変更
  *                  アーカイブシーンのコマンドウィンドウの「やめる」がキャンセルできていなかったため修正
  * 2024/10/13 2.1.0 ストーリーが進んだ時に音を鳴らせるように
@@ -144,12 +147,16 @@
  * @text 目的ｳｨﾝﾄﾞｳX座標
  * @desc 目的ｳｨﾝﾄﾞｳの表示位置（X座標）
  * @default 0
+ * @min -9999
+ * @max 9999
  *
  * @param destinationTextY
  * @parent groupMapDisplay
  * @text 目的ｳｨﾝﾄﾞｳY座標
  * @desc 目的ｳｨﾝﾄﾞｳの表示位置（Y座標）
  * @default 0
+ * @min -9999
+ * @max 9999
  *
  * @param destinationFontSize
  * @parent groupMapDisplay
@@ -350,6 +357,24 @@
  * @type string
  * @default この目的は達成済みです
  *
+ * @param commandWindowOffsetX
+ * @parent groupSceneArchive
+ * @text 達成済ｳｨﾝﾄﾞｳのX軸位置調整
+ * @desc 達成済ｳｨﾝﾄﾞｳのX軸位置調整です
+ * @type number
+ * @default 0
+ * @min -9999
+ * @max 9999
+ *
+ * @param commandWindowOffsetY
+ * @parent groupSceneArchive
+ * @text 達成済ｳｨﾝﾄﾞｳのY軸位置調整
+ * @desc 達成済ｳｨﾝﾄﾞｳのY軸位置調整です
+ * @type number
+ * @default 0
+ * @min -9999
+ * @max 9999
+ *
  * @param groupAddDestinationToMenuCommand
  * @text ➕ ﾒﾆｭｰｺﾏﾝﾄﾞへの追加 ---
  *
@@ -515,6 +540,8 @@
   const commandWindowTextAlreadyCompleted = String(
     parameters['commandWindowTextAlreadyCompleted'] || 'この目的は達成済みです'
   );
+  const commandWindowOffsetX = Number(parameters['commandWindowOffsetX'] || 0);
+  const commandWindowOffsetY = Number(parameters['commandWindowOffsetY'] || 0);
 
   const commandsOfSceneArchiveRaw = parameters['commandsOfSceneArchive'];
 
@@ -2289,12 +2316,11 @@ ${outputFilePath}
       const width = 300;
       const height = Graphics.boxHeight * (1 / 4);
       // 画面の中央に配置するためのX, Yの計算
-      const x = (Graphics.boxWidth - width) / 2; // 横中央
-      const y = (Graphics.boxHeight - height) / 2; // 縦中央
+      const x = (Graphics.boxWidth - width) / 2 + commandWindowOffsetX;
+      const y = (Graphics.boxHeight - height) / 2 + commandWindowOffsetY;
       const rect = new Rectangle(x, y, width, height);
       super(rect);
-      this.opacity = 0;
-      this.showBackgroundDimmer();
+      this.opacity = 255;
       this._item = null;
       this.deactivate();
       this.close();
@@ -2303,25 +2329,6 @@ ${outputFilePath}
 
     drawItemBackground() {
       // itemBackgroundを描画しない
-    }
-
-    // 背景の透明度を変更するため、Window_BaseのrefreshDimmerBitmapを上書き
-    refreshDimmerBitmap() {
-      if (this._dimmerSprite) {
-        const bitmap = this._dimmerSprite.bitmap;
-        const w = this.width > 0 ? this.width + 8 : 0;
-        const h = this.height;
-        const m = this.padding;
-        // ここを変更
-        // const c1 = ColorManager.dimColor1();
-        const c1 = `rgba(0, 0, 0, 1.0)`;
-        const c2 = ColorManager.dimColor2();
-        bitmap.resize(w, h);
-        bitmap.gradientFillRect(0, 0, w, m, c2, c1, true);
-        bitmap.fillRect(0, m, w, h - m * 2, c1);
-        bitmap.gradientFillRect(0, h - m, w, m, c1, c2, true);
-        this._dimmerSprite.setFrame(0, 0, w, h);
-      }
     }
 
     makeCommandList() {
@@ -2342,6 +2349,10 @@ ${outputFilePath}
     }
 
     processOk() {
+      if (!this.isCurrentItemEnabled()) {
+        this.playBuzzerSound();
+        return;
+      }
       const currentSymbol = this.currentSymbol();
       if (currentSymbol === 'cancel') {
         SoundManager.playCancel();
