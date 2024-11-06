@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/06 2.1.3 アーカイブシーンのコマンドウィンドウの位置調整機能を追加
  * 2024/11/06 2.1.2 アーカイブシーンのコマンドウィンドウ背景を黒表示から通常のウィンドウに変更
  *                  アーカイブシーンのコマンドウィンドウが達成済みでも選択できてしまったため修正
  * 2024/11/06 2.1.1 アーカイブシーンのコマンドウィンドウ背景が透過しないように変更
@@ -146,12 +147,16 @@
  * @text 目的ｳｨﾝﾄﾞｳX座標
  * @desc 目的ｳｨﾝﾄﾞｳの表示位置（X座標）
  * @default 0
+ * @min -9999
+ * @max 9999
  *
  * @param destinationTextY
  * @parent groupMapDisplay
  * @text 目的ｳｨﾝﾄﾞｳY座標
  * @desc 目的ｳｨﾝﾄﾞｳの表示位置（Y座標）
  * @default 0
+ * @min -9999
+ * @max 9999
  *
  * @param destinationFontSize
  * @parent groupMapDisplay
@@ -352,6 +357,24 @@
  * @type string
  * @default この目的は達成済みです
  *
+ * @param commandWindowOffsetX
+ * @parent groupSceneArchive
+ * @text 達成済ｳｨﾝﾄﾞｳのX軸位置調整
+ * @desc 達成済ｳｨﾝﾄﾞｳのX軸位置調整です
+ * @type number
+ * @default 0
+ * @min -9999
+ * @max 9999
+ *
+ * @param commandWindowOffsetY
+ * @parent groupSceneArchive
+ * @text 達成済ｳｨﾝﾄﾞｳのY軸位置調整
+ * @desc 達成済ｳｨﾝﾄﾞｳのY軸位置調整です
+ * @type number
+ * @default 0
+ * @min -9999
+ * @max 9999
+ *
  * @param groupAddDestinationToMenuCommand
  * @text ➕ ﾒﾆｭｰｺﾏﾝﾄﾞへの追加 ---
  *
@@ -517,6 +540,8 @@
   const commandWindowTextAlreadyCompleted = String(
     parameters['commandWindowTextAlreadyCompleted'] || 'この目的は達成済みです'
   );
+  const commandWindowOffsetX = Number(parameters['commandWindowOffsetX'] || 0);
+  const commandWindowOffsetY = Number(parameters['commandWindowOffsetY'] || 0);
 
   const commandsOfSceneArchiveRaw = parameters['commandsOfSceneArchive'];
 
@@ -2291,8 +2316,8 @@ ${outputFilePath}
       const width = 300;
       const height = Graphics.boxHeight * (1 / 4);
       // 画面の中央に配置するためのX, Yの計算
-      const x = (Graphics.boxWidth - width) / 2; // 横中央
-      const y = (Graphics.boxHeight - height) / 2; // 縦中央
+      const x = (Graphics.boxWidth - width) / 2 + commandWindowOffsetX;
+      const y = (Graphics.boxHeight - height) / 2 + commandWindowOffsetY;
       const rect = new Rectangle(x, y, width, height);
       super(rect);
       this.opacity = 255;
