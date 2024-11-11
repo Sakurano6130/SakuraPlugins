@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/02 1.1.0 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
+ *                  位置が調整されるように対応
  * 2024/10/05 1.0.0 公開
  * -------------------------------------------------
  *
@@ -658,7 +660,15 @@
 
               // ウィンドウの位置を更新
               const x = sprite.x - window.width / 2;
-              const y = sprite.y - window.height - sprite.height;
+
+              /**
+               * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーの拡大率が設定されている場合を考慮
+               */
+              // 高さのスケールを取得（デフォルト値は1.0）
+              const scaleY =
+                typeof sprite._battler.getScaleY === 'function' ? sprite._battler.getScaleY() : 1.0;
+
+              const y = sprite.y - window.height - sprite.height * scaleY;
               window.updatePosition(x, y); // 新しい位置に更新
             }
           });
