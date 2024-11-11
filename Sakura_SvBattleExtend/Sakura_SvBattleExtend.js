@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/11 1.1.2 息遣いにも拡大縮小率を適用するように修正
  * 2024/11/11 1.1.1 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
  *                  拡大・縮小が維持されたまま息遣いするように機能追加
  * 2024/11/02 1.1.0 物理・魔法の判定方法を各スキルの命中タイプを元にするように変更
@@ -2207,7 +2208,8 @@
       const baseScaleY =
         typeof this._battler.getScaleY === 'function' ? this._battler.getScaleY() : 1.0;
 
-      const scaleAmountY = baseScaleY + Math.sin(this._breathingTimer) * 0.05; // サイン波でY軸スケール変動
+      const scaleAmountY = baseScaleY + Math.sin(this._breathingTimer) * 0.05 * baseScaleY; // サイン波でY軸スケール変動
+
       this.scale.set(baseScaleX, scaleAmountY); // X軸はベース値固定、Y軸のみ拡縮
     } else {
       const baseScaleX =
