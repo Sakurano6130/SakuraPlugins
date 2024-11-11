@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/11 1.1.1 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
+ *                  拡大・縮小が維持されたまま息遣いするように機能追加
  * 2024/11/02 1.1.0 物理・魔法の判定方法を各スキルの命中タイプを元にするように変更
  *                  各スキルのメモ欄に<移動する>を書くと物理・魔法に関係なく移動する機能を追加
  *                  スキル使用時の武器の動きを修正
@@ -2195,13 +2197,27 @@
   Sprite_Enemy.prototype.updateBreathingEffect = function () {
     if (this._battler.canMove() && !this._battler.isSvBattleExMeta(NOTE.NO_BREATHE)) {
       this._breathingTimer += 0.05; // タイマーを徐々に増加
-      const scaleAmount = 1 + Math.sin(this._breathingTimer) * 0.05; // サイン波でスケール変動
-      this.scale.set(1.0, scaleAmount); // X軸は固定、Y軸のみ拡縮
+
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーの拡大率が設定されている場合を考慮
+       */
+      // getScaleX と getScaleY が関数かどうかをチェック
+      const baseScaleX =
+        typeof this._battler.getScaleX === 'function' ? this._battler.getScaleX() : 1.0;
+      const baseScaleY =
+        typeof this._battler.getScaleY === 'function' ? this._battler.getScaleY() : 1.0;
+
+      const scaleAmountY = baseScaleY + Math.sin(this._breathingTimer) * 0.05; // サイン波でY軸スケール変動
+      this.scale.set(baseScaleX, scaleAmountY); // X軸はベース値固定、Y軸のみ拡縮
     } else {
-      this.scale.set(1.0, 1.0); // 敵が動けない場合は元のサイズ
+      const baseScaleX =
+        typeof this._battler.getScaleX === 'function' ? this._battler.getScaleX() : 1.0;
+      const baseScaleY =
+        typeof this._battler.getScaleY === 'function' ? this._battler.getScaleY() : 1.0;
+
+      this.scale.set(baseScaleX, baseScaleY); // 敵が動けない場合は元のサイズに戻す
     }
   };
-
   // ---------------------------------------------------------------------
   // Window_BattleLog の拡張
   // ---------------------------------------------------------------------
@@ -4278,7 +4294,15 @@
       this._chatBubbleSprite.anchor.x = 0;
       this._chatBubbleSprite.anchor.y = 0;
       this._chatBubbleSprite.x = this.x + -bubbleWidth / 2; // バトラーの頭の上に表示
-      this._chatBubbleSprite.y = this.y - bubbleHeight - this.height; // バトラーの頭上に位置設定
+
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーの拡大率が設定されている場合を考慮
+       */
+      // 高さのスケールを取得（デフォルト値は1.0）
+      const scaleY =
+        typeof this._battler.getScaleY === 'function' ? this._battler.getScaleY() : 1.0;
+      this._chatBubbleSprite.y = this.y - bubbleHeight - this.height * scaleY; // 高さスケールに基づく調整
+
       SceneManager._scene._spriteset.addChild(this._chatBubbleSprite); // シーンに追加
     }
   };
