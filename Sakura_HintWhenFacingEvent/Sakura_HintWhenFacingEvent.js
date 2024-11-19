@@ -323,7 +323,7 @@
       if (this._text) {
         this.resetFontSettings();
         const textWidth = this.textWidthEx(this._text);
-        this.width = Math.max(textWidth + this.padding * 2, 10); // 最小幅を50pxに設定
+        this.width = Math.max(textWidth + this.padding * 2, 10); // 最小幅を10pxに設定
         this.createContents();
         this.drawTextEx(this._text, 0, 0);
       }
