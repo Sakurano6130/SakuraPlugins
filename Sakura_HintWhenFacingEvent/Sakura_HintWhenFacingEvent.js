@@ -12,6 +12,9 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/19 1.0.1 キャラクターの画像ファイル名に「!」がついているとき、上からの接触時に
+ *                  うまく表示されてなかったため修正
+ *                  トリアコンタン様HalfMove.jsの半歩移動判定条件を修正
  * 2024/11/17 1.0.0 公開
  * -------------------------------------------------
  *
@@ -99,6 +102,19 @@
   };
 
   // ---------------------------------------------------------------------
+  // Game_CharacterBase の拡張
+  // ---------------------------------------------------------------------
+  /**
+   * !がつくと６ピクセルずらさない座標になってしまうのでその対策
+   */
+  Game_CharacterBase.prototype.screenYWithAllShiftY = function () {
+    const SHIFT_Y = 6;
+    const th = $gameMap.tileHeight();
+    // return Math.floor(this.scrolledY() * th + th - this.shiftY() - this.jumpHeight());
+    return Math.floor(this.scrolledY() * th + th - SHIFT_Y - this.jumpHeight());
+  };
+
+  // ---------------------------------------------------------------------
   // Game_Player の拡張
   // ---------------------------------------------------------------------
   const _Game_Player_update = Game_Player.prototype.update;
@@ -142,14 +158,14 @@
      * @see https://github.com/triacontane/RPGMakerMV/tree/mz_master/HalfMove.js
      */
     const y =
-      usingHalfMove && this.isHalfMove()
+      usingHalfMove && this.isHalfPosY()
         ? $gameMap.roundHalfYWithDirection(this.y, this.direction())
         : $gameMap.roundYWithDirection(this.y, this.direction());
 
     return $gameMap.events().find((event) => {
       // イベントの画面座標
       const eventScreenX = event.screenX();
-      const eventScreenY = event.screenY();
+      const eventScreenY = event.screenYWithAllShiftY();
 
       // イベントのプライオリティを取得
       const priorityType = event._priorityType;
