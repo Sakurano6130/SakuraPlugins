@@ -80,6 +80,25 @@
   const offsetY = Number(parameters['offsetY'] || 0);
 
   // ---------------------------------------------------------------------
+  // 共通関数
+  // ---------------------------------------------------------------------
+  /**
+   * UIエリアのマージンを取得します。
+   *
+   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
+   *
+   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
+   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
+   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
+   */
+  const getMarginOfUIArea = () => {
+    return {
+      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
+      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
+    };
+  };
+
+  // ---------------------------------------------------------------------
   // Game_Player の拡張
   // ---------------------------------------------------------------------
   const _Game_Player_update = Game_Player.prototype.update;
@@ -236,12 +255,15 @@
     if (!this._eventHintWindow) {
       this.createEventHintWindow();
     }
+    const { uiMarginX, uiMarginY } = getMarginOfUIArea();
+
     const text = event.getHintText();
     this._eventHintWindow.setText(text);
-    this._eventHintWindow.setPosition(
-      $gamePlayer.screenX() - this._eventHintWindow.width / 2 + offsetX,
-      $gamePlayer.screenY() - 80 + offsetY
-    );
+    const x =
+      ($gamePlayer.screenX() - this._eventHintWindow.width / 2 + offsetX - uiMarginX) *
+      $gameScreen.zoomScale();
+    const y = ($gamePlayer.screenY() - 80 + offsetY - uiMarginY) * $gameScreen.zoomScale();
+    this._eventHintWindow.setPosition(x, y);
     this._eventHintWindow.fadeIn();
   };
 
