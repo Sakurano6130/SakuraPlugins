@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/22 1.5.0 職業のメモ欄に<省略名:○○>と書くと、省略した職業名を表示できる機能を追加
  * 2024/11/19 1.4.0 パーティーメンバーの数が $gameParty.maxBattleMembers を超える場合に
  *                  控えメンバーが表示されないように修正
  * 2024/10/04 1.3.1 経験値の始点と終点の色表示が逆になっていたので修正
@@ -635,7 +636,8 @@
       const height = this.bitmapHeight();
       this.setupFont();
       this.bitmap.clear();
-      const className = this._battler.currentClass().name;
+      const className =
+        this._battler?.currentClass()?.meta['省略名'] || this._battler?.currentClass()?.name || '';
 
       if (showActorLevel && showActorClass) {
         this.bitmap.drawText(`${className} Lv.${actorLevel}`, 0, 0, width, height, 'right');
