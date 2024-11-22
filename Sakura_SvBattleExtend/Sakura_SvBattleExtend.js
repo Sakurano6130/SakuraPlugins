@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/22 1.2.0 トリアコンタン様の BattlerGraphicExtend.js でアクターが浮遊する設定をしていたときに
+ *                  武器も浮遊するように機能追加
  * 2024/11/11 1.1.2 息遣いにも拡大縮小率を適用するように修正
  * 2024/11/11 1.1.1 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
  *                  拡大・縮小が維持されたまま息遣いするように機能追加
@@ -1939,7 +1941,7 @@
       this._weaponSpriteIdle.anchor.y = 0.5;
 
       const attackMotion = $dataSystem.attackMotions[wtypeId]; // 攻撃モーションを取得
-      this._weaponSpriteIdle.setup(attackMotion.weaponImageId); // 武器画像をセットアップ
+      this._weaponSpriteIdle.setup(attackMotion.weaponImageId, this._battler); // 武器画像をセットアップ
 
       // オフセットと回転角度を設定
       this._weaponSpriteIdle._baseX = offsetX;
@@ -2056,6 +2058,10 @@
       this._waiting = false; // 待機モーションかどうか
       this._spelling = false; // スキル使用モーションかどうか
       this._guarding = false; // 防御モーションかどうか
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーが浮遊している場合を考慮
+       */
+      this._battler = null;
     }
 
     /**
@@ -2063,8 +2069,12 @@
      *
      * @param {number} weaponImageId - 武器の画像ID
      */
-    setup(weaponImageId) {
+    setup(weaponImageId, battler) {
       this._weaponImageId = weaponImageId;
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーが浮遊している場合を考慮
+       */
+      this._battler = battler;
       this._animationCount = 0; // アニメーションカウントの初期化
       this._pattern = 2; // 初期パターンを設定
       this.loadBitmap(); // 画像の読み込み
@@ -2094,10 +2104,18 @@
      * 武器スプライトの位置をモーションに応じて更新する。
      */
     updatePosition() {
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーが浮遊している場合を考慮
+       */
+      const altitude =
+        this._battler && typeof this._battler.getAltitude === 'function'
+          ? this._battler.getAltitude()
+          : 0;
+
       if (this._casting) {
         // 詠唱中の位置設定
         this.x = this._baseX;
-        this.y = this._baseY - 3;
+        this.y = this._baseY - 3 + altitude;
         this.rotation = this._baseRotation;
         return;
       }
@@ -2106,7 +2124,7 @@
         if (this._framePattern > 0) {
           // スキル使用中の位置設定
           this.x = this._baseX - 10;
-          this.y = this._baseY - 6;
+          this.y = this._baseY - 6 + altitude;
           const angle = 20;
           this.rotation = this._baseRotation + (angle * Math.PI) / 180;
         }
@@ -2116,14 +2134,14 @@
       if (this._waiting) {
         // 待機中の位置設定
         this.x = this._baseX;
-        this.y = this._baseY - 3;
+        this.y = this._baseY - 3 + altitude;
         this.rotation = this._baseRotation;
         return;
       }
       if (this._guarding) {
         // 防御中の位置設定
         this.x = this._baseX + 10;
-        this.y = this._baseY - 3;
+        this.y = this._baseY - 3 + altitude;
         const angle = 20;
         this.rotation = this._baseRotation + (angle * Math.PI) / 180; // 20度回転
         return;
@@ -2141,7 +2159,7 @@
 
       // 基本位置に手の位置オフセットを加算
       this.x = this._baseX;
-      this.y = this._baseY + offsetYOfHand[this._framePattern];
+      this.y = this._baseY + offsetYOfHand[this._framePattern] + altitude;
     }
 
     /**
