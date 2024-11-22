@@ -14,6 +14,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/22 1.2.0 トリアコンタン様の BattlerGraphicExtend.js でアクターが浮遊する設定をしていたときに
+ *                  武器も浮遊するように機能追加
  * 2024/11/02 1.1.0 スキル使用時の武器の動きを修正
  * 2024/10/13 1.0.0 公開
  * -------------------------------------------------
@@ -111,9 +113,13 @@
       this._thrustingPrev = false;
       this._thrustOffsetX = 0;
       this._thrustOffsetY = 0;
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーが浮遊している場合を考慮
+       */
+      this._battler = null;
     }
 
-    setup(weaponId, iconIndex) {
+    setup(weaponId, iconIndex, battler) {
       const dataWeapon = $dataWeapons[weaponId];
       this._swingOffsetX = Number(dataWeapon?.meta[NOTE.WEAPON_ICON_OFFSET_X] ?? 9);
       this._swingOffsetY = Number(dataWeapon?.meta[NOTE.WEAPON_ICON_OFFSET_Y] ?? 5);
@@ -151,6 +157,11 @@
       } else {
         bitmap.addLoadListener(onLoad.bind(this));
       }
+
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーが浮遊している場合を考慮
+       */
+      this._battler = battler;
     }
 
     /**
@@ -174,10 +185,18 @@
      * 武器スプライトの位置をモーションに応じて更新する。
      */
     updatePosition() {
+      /**
+       * @remarks トリアコンタン様BattlerGraphicExtend.jsでバトラーが浮遊している場合を考慮
+       */
+      const altitude =
+        this._battler && typeof this._battler.getAltitude === 'function'
+          ? this._battler.getAltitude()
+          : 0;
+
       if (this._casting) {
         // 詠唱中の位置設定
         this.x = this._baseX;
-        this.y = this._baseY - 3;
+        this.y = this._baseY - 3 + altitude;
         this.rotation = this._baseRotation;
         return;
       }
@@ -186,7 +205,7 @@
         if (this._framePattern > 0) {
           // スキル使用中の位置設定
           this.x = this._baseX - 13;
-          this.y = this._baseY - 8;
+          this.y = this._baseY - 8 + altitude;
           const angle = 20;
           this.rotation = this._baseRotation + (angle * Math.PI) / 180;
         }
@@ -196,14 +215,14 @@
       if (this._waiting) {
         // 待機中の位置設定
         this.x = this._baseX;
-        this.y = this._baseY - 3;
+        this.y = this._baseY - 3 + altitude;
         this.rotation = this._baseRotation;
         return;
       }
       if (this._guarding) {
         // 防御中の位置設定
         this.x = this._baseX + 10;
-        this.y = this._baseY - 3;
+        this.y = this._baseY - 3 + altitude;
         const angle = 20;
         this.rotation = this._baseRotation + (angle * Math.PI) / 180; // 20度回転
         return;
@@ -219,7 +238,7 @@
         this.anchor.y = 0.75;
         const startAngle = 45;
         this.x = this._baseX + this._swingOffsetX;
-        this.y = this._baseY + this._swingOffsetY;
+        this.y = this._baseY + this._swingOffsetY + altitude;
         if (this._swingCount < 9) {
           this._swingCount += 1;
         }
@@ -241,7 +260,7 @@
           this._thrustCount += 1;
         }
         this.x = this._baseX + this._thrustOffsetX - this._thrustCount;
-        this.y = this._baseY + this._thrustOffsetY;
+        this.y = this._baseY + this._thrustOffsetY + altitude;
         this.rotation = (startAngle * Math.PI) / 180;
         return;
       }
@@ -259,7 +278,7 @@
 
       // 基本位置に手の位置オフセットを加算
       this.x = this._baseX;
-      this.y = this._baseY + offsetYOfHand[this._framePattern];
+      this.y = this._baseY + offsetYOfHand[this._framePattern] + altitude;
     }
     /**
      * 武器スプライトを回転させる。
@@ -289,8 +308,6 @@
         this._weaponSpriteIdle.destroy(); // メモリの解放
       }
 
-      const wtypeId = weapon1 ? weapon1.wtypeId : 0; // 武器タイプのIDを取得
-      console.log({ weaponPositionSetting });
       const { offsetX, offsetY, angle } = weaponPositionSetting; // オフセットと角度の設定
       this._oldWeapon1 = weapon1; // 古い武器を更新
 
@@ -298,7 +315,7 @@
       this._weaponSpriteIdle.anchor.x = 0.5; // スプライトのアンカー位置を中心に設定
       this._weaponSpriteIdle.anchor.y = 0.5;
 
-      this._weaponSpriteIdle.setup(weapon1.id, weapon1.iconIndex); // 武器画像をセットアップ
+      this._weaponSpriteIdle.setup(weapon1.id, weapon1.iconIndex, this._battler); // 武器画像をセットアップ
 
       // オフセットと回転角度を設定
       this._weaponSpriteIdle._baseX = offsetX;
