@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/23 2.1.4 サブ目的のスイッチオンオフ時にサブ目的表示がリフレッシュされるように修正
  * 2024/11/06 2.1.3 アーカイブシーンのコマンドウィンドウの位置調整機能を追加
  * 2024/11/06 2.1.2 アーカイブシーンのコマンドウィンドウ背景を黒表示から通常のウィンドウに変更
  *                  アーカイブシーンのコマンドウィンドウが達成済みでも選択できてしまったため修正
@@ -776,6 +777,18 @@
     const switchName = $dataSystem.switches[switchId];
     if (switchName.startsWith('$') && value) {
       destinationManager.setActiveSwitchId(switchId, true);
+    }
+  };
+
+  // ---------------------------------------------------------------------
+  // Game_Map.refresh時に、Window_DestinationOnMapもrefreshする
+  // ---------------------------------------------------------------------
+  const _Game_Map_prototype_refresh = Game_Map.prototype.refresh;
+  Game_Map.prototype.refresh = function () {
+    _Game_Map_prototype_refresh.call(this);
+    const scene = SceneManager._scene;
+    if (scene?._destinationWindow) {
+      scene._destinationWindow.refresh();
     }
   };
 
