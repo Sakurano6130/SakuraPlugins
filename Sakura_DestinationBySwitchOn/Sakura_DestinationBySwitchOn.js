@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/11/25 2.1.5 アーカイブシーンでピクチャを指定したときだけに小目的が表示されていたため、表示されないように修正
  * 2024/11/23 2.1.4 サブ目的のスイッチオンオフ時にサブ目的表示がリフレッシュされるように修正
  * 2024/11/06 2.1.3 アーカイブシーンのコマンドウィンドウの位置調整機能を追加
  * 2024/11/06 2.1.2 アーカイブシーンのコマンドウィンドウ背景を黒表示から通常のウィンドウに変更
@@ -2236,25 +2237,28 @@ ${outputFilePath}
           this.contents.fontBold = false;
           y += this.drawTextExAutoWrap(this._text, 0, y, this.contentsWidth());
 
-          if (destinationManager.hasChildren(this._item.switchId)) {
-            this.drawUnderlineWithLinearOpacity(0, y, this.contentsWidth());
-            y += this.lineHeight();
+          /**
+           * アーカイブシーンでは小目的は表示しないようにする
+           */
+          // if (destinationManager.hasChildren(this._item.switchId)) {
+          //   this.drawUnderlineWithLinearOpacity(0, y, this.contentsWidth());
+          //   y += this.lineHeight();
 
-            const childDestinations = destinationManager.getChildDestinations(this._item.switchId);
-            let index = 0;
-            for (const { switchId, switchName } of childDestinations) {
-              const completed = $gameSwitches.value(switchId);
-              const checkMark = completed ? '✔' : '□';
-              const textColor = completed ? 24 : 0;
-              const subText = `\\C[${textColor}]${checkMark} ${switchName}`;
+          //   const childDestinations = destinationManager.getChildDestinations(this._item.switchId);
+          //   let index = 0;
+          //   for (const { switchId, switchName } of childDestinations) {
+          //     const completed = $gameSwitches.value(switchId);
+          //     const checkMark = completed ? '✔' : '□';
+          //     const textColor = completed ? 24 : 0;
+          //     const subText = `\\C[${textColor}]${checkMark} ${switchName}`;
 
-              const subLineHeight = this.maxFontSizeInLine(subText);
-              this.drawTextEx(subText, 10, y);
-              y += subLineHeight;
-              index += 1;
-            }
-            y += this.padding;
-          }
+          //     const subLineHeight = this.maxFontSizeInLine(subText);
+          //     this.drawTextEx(subText, 10, y);
+          //     y += subLineHeight;
+          //     index += 1;
+          //   }
+          //   y += this.padding;
+          // }
           this._overallHeight = y; // テキストの全体の高さを更新
         });
       } else {
