@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/12/10 1.1.1 途中から出現する場合、出現してからHUDが表示されるように修正
  * 2024/11/02 1.1.0 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
  *                  位置が調整されるように対応
  * 2024/10/05 1.0.0 公開
@@ -351,7 +352,7 @@
      * バトラーが死んでいるかをチェックし、可視状態を更新する。
      */
     updateCheckAppear() {
-      this.visible = !this._battler.isDead(); // バトラーが死んでいる場合は非表示
+      this.visible = this._battler.isAppeared() && !this._battler.isDead(); // バトラーが死んでいる場合は非表示
     }
 
     /**
@@ -438,7 +439,7 @@
      * バトラーが死亡しているか確認し、スプライトの表示・非表示を設定。
      */
     updateCheckAppear() {
-      this.visible = !this._battler.isDead(); // バトラーが死んでいる場合は非表示
+      this.visible = this._battler.isAppeared() && !this._battler.isDead(); // バトラーが死んでいる場合は非表示
     }
 
     /**
