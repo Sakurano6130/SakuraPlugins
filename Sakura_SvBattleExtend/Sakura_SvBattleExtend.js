@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/12/17 1.2.1 スキル表示拡張機能をオフにしていた時に、スキル名が表示されていなかったので修正
  * 2024/11/22 1.2.0 トリアコンタン様の BattlerGraphicExtend.js でアクターが浮遊する設定をしていたときに
  *                  武器も浮遊するように機能追加
  * 2024/11/11 1.1.2 息遣いにも拡大縮小率を適用するように修正
@@ -3663,6 +3664,8 @@
         targets
       );
     }
+
+    this.displayAction(subject, action.item());
   };
 
   /**
