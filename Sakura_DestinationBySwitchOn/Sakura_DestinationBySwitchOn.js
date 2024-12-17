@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/12/17 2.1.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
  * 2024/11/25 2.1.5 アーカイブシーンでピクチャを指定したときだけに小目的が表示されていたため、表示されないように修正
  * 2024/11/23 2.1.4 サブ目的のスイッチオンオフ時にサブ目的表示がリフレッシュされるように修正
  * 2024/11/06 2.1.3 アーカイブシーンのコマンドウィンドウの位置調整機能を追加
@@ -1210,8 +1211,11 @@
   const destinationManager = new DestinationManager();
 
   // ファイル操作とパス操作のモジュールをインポート
-  const fs = require('fs');
-  const path = require('path');
+  let fs, path;
+  if (typeof require !== 'undefined' && Utils.isNwjs()) {
+    fs = require('fs');
+    path = require('path');
+  }
 
   /**
    * 抽出された目的地データを保存する
