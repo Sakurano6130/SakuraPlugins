@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2024/12/17 1.0.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
  * 2024/09/25 1.0.5 マップ名非表示スイッチとイベントコマンドの「マップ名表示」を
  *                  OFFにしたときの動きが同じになるように。ただしスイッチの設定が優先
  * 2024/09/23 1.0.4 マップ名非表示スイッチを追加
@@ -179,8 +180,11 @@
   };
 
   // ファイル操作とパス操作のモジュールをインポート
-  const fs = require('fs');
-  const path = require('path');
+  let fs, path;
+  if (typeof require !== 'undefined' && Utils.isNwjs()) {
+    fs = require('fs');
+    path = require('path');
+  }
 
   /**
    * ベースパスを取得する
