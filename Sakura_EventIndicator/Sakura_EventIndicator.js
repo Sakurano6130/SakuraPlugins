@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/01/08 2.0.0 ブラウザ版デプロイに対応するため、移動先の表示仕様を変更
  * 2024/09/11 1.0.0 公開
  * -------------------------------------------------
  *
@@ -149,32 +150,6 @@
   // ■ 共通関数の定義
   // ------------------------------------------------------------------------------- //
 
-  // ファイル操作とパス操作のモジュールをインポート
-  const fs = require('fs');
-  const path = require('path');
-
-  /**
-   * ベースパスを取得する
-   * @returns {string} ベースパス
-   */
-  const getBasePath = () => path.dirname(process.mainModule.filename);
-
-  /**
-   * データディレクトリのパスを取得する
-   * @returns {string} データディレクトリのパス
-   */
-  const getDataDirectory = () => path.join(getBasePath(), 'data');
-
-  /**
-   * JSONファイルをパースしてオブジェクトに変換する
-   * @param {string} filePath - ファイルパス
-   * @returns {object} パースされたオブジェクト
-   */
-  const parseJsonFile = (filePath) => {
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data);
-  };
-
   /**
    * イベントの移動先を抽出する
    * @param {object} event - ゲームイベント
@@ -188,13 +163,7 @@
       if (code === TRANSFER_CODE) {
         const [type, mapId] = parameters;
         if (type === 0) {
-          const filePath = path.join(
-            getDataDirectory(),
-            `Map${String(mapId).padStart(3, '0')}.json`
-          );
-          const mapData = parseJsonFile(filePath);
-          const mapName = mapData?.displayName ?? '';
-          return mapName || ($dataMapInfos[mapId]?.name ?? '');
+          return $dataMapInfos[mapId]?.name ?? '';
         }
       }
     }
