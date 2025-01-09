@@ -4,8 +4,7 @@
  * @author Sakurano
  * @url https://github.com/Sakurano6130/SakuraPlugins/
  * @help
- * 事前に指定した変数について、全セーブファイルの中で一番進行度が進んでいるもの
- * の内容にタイトル画像とBGMを変えます
+ * ゲームの進行度に応じてタイトル画像とBGMを変えます
  *
  * -------------------------------------------------
  * Sakura_ChangeTitleByProgress
@@ -13,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/01/09 1.1.0 全セーブ内の最大進行度を使用するか、最後にセーブした
+ *                  ファイルの進行度を使用するか選択できる機能を追加
  * 2025/01/08 1.0.0 公開
  * -------------------------------------------------
  * 使用方法:
@@ -22,13 +23,12 @@
  * 1. プラグインパラメータ「進行度を保存する変数ID」に、
  *    進行度として扱いたい変数を指定してください。
  *
- * 2. プラグインパラメータ「タイトルイメージ」で、
- *    進行度の値ごとに表示したいタイトル画像とBGMを設定してください。
+ * 2. プラグインパラメータ「タイトルリスト」で、
+ *    進行度の値ごとに表示したいタイトル画像・BGMを設定してください。
  *
- * 3. セーブしたときに、このプラグインが進行度をグローバル情報へ書き込みます。
- *
- * 4. タイトル画面表示時に、グローバル情報内の全てのセーブファイルをチェックし、
- *    その中で最大の進行度の値に合うタイトル画像 & BGM を表示します。
+ * 3. プラグインパラメータ「比較対象」を指定してください。
+ *    ・全セーブの最大進行度を使用 (highest)
+ *    ・最後にセーブしたファイルの進行度を使用 (latest)
  *
  * -------------------------------------------------
  *
@@ -43,6 +43,16 @@
  * @desc 進行度の値ごとに設定するタイトル画像・BGM情報
  * @type struct<TitleImage>[]
  * @default []
+ *
+ * @param compareType
+ * @text 進行度の比較対象
+ * @desc 進行度を「全セーブの最大値」にするか「最後にセーブしたファイル」にするかを選択
+ * @type select
+ * @option 全セーブデータから最大を使用
+ * @value highest
+ * @option 最後にセーブしたファイルを使用
+ * @value latest
+ * @default highest
  */
 
 /*~struct~TitleImage:
@@ -103,6 +113,8 @@
   // ---------------------------------------------------------------------
   const parameters = PluginManager.parameters(pluginName);
   const progressVariableID = Number(parameters['progressVariableID'] || 1);
+  // 比較対象 ( "highest" or "latest" )
+  const compareType = String(parameters['compareType'] || 'highest');
 
   /**
    * タイトル画面の差し替え情報（進行度ごとの画像＆BGM設定）の配列。
@@ -149,8 +161,10 @@
     // 元のセーブファイル情報を作成
     const info = _DataManager_makeSavefileInfo.call(this);
 
-    // progressVariableIDの指定がない場合はここで終了
-    if (!progressVariableID) return;
+    // progressVariableIDの指定がない場合はそのまま info を返す
+    if (!progressVariableID) {
+      return info;
+    }
 
     // ゲーム内変数 progressVariableID の値を「進行度」として保存する
     const progress = $gameVariables.value(progressVariableID) || 0;
@@ -180,6 +194,38 @@
   };
 
   /**
+   * 最後にセーブしたファイルの進行度を取得（latestSavefileIdを使用）
+   *
+   * @returns {number} 最高進行度（セーブファイルがない場合は0）
+   */
+  const calculateLatestProgress = () => {
+    const globalInfo = DataManager._globalInfo;
+    if (!globalInfo) return 0;
+
+    // ここでDataManager.latestSavefileId()を呼び出し
+    const lastSavedId = DataManager.latestSavefileId();
+    if (!lastSavedId) return 0;
+
+    const info = globalInfo[lastSavedId];
+    return info?.progress || 0;
+  };
+
+  /**
+   * 進行度を取得
+   *
+   * @returns {number} 最高進行度（セーブファイルがない場合は0）
+   */
+  const getProgressForTitle = () => {
+    if (!progressVariableID) return 0;
+    if (compareType === 'latest') {
+      return calculateLatestProgress();
+    } else {
+      // デフォルトは highest
+      return calculateHighestProgress();
+    }
+  };
+
+  /**
    * タイトル画面の背景画像生成をオーバーライドし、
    * 最高進行度に合ったタイトル画像を表示する。
    * 一致しない場合はデフォルトの処理を実行。
@@ -192,12 +238,11 @@
       return;
     }
 
-    const highestProgress = calculateHighestProgress();
+    // 進行度を取得
+    const progress = getProgressForTitle();
 
     // 最高進行度と一致する設定を検索
-    const matchedImage = titleImages.find(
-      (titleImage) => titleImage.progressValue === highestProgress
-    );
+    const matchedImage = titleImages.find((titleImage) => titleImage.progressValue === progress);
 
     if (matchedImage && matchedImage.imageName) {
       // タイトル画像を差し替え
@@ -225,8 +270,9 @@
       return;
     }
 
-    const highestProgress = calculateHighestProgress();
-    const matchedImage = titleImages.find((data) => data.progressValue === highestProgress);
+    // 進行度を取得
+    const progress = getProgressForTitle();
+    const matchedImage = titleImages.find((data) => data.progressValue === progress);
 
     if (matchedImage?.bgm?.name) {
       const { name, volume, pitch, pan } = matchedImage.bgm;
