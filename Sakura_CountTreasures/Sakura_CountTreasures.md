@@ -1,10 +1,10 @@
-# Sakura_Sakura_CountTreasures
+# Sakura_CountTreasures
 📦 マップ内宝箱数表示プラグイン
 
 ![alt text](image.png)
 
 ## ダウンロード
-[Sakura_Sakura_CountTreasures.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_Sakura_CountTreasures/Sakura_Sakura_CountTreasures.js)
+[Sakura_CountTreasures.js](https://raw.githubusercontent.com/Sakurano6130/SakuraPlugins/main/Sakura_CountTreasures/Sakura_CountTreasures.js)
 
 ## 更新履歴
 | ver   | 日付       | 説明 |
