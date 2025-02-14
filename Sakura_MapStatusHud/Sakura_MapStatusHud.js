@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/02/14 1.5.1 アクター間の余白に負の値を指定できるように。
  * 2024/11/22 1.5.0 職業のメモ欄に<省略名:○○>と書くと、省略した職業名を表示できる機能を追加
  * 2024/11/19 1.4.0 パーティーメンバーの数が $gameParty.maxBattleMembers を超える場合に
  *                  控えメンバーが表示されないように修正
@@ -280,6 +281,8 @@
  * @text アクター間の余白
  * @type number
  * @desc アクター間の余白を設定します。
+ * @min -9999
+ * @max 9999
  * @default 0
  *
  * @param labelColor
@@ -1293,6 +1296,13 @@
       this.opacity = 0;
       this.refresh();
       this.allShow();
+    }
+
+    render(renderer) {
+      const gl = renderer.gl;
+      gl.disable(gl.STENCIL_TEST); // ステンシルバッファを無効化
+      super.render(renderer);
+      gl.enable(gl.STENCIL_TEST); // 元に戻す
     }
 
     refresh() {
