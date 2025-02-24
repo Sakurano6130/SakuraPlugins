@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/02/24 1.3.0 機能ごとに個別にオンオフ指定できる機能を追加
  * 2024/12/17 1.2.1 スキル表示拡張機能をオフにしていた時に、スキル名が表示されていなかったので修正
  * 2024/11/22 1.2.0 トリアコンタン様の BattlerGraphicExtend.js でアクターが浮遊する設定をしていたときに
  *                  武器も浮遊するように機能追加
@@ -444,7 +445,14 @@
  * @default
  *
  * @param layoutDamagePop
- * @text 💥 ﾀﾞﾒｰｼﾞﾎﾟｯﾌﾟのﾚｲｱｳﾄ ---
+ * @text 💥 ﾀﾞﾒｰｼﾞｱﾆﾒ連動機能設定 ---
+ *
+ * @param enabledDamage
+ * @parent layoutDamagePop
+ * @text ⏻ ﾀﾞﾒｰｼﾞｱﾆﾒ連動機能のｵﾝｵﾌ
+ * @desc ﾀﾞﾒｰｼﾞｱﾆﾒ連動機能のｵﾝｵﾌです。他ﾌﾟﾗｸﾞｲﾝをお使いで邪魔されたくない方はｵﾌにしてください。
+ * @type boolean
+ * @default true
  *
  * @param fontFile
  * @parent layoutDamagePop
@@ -520,6 +528,13 @@
  *
  * @param weaponDisplay
  * @text ⚔️ 武器表示設定 ---
+ *
+ * @param enabledWeapon
+ * @parent weaponDisplay
+ * @text ⏻ 武器表示機能のｵﾝｵﾌ
+ * @desc 武器表示機能のｵﾝｵﾌです。他ﾌﾟﾗｸﾞｲﾝをお使いで邪魔されたくない方はｵﾌにしてください。
+ * @type boolean
+ * @default true
  *
  * @param settingBareHands
  * @parent weaponDisplay
@@ -612,12 +627,32 @@
  * @type struct<WeaponDisplaySetting>
  * @default {"offsetX":"-10","offsetY":"-28","angle":"20"}
  *
+ * @param enemyBreathing
+ * @text ⚡ 敵の息遣い ---
+ *
+ * @param enabledEnemyBreathing
+ * @parent enemyBreathing
+ * @text ⏻ 敵息遣い機能のｵﾝｵﾌ
+ * @desc 敵息遣い機能のｵﾝｵﾌです。他ﾌﾟﾗｸﾞｲﾝをお使いで邪魔されたくない方はｵﾌにしてください。
+ * @type boolean
+ * @default true
+ *
+ * @param dynamicAction
+ * @text ⚡ 敵前への移動 ---
+ *
+ * @param enabledDynamicAction
+ * @parent dynamicAction
+ * @text ⏻ 敵前への移動機能のｵﾝｵﾌ
+ * @desc 敵前への移動機能のｵﾝｵﾌです。他ﾌﾟﾗｸﾞｲﾝをお使いで邪魔されたくない方はｵﾌにしてください。
+ * @type boolean
+ * @default true
+ *
  * @param skillDisplay
  * @text ⚡ ｽｷﾙ表示設定 ---
  *
  * @param showSkillNameExtend
  * @parent skillDisplay
- * @text ｽｷﾙ表示拡張機能のｵﾝｵﾌ
+ * @text ⏻ ｽｷﾙ表示拡張機能のｵﾝｵﾌ
  * @desc ｽｷﾙ表示拡張機能のｵﾝｵﾌです。ｵﾌにするとﾃﾞﾌｫﾙﾄのﾛｸﾞ表示になります。他ﾌﾟﾗｸﾞｲﾝをお使いで邪魔されたくない方はｵﾌにしてください。
  * @type boolean
  * @default true
@@ -734,25 +769,7 @@
   const textForCritical = String(parameters['textForCritical'] || 'CRITICAL!');
   const lineSpace = Number(parameters['lineSpace'] || 24);
 
-  const showEnemyName = parameters['showEnemyName'] === 'true';
-  const enemyNameFontSize = Number(parameters['enemyNameFontSize'] || 16);
-  const enemyNameWidth = Number(parameters['enemyNameWidth'] || 128);
-  const showEnemyGauge = parameters['showEnemyGauge'] === 'true';
-
   const reflectAnimation = Number(parameters['reflectAnimation'] || 53);
-
-  const enemyGaugeLabelFontSize = Number(parameters['enemyGaugeLabelFontSize'] || 12);
-  const enemyGaugeValueFontSize = Number(parameters['enemyGaugeValueFontSize'] || 12);
-  const enemyGaugeWidth = Number(parameters['enemyGaugeWidth'] || 80);
-
-  // プラグインパラメータとしては未開放
-  const enemyGaugeHeight = Number(parameters['enemyGaugeHeight'] || 6);
-  const gaugeColorHp1 = Number(parameters['gaugeColorHp1'] || 20);
-  const gaugeColorHp2 = Number(parameters['gaugeColorHp2'] || 21);
-  const gaugeColorMp1 = Number(parameters['gaugeColorMp1'] || 22);
-  const gaugeColorMp2 = Number(parameters['gaugeColorMp2'] || 23);
-  const gaugeColorTp1 = Number(parameters['gaugeColorTp1'] || 28);
-  const gaugeColorTp2 = Number(parameters['gaugeColorTp2'] || 29);
 
   // デフォルトの設定値
   const defaultSetting = { offsetX: -10, offsetY: -38, angle: 0 };
@@ -870,6 +887,11 @@
 
   const showBattleLog = parameters['showBattleLog'] !== 'false';
 
+  const enabledDamage = parameters['enabledDamage'] !== 'false';
+  const enabledWeapon = parameters['enabledWeapon'] !== 'false';
+  const enabledEnemyBreathing = parameters['enabledEnemyBreathing'] !== 'false';
+  const enabledDynamicAction = parameters['enabledDynamicAction'] !== 'false';
+
   // ---------------------------------------------------------------------
   // メモ欄定数
   // ---------------------------------------------------------------------
@@ -909,21 +931,6 @@
   // ---------------------------------------------------------------------
   // 共通関数
   // ---------------------------------------------------------------------
-  /**
-   * UIエリアのマージンを取得します。
-   *
-   * 画面の幅と高さに対して、UIエリアの中央配置に必要なX軸およびY軸のマージンを計算します。
-   *
-   * @returns {Object} マージンのオブジェクト。X軸とY軸のマージンが含まれます。
-   * @property {number} uiMarginX - 横方向のマージン（左側のスペース）。
-   * @property {number} uiMarginY - 縦方向のマージン（上側のスペース）。
-   */
-  const getMarginOfUIArea = () => {
-    return {
-      uiMarginX: (Graphics.width - Graphics.boxWidth) / 2,
-      uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
-    };
-  };
 
   /**
    * 六角形の背景を描画する関数
@@ -1436,12 +1443,18 @@
     this._damagePops = [];
   };
 
+  const _Game_Battler_prototype_isDamagePopupRequested =
+    Game_Battler.prototype.isDamagePopupRequested;
   /**
    * ダメージポップアップが要求されているかを判定する。
    *
    * @returns {boolean} ダメージポップアップが要求されている場合にtrueを返す。
    */
   Game_Battler.prototype.isDamagePopupRequested = function () {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのときは、元の処理を返す
+    if (!enabledDamage) {
+      return _Game_Battler_prototype_isDamagePopupRequested.call(this);
+    }
     if (!this._damagePops) this._damagePops = [];
     return this._damagePops.length > 0;
   };
@@ -1453,10 +1466,16 @@
   const _Game_Battler_prototype_regenerateHp = Game_Battler.prototype.regenerateHp;
   Game_Battler.prototype.regenerateHp = function () {
     _Game_Battler_prototype_regenerateHp.call(this);
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのときは、終了
+    if (!enabledDamage) {
+      return;
+    }
     const minRecover = -this.maxSlipDamage();
     const value = Math.max(Math.floor(this.mhp * this.hrg), minRecover);
     if (value !== 0) this.pushDamagePop({ hpAffected: true, hpDamage: -value });
   };
+
+  const _Game_Actor_prototype_performAction = Game_Actor.prototype.performAction;
 
   // ---------------------------------------------------------------------
   // Game_Actorの拡張
@@ -1466,6 +1485,12 @@
    * オーバーライドします
    */
   Game_Actor.prototype.performAction = function (action) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのときは、元の処理を呼んで終了
+    if (!enabledDynamicAction) {
+      _Game_Actor_prototype_performAction.call(this, action);
+      return;
+    }
+
     Game_Battler.prototype.performAction.call(this, action);
     if (action.isAttack()) {
       this.performAttack();
@@ -1526,6 +1551,11 @@
     // 元のupdateメソッドを呼び出し
     _Sprite_Battler_update.call(this);
 
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合は終了
+    if (!enabledDynamicAction) {
+      return;
+    }
+
     // ジャンプが実行中ならジャンプの更新処理を行う
     if (this._jumpDuration > 0) {
       this.updateJump();
@@ -1550,10 +1580,17 @@
     this.updateChatBubble();
   };
 
+  const _Sprite_Battler_prototype_updateDamagePopup = Sprite_Battler.prototype.updateDamagePopup;
   /**
    * ダメージポップアップを更新し、スプライトの位置と可視状態を調整する。
    */
   Sprite_Battler.prototype.updateDamagePopup = function () {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Sprite_Battler_prototype_updateDamagePopup.call(this);
+      return;
+    }
+
     this.setupDamagePopup();
     if (this._damageSprites.length > 0) {
       const y = this.y - 24; // ダメージポップアップのY座標を調整
@@ -1573,10 +1610,17 @@
     }
   };
 
+  const _Sprite_Battler_prototype_setupDamagePopup = Sprite_Battler.prototype.setupDamagePopup;
+
   /**
    * ダメージポップアップが必要な場合にダメージスプライトを作成する。
    */
   Sprite_Battler.prototype.setupDamagePopup = function () {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Sprite_Battler_prototype_setupDamagePopup.call(this);
+      return;
+    }
     if (!this._battler) return;
     if (this._battler.isDamagePopupRequested()) {
       this.createDamageSprite();
@@ -1612,10 +1656,16 @@
     this._chatBubbleSprite.opacity = 255; // チャットバブルを完全に表示
   };
 
+  const _Sprite_Battler_prototype_createDamageSprite = Sprite_Battler.prototype.createDamageSprite;
   /**
    * ダメージスプライトを作成して画面に追加する。
    */
   Sprite_Battler.prototype.createDamageSprite = function () {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Sprite_Battler_prototype_createDamageSprite.call(this);
+      return;
+    }
     const damageSprite = new Sprite_DamageEx(); // ダメージスプライトの作成
     damageSprite.x = (this.x + this.damageOffsetX()) * $gameScreen.zoomScale(); // X座標を設定
     damageSprite.y = (this.y + this.damageOffsetY()) * $gameScreen.zoomScale(); // Y座標を設定
@@ -1624,30 +1674,19 @@
     SceneManager._scene._spriteset._damageSpriteLayer.addChild(damageSprite); // スプライトレイヤーに追加
   };
 
-  /**
-   * ダメージポップアップのX座標のオフセットを返す。
-   *
-   * @returns {number} X座標のオフセット
-   */
-  Sprite_Battler.prototype.damageOffsetX = function () {
-    return 0; // X座標のデフォルトオフセット
-  };
-
-  /**
-   * ダメージポップアップのY座標のオフセットを返す。
-   *
-   * @returns {number} Y座標のオフセット
-   */
-  Sprite_Battler.prototype.damageOffsetY = function () {
-    return 0; // Y座標のデフォルトオフセット
-  };
-
+  const _Sprite_Battler_prototype_destroyDamageSprite =
+    Sprite_Battler.prototype.destroyDamageSprite;
   /**
    * ダメージスプライトを破棄して、レイヤーと配列から削除する。
    *
    * @param {Sprite_DamageEx} damageSprite - 破棄するダメージスプライト
    */
   Sprite_Battler.prototype.destroyDamageSprite = function (damageSprite) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Sprite_Battler_prototype_destroyDamageSprite.call(this, damageSprite);
+      return;
+    }
     SceneManager._scene._spriteset._damageSpriteLayer.removeChild(damageSprite); // レイヤーから削除
     this._damageSprites.remove(damageSprite); // 配列から削除
     damageSprite.destroy(); // スプライトを破棄
@@ -1913,6 +1952,8 @@
   const _Sprite_Actor_prototype_update = Sprite_Actor.prototype.update;
   Sprite_Actor.prototype.update = function () {
     _Sprite_Actor_prototype_update.call(this);
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合は終了
+    if (!enabledWeapon) return;
     this.createWeaponSpriteIdle(); // 武器スプライトの作成
     this.updateWeaponSpriteIdleVisible(); // 武器スプライトの可視状態を更新
   };
@@ -2208,6 +2249,8 @@
   const _Sprite_Enemy_update = Sprite_Enemy.prototype.update;
   Sprite_Enemy.prototype.update = function () {
     _Sprite_Enemy_update.call(this);
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合は終了
+    if (!enabledEnemyBreathing) return;
     this.updateBreathingEffect(); // 呼吸アニメーションを更新
   };
 
@@ -2274,6 +2317,9 @@
    */
   const _Window_BattleLog_prototype_backPaintOpacity = Window_BattleLog.prototype.backPaintOpacity;
   Window_BattleLog.prototype.backPaintOpacity = function () {
+    if (!showBattleLog) {
+      return 0; // 背景を透明に設定
+    }
     if (!showSkillNameExtend) {
       return _Window_BattleLog_prototype_backPaintOpacity.call(this);
     }
@@ -2358,6 +2404,8 @@
     this.wait(); // 少し待機
   };
 
+  const _Window_BattleLog_prototype_displayActionResults =
+    Window_BattleLog.prototype.displayActionResults;
   /**
    * 対象のアクション結果を表示する。
    *
@@ -2365,6 +2413,11 @@
    * @param {Game_Battler} target - アクションを受けたキャラクター
    */
   Window_BattleLog.prototype.displayActionResults = function (subject, target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_displayActionResults.call(this, subject, target);
+      return;
+    }
     if (target.result().used) {
       this.displayCritical(target); // クリティカルヒットの表示
       this.displayDamage(target); // ダメージの表示
@@ -2373,12 +2426,18 @@
     }
   };
 
+  const _Window_BattleLog_prototype_displayMiss = Window_BattleLog.prototype.displayMiss;
   /**
    * 対象が攻撃を外した（ミスした）場合の表示。
    *
    * @param {Game_Battler} target - 攻撃を受ける対象
    */
   Window_BattleLog.prototype.displayMiss = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_displayMiss.call(this, target);
+      return;
+    }
     let fmt;
     if (target.result().physical) {
       const isActor = target.isActor();
@@ -2390,12 +2449,18 @@
     this.push('addText', fmt.format(target.name())); // ログにメッセージを追加
   };
 
+  const Window_BattleLog_prototype_displayEvasion = Window_BattleLog.prototype.displayEvasion;
   /**
    * 対象が攻撃を回避した場合の表示。
    *
    * @param {Game_Battler} target - 回避したキャラクター
    */
   Window_BattleLog.prototype.displayEvasion = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      Window_BattleLog_prototype_displayEvasion.call(this, target);
+      return;
+    }
     let fmt;
     if (target.result().physical) {
       fmt = TextManager.evasion; // 物理攻撃の回避メッセージ
@@ -2411,12 +2476,19 @@
     this.push('addText', fmt.format(target.name())); // ログにメッセージを追加
   };
 
+  const _Window_BattleLog_prototype_displayHpDamage = Window_BattleLog.prototype.displayHpDamage;
   /**
    * 対象が受けたHPダメージを表示する。
    *
    * @param {Game_Battler} target - ダメージを受けた対象
    */
   Window_BattleLog.prototype.displayHpDamage = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_displayHpDamage.call(this, target);
+      return;
+    }
+
     if (target.result().hpAffected) {
       if (target.result().hpDamage > 0 && !target.result().drain) {
         this.performDamage(target); // ダメージのアニメーションを実行
@@ -2428,12 +2500,19 @@
     }
   };
 
+  const _Window_BattleLog_prototype_displayMpDamage = Window_BattleLog.prototype.displayMpDamage;
   /**
    * 対象が受けたMPダメージを表示する。
    *
    * @param {Game_Battler} target - MPダメージを受けた対象
    */
   Window_BattleLog.prototype.displayMpDamage = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_displayMpDamage.call(this, target);
+      return;
+    }
+
     if (target.isAlive() && target.result().mpDamage !== 0) {
       if (target.result().mpDamage < 0) {
         this.performRecovery(target); // 回復のアニメーションを実行
@@ -2442,12 +2521,19 @@
     }
   };
 
+  const _Window_BattleLog_prototype_displayTpDamage = Window_BattleLog.prototype.displayTpDamage;
   /**
    * 対象が受けたTPダメージを表示する。
    *
    * @param {Game_Battler} target - TPダメージを受けた対象
    */
   Window_BattleLog.prototype.displayTpDamage = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_displayTpDamage.call(this, target);
+      return;
+    }
+
     if (target.isAlive() && target.result().tpDamage !== 0) {
       if (target.result().tpDamage < 0) {
         this.performRecovery(target); // 回復のアニメーションを実行
@@ -2456,6 +2542,8 @@
     }
   };
 
+  const _Window_BattleLog_prototype_showNormalAnimation =
+    Window_BattleLog.prototype.showNormalAnimation;
   /**
    * 通常のアニメーションを表示するための関数。
    * 現在はアニメーション表示を無効化している（何もしない）。
@@ -2468,6 +2556,11 @@
    * @param {boolean} mirror - アニメーションを左右反転させるかどうかを指定するフラグ。
    */
   Window_BattleLog.prototype.showNormalAnimation = function (targets, animationId, mirror) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_showNormalAnimation.call(this, targets, animationId, mirror);
+      return;
+    }
     // 何もしない
     // const animation = $dataAnimations[animationId];
     // if (animation) {
@@ -2763,6 +2856,12 @@
    */
   const _Window_BattleLog_prototype_performEvasion = Window_BattleLog.prototype.performEvasion;
   Window_BattleLog.prototype.performEvasion = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_performEvasion.call(this, target);
+      return;
+    }
+
     const targetSprite = findSprite(target);
     if (!targetSprite) return;
 
@@ -2778,6 +2877,12 @@
   const _Window_BattleLog_prototype_performMagicEvasion =
     Window_BattleLog.prototype.performMagicEvasion;
   Window_BattleLog.prototype.performMagicEvasion = function (target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_performMagicEvasion.call(this, target);
+      return;
+    }
+
     const targetSprite = findSprite(target);
     if (!targetSprite) return;
 
@@ -2793,6 +2898,12 @@
   const _Window_BattleLog_prototype_performSubstitute =
     Window_BattleLog.prototype.performSubstitute;
   Window_BattleLog.prototype.performSubstitute = function (substitute, target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのとき、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _Window_BattleLog_prototype_performSubstitute.call(this, substitute, target);
+      return;
+    }
+
     const subjectSprite = findSprite(substitute);
     if (!subjectSprite) return;
     const targetSprite = findSprite(target);
@@ -3600,6 +3711,7 @@
     }
   };
 
+  const _Window_BattleLog_prototype_startAction = Window_BattleLog.prototype.startAction;
   /**
    * バトルアクション開始時にジャンプアニメーションを追加で実行する。（オーバーライド）
    *
@@ -3608,9 +3720,16 @@
    * @param {Game_Battler[]} targets - ターゲットとなるキャラクター
    */
   Window_BattleLog.prototype.startAction = function (subject, action, targets) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合、元の処理を呼んで終了
+    if (!enabledDynamicAction) {
+      _Window_BattleLog_prototype_startAction.call(this, subject, action, targets);
+      return;
+    }
+
     if (needsShowSkillName(action)) {
       this.showSkillAndTargetInChatBubble(subject, action, targets); // チャットバブルでスキルを表示
     }
+
     // 防御の場合は何もしない
     if (action.isGuard()) {
       return;
@@ -3676,6 +3795,12 @@
   const _Window_BattleLog_prototype_endAction = Window_BattleLog.prototype.endAction;
   Window_BattleLog.prototype.endAction = function (subject) {
     _Window_BattleLog_prototype_endAction.call(this, subject);
+
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合終了
+    if (!enabledDynamicAction) {
+      return;
+    }
+
     const subjectSprite = findSprite(subject);
     if (!subjectSprite) return;
 
@@ -3810,13 +3935,18 @@
     formula(); // スクリプト実行
   };
 
+  const _Window_BattleLog_prototype_wait = Window_BattleLog.prototype.wait;
   /**
    * 指定したフレーム数だけ待機する処理。
    *
    * @param {number} frames - 待機するフレーム数（指定しない場合はデフォルトのメッセージスピードを使用）
    */
   Window_BattleLog.prototype.wait = function (frames) {
-    this._waitCount = frames || this.messageSpeed(); // フレーム数が指定されていない場合、デフォルトのメッセージスピードで待機
+    if (!frames) {
+      _Window_BattleLog_prototype_wait.call(this);
+      return;
+    }
+    this._waitCount = frames;
   };
 
   // ---------------------------------------------------------------------
@@ -4069,235 +4199,6 @@
     this.startFlash([255, 255, 0, 160], 60);
   };
 
-  // ---------------------------------------------------------------------
-  // 敵のゲージ
-  // ---------------------------------------------------------------------
-  /**
-   * 敵キャラクターのステータスHUD用のゲージスプライト
-   * HP、MP、TPなどのゲージをアニメーションで表示・更新する。
-   *
-   * @extends Sprite_Gauge
-   */
-  class Sprite_Gauge_EnemyStatusHud extends Sprite_Gauge {
-    /**
-     * 初期化メソッド。初期値としてゲージの値を0に設定。
-     */
-    initialize() {
-      super.initialize();
-      this._displayedValue = 0; // 表示される値の初期化
-      this._gaugeMode = 'bar'; // ゲージモードを設定（バー表示）
-    }
-
-    /**
-     * ゲージの幅を取得する。
-     *
-     * @returns {number} ゲージの幅
-     */
-    bitmapWidth() {
-      return enemyGaugeWidth;
-    }
-
-    /**
-     * ゲージの高さを取得する。
-     *
-     * @returns {number} ゲージの高さ
-     */
-    bitmapHeight() {
-      return this.gaugeHeight() + 20;
-    }
-
-    /**
-     * テキストの高さを取得する。
-     *
-     * @returns {number} テキストの高さ
-     */
-    textHeight() {
-      return Math.max(enemyGaugeLabelFontSize, enemyGaugeValueFontSize);
-    }
-
-    /**
-     * ゲージの高さを取得する。
-     *
-     * @returns {number} ゲージの高さ
-     */
-    gaugeHeight() {
-      return enemyGaugeHeight;
-    }
-
-    /**
-     * ゲージのX座標を取得する。
-     *
-     * @returns {number} ゲージのX座標
-     */
-    gaugeX() {
-      if (this._statusType === 'time') {
-        return 0;
-      } else {
-        return 0; // タイプが異なる場合もX座標は0
-      }
-    }
-
-    /**
-     * ラベルのフォントフェイスを取得する。
-     *
-     * @returns {string} フォントフェイス
-     */
-    labelFontFace() {
-      return $gameSystem.mainFontFace();
-    }
-
-    /**
-     * ラベルのフォントサイズを取得する。
-     *
-     * @returns {number} フォントサイズ
-     */
-    labelFontSize() {
-      return enemyGaugeLabelFontSize;
-    }
-
-    /**
-     * ラベルのアウトライン色を取得する。
-     *
-     * @returns {string} アウトラインの色
-     */
-    labelOutlineColor() {
-      return ColorManager.outlineColor();
-    }
-
-    /**
-     * ラベルのアウトライン幅を取得する。
-     *
-     * @returns {number} アウトライン幅
-     */
-    labelOutlineWidth() {
-      return 3;
-    }
-
-    /**
-     * ゲージの数値部分のフォントフェイスを取得する。
-     *
-     * @returns {string} フォントフェイス
-     */
-    valueFontFace() {
-      return $gameSystem.damagePopFontFace();
-    }
-
-    /**
-     * ゲージの数値部分のフォントサイズを取得する。
-     *
-     * @returns {number} フォントサイズ
-     */
-    valueFontSize() {
-      return enemyGaugeValueFontSize;
-    }
-
-    /**
-     * ゲージの開始色を取得する。
-     *
-     * @returns {string} ゲージの開始色
-     */
-    gaugeColor1() {
-      switch (this._statusType) {
-        case 'hp':
-          return ColorManager.textColor(gaugeColorHp1);
-        case 'mp':
-          return ColorManager.textColor(gaugeColorMp1);
-        case 'tp':
-          return ColorManager.textColor(gaugeColorTp1);
-        case 'time':
-          return ColorManager.ctGaugeColor1();
-        default:
-          return ColorManager.normalColor();
-      }
-    }
-
-    /**
-     * ゲージの終了色を取得する。
-     *
-     * @returns {string} ゲージの終了色
-     */
-    gaugeColor2() {
-      switch (this._statusType) {
-        case 'hp':
-          return ColorManager.textColor(gaugeColorHp2);
-        case 'mp':
-          return ColorManager.textColor(gaugeColorMp2);
-        case 'tp':
-          return ColorManager.textColor(gaugeColorTp2);
-        case 'time':
-          return ColorManager.ctGaugeColor2();
-        default:
-          return ColorManager.normalColor();
-      }
-    }
-
-    /**
-     * バトラーとステータスタイプを設定し、表示値を初期化する。
-     *
-     * @param {Game_Battler} battler - バトラーオブジェクト
-     * @param {string} statusType - ステータスの種類（'hp', 'mp', 'tp', 'time'など）
-     */
-    setup(battler, statusType) {
-      super.setup(battler, statusType);
-      this._displayedValue = this._value; // 表示する値を現在の値で初期化
-    }
-
-    /**
-     * フレームごとに更新処理を行う。
-     */
-    update() {
-      super.update();
-      this.updateDisplayedValue(); // 表示する値を更新
-      this.updateCheckAppear(); // 可視状態のチェック
-    }
-
-    /**
-     * アニメーションで表示されるゲージの値を更新する。
-     */
-    updateDisplayedValue() {
-      const realValue = this._value; // ゲージの実際の値
-      if (this._displayedValue !== realValue) {
-        const changeSpeed = Math.abs(realValue - this._displayedValue) / 10; // 値の変化速度
-        if (this._displayedValue < realValue) {
-          this._displayedValue = Math.min(this._displayedValue + changeSpeed, realValue);
-        } else {
-          this._displayedValue = Math.max(this._displayedValue - changeSpeed, realValue);
-        }
-        this.redraw(); // 値が変わったら再描画
-      }
-    }
-
-    /**
-     * バトラーが死んでいるかをチェックし、可視状態を更新する。
-     */
-    updateCheckAppear() {
-      this.visible = !this._battler.isDead(); // バトラーが死んでいる場合は非表示
-    }
-
-    /**
-     * ゲージの数値を描画する。
-     */
-    drawValue() {
-      const currentValue = Math.floor(this._displayedValue); // 表示用の値を使用
-      const width = this.bitmapWidth();
-      const height = this.textHeight();
-      this.setupValueFont();
-      this.bitmap.drawText(currentValue, 0, 0, width, height, 'right'); // 右揃えで描画
-    }
-
-    /**
-     * 数値部分のフォント設定を行う。
-     */
-    setupValueFont() {
-      this.bitmap.fontFace = this.valueFontFace();
-      this.bitmap.fontBold = false;
-      this.bitmap.fontSize = this.valueFontSize();
-      this.bitmap.textColor = this.valueColor();
-      this.bitmap.outlineColor = this.valueOutlineColor();
-      this.bitmap.outlineWidth = this.valueOutlineWidth();
-    }
-  }
-
   // ----------------------------------------------------------------------------
   // スキル表示するための処理
   // ----------------------------------------------------------------------------
@@ -4415,6 +4316,12 @@
   const _Scene_Battle_update = Scene_Battle.prototype.update;
   Scene_Battle.prototype.update = function () {
     _Scene_Battle_update.call(this);
+
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合、終了
+    if (!enabledDamage) {
+      return;
+    }
+
     this.updateQueue(); // アニメーションキューの更新
     this._spriteset.updateThrowObjects(); // キューを使った投擲オブジェクトの更新処理
   };
@@ -4598,11 +4505,18 @@
     return dataItem.animationId;
   };
 
+  const _BattleManager_updateAction = BattleManager.updateAction;
   /**
    * アクションの更新を行い、全てのターゲットに対してアクションを適用する。
    * すべてのターゲットにアクションが適用されたらアクションを終了する。
    */
   BattleManager.updateAction = function () {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合は、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _BattleManager_updateAction.call(this);
+      return;
+    }
+
     if (this._targets.length > 0) {
       for (const target of this._targets) {
         this.invokeAction(this._subject, target);
@@ -4613,6 +4527,7 @@
     this.endAction();
   };
 
+  const _BattleManager_invokeNormalAction = BattleManager.invokeNormalAction;
   /**
    * 通常攻撃のアクションを実行し、アニメーションやダメージをスケジュールする。
    *
@@ -4620,6 +4535,11 @@
    * @param {Game_Battler} target - アクションの対象キャラクター
    */
   BattleManager.invokeNormalAction = function (subject, target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合、元の処理を呼んで終了
+    if (!enabledDamage) {
+      _BattleManager_invokeNormalAction.call(this, subject, target);
+      return;
+    }
     const realTarget = this.applySubstitute(target);
 
     // ガードの時はガードを適用して抜ける
@@ -4650,6 +4570,7 @@
     }
   };
 
+  const _BattleManager_invokeCounterAttack = BattleManager.invokeCounterAttack;
   /**
    * カウンター攻撃を実行し、アニメーションやダメージをスケジュールする。
    *
@@ -4657,6 +4578,11 @@
    * @param {Game_Battler} target - カウンター攻撃を行うキャラクター
    */
   BattleManager.invokeCounterAttack = function (subject, target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合は元の処理を呼んで終了
+    if (!enabledDamage) {
+      _BattleManager_invokeCounterAttack.call(this, subject, target);
+      return;
+    }
     const action = new Game_Action(target);
     action.setAttack();
     target.pushDamagePop('COUNTER!');
@@ -4674,6 +4600,7 @@
     this._logWindow.displayActionResults(target, subject);
   };
 
+  const _BattleManager_invokeMagicReflection = BattleManager.invokeMagicReflection;
   /**
    * 魔法反射を実行し、アニメーションやダメージをスケジュールする。
    *
@@ -4681,6 +4608,12 @@
    * @param {Game_Battler} target - 魔法を反射するキャラクター
    */
   BattleManager.invokeMagicReflection = function (subject, target) {
+    // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseの場合は元の処理を呼んで終了
+    if (!enabledDamage) {
+      _BattleManager_invokeMagicReflection.call(this, subject, target);
+      return;
+    }
+
     this._action._reflectionTarget = target;
     this._logWindow.displayReflection(target);
     target.pushDamagePop('REFLECT!');
