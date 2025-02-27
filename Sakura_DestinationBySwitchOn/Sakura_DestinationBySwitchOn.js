@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/02/27 2.1.7 アーカイブシーンでマウスの右クリックのキャンセルに対応
  * 2024/12/17 2.1.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
  * 2024/11/25 2.1.5 アーカイブシーンでピクチャを指定したときだけに小目的が表示されていたため、表示されないように修正
  * 2024/11/23 2.1.4 サブ目的のスイッチオンオフ時にサブ目的表示がリフレッシュされるように修正
@@ -1795,10 +1796,32 @@ ${outputFilePath}
       }
     }
 
+    processTouch() {
+      if (this.isOpenAndActive()) {
+        if (TouchInput.isClicked() && this.isTouchedInsideFrame()) {
+          this.onTouchOk();
+        } else if (TouchInput.isCancelled()) {
+          this.onTouchCancel();
+        }
+      }
+    }
+
     isTouchedInsideFrame() {
       const touchPos = new Point(TouchInput.x, TouchInput.y);
       const localPos = this.worldTransform.applyInverse(touchPos);
       return this.innerRect.contains(localPos.x, localPos.y);
+    }
+
+    onTouchOk() {
+      if (this.isOkEnabled()) {
+        this.processOk();
+      }
+    }
+
+    onTouchCancel() {
+      if (this.isCancelEnabled()) {
+        this.processCancel();
+      }
     }
 
     onTouchScrollStart() {
@@ -1837,6 +1860,7 @@ ${outputFilePath}
       this.processKeyScroll();
       this.processWheelScroll();
       this.processTouchScroll();
+      this.processTouch();
       this.updateArrows(); // 矢印の更新
     }
 
