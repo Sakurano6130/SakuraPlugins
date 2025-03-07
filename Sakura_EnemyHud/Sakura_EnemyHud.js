@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/03/07 1.2.0 HUD表示非表示切り替えスイッチの追加
  * 2024/12/10 1.1.1 途中から出現する場合、出現してからHUDが表示されるように修正
  * 2024/11/02 1.1.0 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
  *                  位置が調整されるように対応
@@ -80,6 +81,13 @@
  * @type string
  * @default
  *
+ * @param showSwitchId
+ * @parent enemyStatusDisplay
+ * @text HUD表示非表示切替ｽｲｯﾁ
+ * @desc ここで指定したｽｲｯﾁがｵﾝのときのみに表示されるようになります。指定しない場合は常に表示されます。
+ * @type switch
+ * @default 0
+ *
  */
 
 (() => {
@@ -99,6 +107,8 @@
   const enemyGaugeLabelFontSize = Number(parameters['enemyGaugeLabelFontSize'] || 12);
   const enemyGaugeValueFontSize = Number(parameters['enemyGaugeValueFontSize'] || 12);
   const enemyGaugeWidth = Number(parameters['enemyGaugeWidth'] || 80);
+
+  const showSwitchId = Number(parameters['showSwitchId'] || 0);
 
   // プラグインパラメータとしては未開放
   const enemyGaugeHeight = Number(parameters['enemyGaugeHeight'] || 6);
@@ -650,6 +660,15 @@
       const sprite = this._spriteset.findEnemySprite(enemy); // 敵キャラクタースプライトの取得
       if (sprite) {
         const window = this._enemyStatusWindows[index]; // 対応する敵ステータスウィンドウ
+
+        // 表示非表示切替スイッチが指定されているときは、オンオフに応じて表示切替
+        if (showSwitchId > 0 && !$gameSwitches.value(showSwitchId)) {
+          if (window.visible) window.hide();
+          return;
+        }
+
+        if (!window.visible) window.show();
+
         if (window && window._innerChildren) {
           window._innerChildren.forEach((child) => {
             // バトルフェーズが「action」の場合はフェードアウト
