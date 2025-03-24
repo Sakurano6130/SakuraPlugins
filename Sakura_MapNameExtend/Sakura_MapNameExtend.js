@@ -507,12 +507,10 @@
       }
 
       this.resetFontSettings();
-      console.log(this.contents.fontFace);
       this.drawTextEx(mainText, mainTextX, 0);
       this.drawGradientLine(0, mainTextHeight, width, 2);
       if (subName) {
         this.resetSubFontSettings();
-        console.log(this.contents.fontFace);
         this.drawTextEx(subText, subTextX, 0 + mainTextHeight);
       }
     }
