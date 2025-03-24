@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/03/24 1.1.0 メイン行とサブ行で異なるフォントを指定できる機能を追加
  * 2024/12/17 1.0.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
  * 2024/09/25 1.0.5 マップ名非表示スイッチとイベントコマンドの「マップ名表示」を
  *                  OFFにしたときの動きが同じになるように。ただしスイッチの設定が優先
@@ -72,8 +73,14 @@
  * @default 0
  *
  * @param fontFile
- * @desc 使用するフォントのファイル名
- * @text 使用するフォントのファイル名
+ * @desc 使用するメインのフォントのファイル名
+ * @text メインのフォントファイル名
+ * @type string
+ * @default
+ *
+ * @param subFontFile
+ * @desc 2行目に使用するフォントのファイル名(指定しない場合はメインと同じになります)
+ * @text サブのフォントファイル名
  * @type string
  * @default
  *
@@ -152,6 +159,7 @@
   const mapNameTextX = Number(parameters['mapNameTextX'] || 40);
   const mapNameTextY = Number(parameters['mapNameTextY'] || 0);
   const fontFile = String(parameters.fontFile || '');
+  const subFontFile = String(parameters.subFontFile || '');
   const mainFontSize = Number(parameters.mainFontSize || 30);
   const mainFontColor = Number(parameters.mainFontColor || 0);
   const subFontSize = Number(parameters.subFontSize || 16);
@@ -408,6 +416,40 @@
     this.resetTextColor();
   };
 
+  /**
+   * フォント設定(2行目用)をリセットする関数
+   * マップ名の表示に使用するフォントとフォントサイズを設定します。
+   */
+  Window_MapName.prototype.resetSubFontSettings = function () {
+    if (!subFontFile) return;
+    this.contents.fontFace = $gameSystem.mapNamefont2Face();
+    this.contents.fontSize = subFontSize;
+    this.resetTextColor();
+  };
+
+  /**
+   * drawTextExの中でresetFontSettingsが呼ばれることを防ぐため、
+   * 致し方なくオーバーライドする
+   */
+  Window_MapName.prototype.drawTextEx = function (text, x, y, width) {
+    // this.resetFontSettings();
+    const textState = this.createTextState(text, x, y, width);
+    this.processAllText(textState);
+    return textState.outputWidth;
+  };
+
+  /**
+   * textSizeExの中でresetFontSettingsが呼ばれることを防ぐため、
+   * 致し方なくオーバーライドする
+   */
+  Window_MapName.prototype.textSizeEx = function (text) {
+    // this.resetFontSettings();
+    const textState = this.createTextState(text, 0, 0, 0);
+    textState.drawing = false;
+    this.processAllText(textState);
+    return { width: textState.outputWidth, height: textState.outputHeight };
+  };
+
   // Window_MapNameのリフレッシュをオーバーライドして幅と高さを自動計算
   /**
    * ウィンドウのリフレッシュを行う関数
@@ -416,14 +458,17 @@
   Window_MapName.prototype.refresh = function () {
     this.contents.clear();
     if ($gameMap.displayName()) {
-      this.resetFontSettings();
-
       const [mainName, subName] = $gameMap.displayName().split('|') || ['', ''];
 
       const mainText = `\\FS[${mainFontSize}]\\C[${mainFontColor}]${mainName}`;
-      const subText = subName ? `\\FS[${subFontSize}]\\C[${subFontColor}]- ${subName} -` : '';
+      const subText = subName
+        ? `\\FS[${subFontSize}]\\C[${subFontColor}]- ${subName} \\C[${subFontColor}]-`
+        : '';
 
+      this.resetFontSettings();
       const { width: mainTextWidth, height: mainTextHeight } = this.textSizeEx(mainText);
+
+      this.resetSubFontSettings();
       const { width: subTextWidth, height: subTextHeight } = subText
         ? this.textSizeEx(subText)
         : { width: 0, height: 0 };
@@ -461,9 +506,13 @@
           break;
       }
 
+      this.resetFontSettings();
+      console.log(this.contents.fontFace);
       this.drawTextEx(mainText, mainTextX, 0);
       this.drawGradientLine(0, mainTextHeight, width, 2);
       if (subName) {
+        this.resetSubFontSettings();
+        console.log(this.contents.fontFace);
         this.drawTextEx(subText, subTextX, 0 + mainTextHeight);
       }
     }
@@ -513,6 +562,9 @@
     if (fontFile) {
       FontManager.load('rmmz-mapNamefont', fontFile);
     }
+    if (subFontFile) {
+      FontManager.load('rmmz-mapNamefont2', subFontFile);
+    }
   };
 
   /**
@@ -521,5 +573,13 @@
    */
   Game_System.prototype.mapNameFontFace = function () {
     return 'rmmz-mapNamefont, ' + $dataSystem.advanced.fallbackFonts;
+  };
+
+  /**
+   * マップ名表示に使用するフォント名を取得する関数
+   * @returns {string} フォント名
+   */
+  Game_System.prototype.mapNamefont2Face = function () {
+    return subFontFile ? 'rmmz-mapNamefont2, ' + $dataSystem.advanced.fallbackFonts : '';
   };
 })();
