@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/04/30 1.3.0 HUDウィンドウの背景透過をこのプラグイン単独で行うように修正
  * 2025/03/07 1.2.0 HUD表示非表示切り替えスイッチの追加
  * 2024/12/10 1.1.1 途中から出現する場合、出現してからHUDが表示されるように修正
  * 2024/11/02 1.1.0 トリアコンタン様の BattlerGraphicExtend.js でバトラーの拡大・縮小をしていたときに
@@ -543,6 +544,13 @@
     setEnemy(enemy) {
       this._enemy = enemy; // 敵キャラクターを設定
       this.refresh(); // ウィンドウ内容を更新
+    }
+
+    render(renderer) {
+      const gl = renderer.gl;
+      gl.disable(gl.STENCIL_TEST); // ステンシルバッファを無効化
+      super.render(renderer);
+      gl.enable(gl.STENCIL_TEST); // 元に戻す
     }
 
     /**
