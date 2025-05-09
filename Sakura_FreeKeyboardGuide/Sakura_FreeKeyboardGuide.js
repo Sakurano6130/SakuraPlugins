@@ -8,11 +8,12 @@
  * キーボードガイドウィンドウを表示するプラグインです。
  *
  * -------------------------------------------------
- * Sakura_MapNameExtend
+ * Sakura_FreeKeyboardGuide
  * Copyright (c) 2024 Sakurano
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/05/09 2.0.0 マウスアイコンの表示ができるように
  * 2024/10/03 1.2.0 表示するウィンドウの幅と高さを指定できるように
  * 2024/09/18 1.1.1 プラグインパラメータの説明文の誤り修正（処理変更なし）
  * 2024/09/18 1.1.0 表示できるSceneを拡大。
@@ -221,15 +222,16 @@
  */
 
 /*~struct~KeyDescriptionPair:
+ * @param keyboard
+ * @text ｷｰﾎﾞｰﾄﾞ表示 ---
+ *
  * @param KeyName
+ * @parent keyboard
  * @text 表示するキー
  * @desc 表示するキー（例: "M"）
  *
- * @param Description
- * @text 説明
- * @desc キーの機能に関する説明です。
- *
  * @param TriggerKey
+ * @parent keyboard
  * @text クリックされたときにトリガーするキー
  * @desc クリックされたときにトリガーするキー
  * @default なし
@@ -336,6 +338,48 @@
  * @option BracketLeft
  * @option BracketRight
  *
+ * @param mouse
+ * @text ﾏｳｽ表示(ﾏｳｽを指定するとﾏｳｽ表示優先になります) ---
+ *
+ * @param MouseIcon
+ * @parent mouse
+ * @text ﾏｳｽｱｲｺﾝ
+ * @type select
+ * @default none
+ * @option 表示しない
+ * @value none
+ * @option 左ｸﾘｯｸを表示
+ * @value leftClick
+ * @option 右ｸﾘｯｸを表示
+ * @value rightClick
+ *
+ * @param MouseIconScale
+ * @parent mouse
+ * @text ﾏｳｽｱｲｺﾝのｻｲｽﾞ(1.0が標準)
+ * @type number
+ * @default 1.0
+ * @decimals 1
+ *
+ * @param MouseIconOffsetX
+ * @parent mouse
+ * @text ﾏｳｽｱｲｺﾝのｵﾌｾｯﾄX
+ * @type number
+ * @default 0
+ * @min -9999
+ * @max 9999
+ *
+ * @param MouseIconOffsetY
+ * @parent mouse
+ * @text ﾏｳｽｱｲｺﾝのｵﾌｾｯﾄY
+ * @type number
+ * @default 0
+ * @min -9999
+ * @max 9999
+ *
+ * @param Description
+ * @text 説明
+ * @desc キーの機能に関する説明です。
+ *
  */
 
 (() => {
@@ -390,6 +434,125 @@
       uiMarginY: (Graphics.height - Graphics.boxHeight) / 2,
     };
   };
+
+  function drawMouseIcon(contents, x, y, scale = 1, leftPressed = false, rightPressed = false) {
+    const ctx = contents.context;
+
+    // ==== 定数定義 ====
+    const BASE_SIZE = 32; // 基準のマウスサイズ（32x32がちょうどよい）
+    const MOUSE_WIDTH = BASE_SIZE * scale;
+    const MOUSE_HEIGHT = BASE_SIZE * scale;
+    const RADIUS = MOUSE_WIDTH / 2;
+    const LINE_WIDTH = 1.5 * scale;
+
+    const OUTLINE_ARC = 10 * scale;
+    const EDGE_MARGIN = 2 * scale;
+
+    const WHEEL_WIDTH = 4 * scale;
+    const WHEEL_HEIGHT = 7 * scale;
+    const WHEEL_RADIUS = 1.5 * scale;
+    const WHEEL_OFFSET_Y = 4 * scale;
+
+    const COLOR_BODY = '#FFFFFF';
+    const COLOR_CLICK = '#DBA901';
+    const COLOR_BORDER = '#000000';
+
+    // ==== 描画開始 ====
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.strokeStyle = COLOR_BORDER;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    // 背景（本体）
+    ctx.fillStyle = COLOR_BODY;
+    ctx.beginPath();
+    ctx.moveTo(RADIUS - OUTLINE_ARC, MOUSE_HEIGHT / 2);
+    ctx.quadraticCurveTo(RADIUS - OUTLINE_ARC, EDGE_MARGIN, RADIUS, EDGE_MARGIN);
+    ctx.quadraticCurveTo(RADIUS + OUTLINE_ARC, EDGE_MARGIN, RADIUS + OUTLINE_ARC, MOUSE_HEIGHT / 2);
+    ctx.quadraticCurveTo(
+      RADIUS + OUTLINE_ARC,
+      MOUSE_HEIGHT - EDGE_MARGIN,
+      RADIUS,
+      MOUSE_HEIGHT - EDGE_MARGIN
+    );
+    ctx.quadraticCurveTo(
+      RADIUS - OUTLINE_ARC,
+      MOUSE_HEIGHT - EDGE_MARGIN,
+      RADIUS - OUTLINE_ARC,
+      MOUSE_HEIGHT / 2
+    );
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 左クリックハイライト
+    if (leftPressed) {
+      ctx.fillStyle = COLOR_CLICK;
+      ctx.beginPath();
+      ctx.moveTo(RADIUS - OUTLINE_ARC, MOUSE_HEIGHT / 2);
+      ctx.quadraticCurveTo(RADIUS - OUTLINE_ARC, EDGE_MARGIN, RADIUS, EDGE_MARGIN);
+      ctx.lineTo(RADIUS, MOUSE_HEIGHT / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 右クリックハイライト
+    if (rightPressed) {
+      ctx.fillStyle = COLOR_CLICK;
+      ctx.beginPath();
+      ctx.moveTo(RADIUS, EDGE_MARGIN);
+      ctx.quadraticCurveTo(
+        RADIUS + OUTLINE_ARC,
+        EDGE_MARGIN,
+        RADIUS + OUTLINE_ARC,
+        MOUSE_HEIGHT / 2
+      );
+      ctx.lineTo(RADIUS, MOUSE_HEIGHT / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 中央縦線（左右の仕切り）
+    ctx.beginPath();
+    ctx.moveTo(RADIUS, EDGE_MARGIN);
+    ctx.lineTo(RADIUS, MOUSE_HEIGHT / 2 - 0.5 * scale);
+    ctx.stroke();
+
+    // 水平線（ボタンと本体の境界）
+    ctx.beginPath();
+    ctx.moveTo(RADIUS - OUTLINE_ARC, MOUSE_HEIGHT / 2);
+    ctx.lineTo(RADIUS + OUTLINE_ARC, MOUSE_HEIGHT / 2);
+    ctx.stroke();
+
+    // ホイール（角丸長方形）
+    const wheelX = RADIUS - WHEEL_WIDTH / 2;
+    const wheelY = MOUSE_HEIGHT / 2 - WHEEL_HEIGHT / 2 - WHEEL_OFFSET_Y;
+    ctx.beginPath();
+    ctx.moveTo(wheelX + WHEEL_RADIUS, wheelY);
+    ctx.lineTo(wheelX + WHEEL_WIDTH - WHEEL_RADIUS, wheelY);
+    ctx.quadraticCurveTo(wheelX + WHEEL_WIDTH, wheelY, wheelX + WHEEL_WIDTH, wheelY + WHEEL_RADIUS);
+    ctx.lineTo(wheelX + WHEEL_WIDTH, wheelY + WHEEL_HEIGHT - WHEEL_RADIUS);
+    ctx.quadraticCurveTo(
+      wheelX + WHEEL_WIDTH,
+      wheelY + WHEEL_HEIGHT,
+      wheelX + WHEEL_WIDTH - WHEEL_RADIUS,
+      wheelY + WHEEL_HEIGHT
+    );
+    ctx.lineTo(wheelX + WHEEL_RADIUS, wheelY + WHEEL_HEIGHT);
+    ctx.quadraticCurveTo(
+      wheelX,
+      wheelY + WHEEL_HEIGHT,
+      wheelX,
+      wheelY + WHEEL_HEIGHT - WHEEL_RADIUS
+    );
+    ctx.lineTo(wheelX, wheelY + WHEEL_RADIUS);
+    ctx.quadraticCurveTo(wheelX, wheelY, wheelX + WHEEL_RADIUS, wheelY);
+    ctx.stroke();
+
+    ctx.restore();
+  }
 
   /**
    * 角丸の矩形を描画するための関数
@@ -743,40 +906,59 @@
       const adjustedTextY = y - this.itemPadding() + 4 + buttonPaddingY;
 
       this._keyDescriptions.forEach((keyDesc) => {
-        const { KeyName: keyName, Description: description } = keyDesc;
+        const {
+          MouseIcon: mouseIcon = 'none',
+          MouseIconScale: mouseIconScale = 1,
+          MouseIconOffsetX: mouseIconOffsetX = 0,
+          MouseIconOffsetY: mouseIconOffsetY = 0,
+          KeyName: keyName,
+          Description: description,
+        } = keyDesc;
 
         const triggerKey = keyDesc.TriggerKey === 'なし' ? '' : keyDesc.TriggerKey;
 
         const textWidth = this.textWidth(keyName);
         const buttonWidth = textWidth + buttonPaddingX * 2;
 
-        // ボタンの描画
-        drawButtonShapeToContents(
-          this.contents,
-          x,
-          y,
-          buttonWidth,
-          buttonHeight,
-          buttonCornerRadius
-        );
+        if (mouseIcon !== 'none') {
+          // マウスの描画
+          drawMouseIcon(
+            this.contents,
+            x + mouseIconOffsetX,
+            y + mouseIconOffsetY,
+            mouseIconScale,
+            mouseIcon === 'leftClick',
+            mouseIcon === 'rightClick'
+          );
+        } else {
+          // ボタンの描画
+          drawButtonShapeToContents(
+            this.contents,
+            x,
+            y,
+            buttonWidth,
+            buttonHeight,
+            buttonCornerRadius
+          );
 
-        // keyManagerへの登録
-        keyManager.registerKey(
-          triggerKey,
-          this.x + this.padding + x,
-          this.y + this.padding + y,
-          buttonWidth,
-          buttonHeight
-        );
+          // keyManagerへの登録
+          keyManager.registerKey(
+            triggerKey,
+            this.x + this.padding + x,
+            this.y + this.padding + y,
+            buttonWidth,
+            buttonHeight
+          );
 
-        this.contents.textColor = buttonTextColor;
-        this.drawText(
-          keyName,
-          x + buttonPaddingX,
-          adjustedTextY,
-          buttonWidth - buttonPaddingX * 2,
-          'center'
-        );
+          this.contents.textColor = buttonTextColor;
+          this.drawText(
+            keyName,
+            x + buttonPaddingX,
+            adjustedTextY,
+            buttonWidth - buttonPaddingX * 2,
+            'center'
+          );
+        }
 
         if (description) {
           x += buttonWidth + buttonMarginX;
