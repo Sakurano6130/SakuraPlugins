@@ -13,6 +13,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/05/10 2.1.0 クリックなし表示、マウスホイールのハイライト機能を追加
  * 2025/05/09 2.0.0 マウスアイコンの表示ができるように
  * 2024/10/03 1.2.0 表示するウィンドウの幅と高さを指定できるように
  * 2024/09/18 1.1.1 プラグインパラメータの説明文の誤り修正（処理変更なし）
@@ -352,6 +353,10 @@
  * @value leftClick
  * @option 右ｸﾘｯｸを表示
  * @value rightClick
+ * @option ｸﾘｯｸなし表示
+ * @value noClick
+ * @option ﾏｳｽﾎｲｰﾙ表示
+ * @value wheel
  *
  * @param MouseIconScale
  * @parent mouse
@@ -435,11 +440,11 @@
     };
   };
 
-  function drawMouseIcon(contents, x, y, scale = 1, leftPressed = false, rightPressed = false) {
+  function drawMouseIcon(contents, x, y, scale = 1, clickType = 'noClick') {
     const ctx = contents.context;
 
     // ==== 定数定義 ====
-    const BASE_SIZE = 32; // 基準のマウスサイズ（32x32がちょうどよい）
+    const BASE_SIZE = 32;
     const MOUSE_WIDTH = BASE_SIZE * scale;
     const MOUSE_HEIGHT = BASE_SIZE * scale;
     const RADIUS = MOUSE_WIDTH / 2;
@@ -488,7 +493,7 @@
     ctx.stroke();
 
     // 左クリックハイライト
-    if (leftPressed) {
+    if (clickType === 'leftClick') {
       ctx.fillStyle = COLOR_CLICK;
       ctx.beginPath();
       ctx.moveTo(RADIUS - OUTLINE_ARC, MOUSE_HEIGHT / 2);
@@ -499,7 +504,7 @@
     }
 
     // 右クリックハイライト
-    if (rightPressed) {
+    if (clickType === 'rightClick') {
       ctx.fillStyle = COLOR_CLICK;
       ctx.beginPath();
       ctx.moveTo(RADIUS, EDGE_MARGIN);
@@ -514,13 +519,13 @@
       ctx.fill();
     }
 
-    // 中央縦線（左右の仕切り）
+    // 中央縦線
     ctx.beginPath();
     ctx.moveTo(RADIUS, EDGE_MARGIN);
     ctx.lineTo(RADIUS, MOUSE_HEIGHT / 2 - 0.5 * scale);
     ctx.stroke();
 
-    // 水平線（ボタンと本体の境界）
+    // 水平線
     ctx.beginPath();
     ctx.moveTo(RADIUS - OUTLINE_ARC, MOUSE_HEIGHT / 2);
     ctx.lineTo(RADIUS + OUTLINE_ARC, MOUSE_HEIGHT / 2);
@@ -529,6 +534,11 @@
     // ホイール（角丸長方形）
     const wheelX = RADIUS - WHEEL_WIDTH / 2;
     const wheelY = MOUSE_HEIGHT / 2 - WHEEL_HEIGHT / 2 - WHEEL_OFFSET_Y;
+
+    if (clickType === 'wheel') {
+      ctx.fillStyle = COLOR_CLICK;
+    }
+
     ctx.beginPath();
     ctx.moveTo(wheelX + WHEEL_RADIUS, wheelY);
     ctx.lineTo(wheelX + WHEEL_WIDTH - WHEEL_RADIUS, wheelY);
@@ -549,6 +559,11 @@
     );
     ctx.lineTo(wheelX, wheelY + WHEEL_RADIUS);
     ctx.quadraticCurveTo(wheelX, wheelY, wheelX + WHEEL_RADIUS, wheelY);
+    ctx.closePath();
+
+    if (clickType === 'wheel') {
+      ctx.fill();
+    }
     ctx.stroke();
 
     ctx.restore();
@@ -907,7 +922,7 @@
 
       this._keyDescriptions.forEach((keyDesc) => {
         const {
-          MouseIcon: mouseIcon = 'none',
+          MouseIcon: clickType = 'none',
           MouseIconScale: mouseIconScale = 1,
           MouseIconOffsetX: mouseIconOffsetX = 0,
           MouseIconOffsetY: mouseIconOffsetY = 0,
@@ -920,15 +935,14 @@
         const textWidth = this.textWidth(keyName);
         const buttonWidth = textWidth + buttonPaddingX * 2;
 
-        if (mouseIcon !== 'none') {
+        if (clickType !== 'none') {
           // マウスの描画
           drawMouseIcon(
             this.contents,
             x + mouseIconOffsetX,
             y + mouseIconOffsetY,
             mouseIconScale,
-            mouseIcon === 'leftClick',
-            mouseIcon === 'rightClick'
+            clickType
           );
         } else {
           // ボタンの描画
