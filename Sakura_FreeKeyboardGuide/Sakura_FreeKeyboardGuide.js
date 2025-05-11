@@ -13,6 +13,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/05/11 2.1.1 マウスアイコンの表示座標計算不具合修正
  * 2025/05/10 2.1.0 クリックなし表示、マウスホイールのハイライト機能を追加
  * 2025/05/09 2.0.0 マウスアイコンの表示ができるように
  * 2024/10/03 1.2.0 表示するウィンドウの幅と高さを指定できるように
@@ -939,9 +940,9 @@
           // マウスの描画
           drawMouseIcon(
             this.contents,
-            x + mouseIconOffsetX,
-            y + mouseIconOffsetY,
-            mouseIconScale,
+            x + Number(mouseIconOffsetX || 0),
+            y + Number(mouseIconOffsetY || 0),
+            Number(mouseIconScale || 1),
             clickType
           );
         } else {
@@ -1006,8 +1007,7 @@
       let width = 0;
 
       this._keyDescriptions.forEach((keyDesc) => {
-        width += this.textWidth(keyDesc.KeyName);
-        +buttonPaddingX * 2 + buttonMarginX;
+        width += this.textWidth(keyDesc.KeyName) + buttonPaddingX * 2 + buttonMarginX;
 
         const descriptionWidth = this.textWidth(keyDesc.Description) + buttonMarginX;
         width += descriptionWidth + buttonMarginX;
