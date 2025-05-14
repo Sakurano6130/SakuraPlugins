@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/05/14 1.2.0 マップのメモ欄に<displayName:●●>と書くとそちらを優先表示する機能を追加
  * 2025/03/24 1.1.0 メイン行とサブ行で異なるフォントを指定できる機能を追加
  * 2024/12/17 1.0.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
  * 2024/09/25 1.0.5 マップ名非表示スイッチとイベントコマンドの「マップ名表示」を
@@ -450,6 +451,14 @@
     return { width: textState.outputWidth, height: textState.outputHeight };
   };
 
+  Game_Map.prototype.mapNameExtendDisplayName = function () {
+    const metaDisplayName = $dataMap.meta['displayName'];
+    if (metaDisplayName) {
+      return metaDisplayName;
+    }
+    return $dataMap.displayName;
+  };
+
   // Window_MapNameのリフレッシュをオーバーライドして幅と高さを自動計算
   /**
    * ウィンドウのリフレッシュを行う関数
@@ -457,8 +466,8 @@
    */
   Window_MapName.prototype.refresh = function () {
     this.contents.clear();
-    if ($gameMap.displayName()) {
-      const [mainName, subName] = $gameMap.displayName().split('|') || ['', ''];
+    if ($gameMap.mapNameExtendDisplayName()) {
+      const [mainName, subName] = $gameMap.mapNameExtendDisplayName().split('|') || ['', ''];
 
       const mainText = `\\FS[${mainFontSize}]\\C[${mainFontColor}]${mainName}`;
       const subText = subName
