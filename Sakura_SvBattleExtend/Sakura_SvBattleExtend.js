@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/05/16 1.3.2 HP再生率が反映されていなかったため、再修正
  * 2025/05/16 1.3.1 HP再生率のある装備をしてマップを移動した場合、戦闘開始時にマップ上で発生した
  *                  HP再生が表示されてしまっていたため修正
  * 2025/02/24 1.3.0 機能ごとに個別にオンオフ指定できる機能を追加
@@ -1471,9 +1472,9 @@
       _Game_Battler_prototype_regenerateHp.call(this);
       return;
     }
+    _Game_Battler_prototype_regenerateHp.call(this);
     // 全体ｵﾝｵﾌﾌﾗｸﾞがfalseのときは、終了
     if (!enabledDamage) {
-      _Game_Battler_prototype_regenerateHp.call(this);
       return;
     }
     const minRecover = -this.maxSlipDamage();
