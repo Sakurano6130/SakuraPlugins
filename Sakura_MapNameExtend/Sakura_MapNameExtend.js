@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/08/23 1.3.0 指定したスイッチがオンのとき、拡張機能を無効化しツクール標準のマップ名表示に戻す機能追加
  * 2025/05/14 1.2.0 マップのメモ欄に<displayName:●●>と書くとそちらを優先表示する機能を追加
  * 2025/03/24 1.1.0 メイン行とサブ行で異なるフォントを指定できる機能を追加
  * 2024/12/17 1.0.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
@@ -143,6 +144,12 @@
  * @type switch
  * @default 0
  *
+ * @param vanillaSwitch
+ * @text 機能無効化スイッチ
+ * @desc このスイッチがONの間、拡張機能を無効化しツクール標準のマップ名表示に戻します
+ * @type switch
+ * @default 0
+
  * @param needsOutputMaps
  * @text マップ表示名一覧データを書き出すかどうか
  * @desc これをtrueにして、テストプレイを実行するとプロジェクトフォルダ直下に「mapsData.txt」というファイルが出力されます
@@ -156,7 +163,7 @@
   const parameters = PluginManager.parameters(pluginName);
 
   // マップ名の表示位置の設定
-  const mapNamePosition = String(parameters['mapNamePosition'] || 'topLeft');
+  const mapNamePosition = String(parameters['mapNamePosition'] || 'center');
   const mapNameTextX = Number(parameters['mapNameTextX'] || 40);
   const mapNameTextY = Number(parameters['mapNameTextY'] || 0);
   const fontFile = String(parameters.fontFile || '');
@@ -171,6 +178,36 @@
   const hideSwitch = Number(parameters.hideSwitch || 0);
 
   const needsOutputMaps = String(parameters['needsOutputMaps']) === 'true';
+
+  /**
+   * @remarks v1.3.0 added-start
+   */
+  // 標準表示へ戻すためのスイッチ設定
+  const vanillaSwitch = Number(parameters.vanillaSwitch || 0);
+  const isVanillaMode = () => vanillaSwitch > 0 && $gameSwitches.value(vanillaSwitch);
+
+  // 標準のメソッドを退避
+  const _Vanilla_Window_MapName_initialize = Window_MapName.prototype.initialize;
+  const _Vanilla_Window_MapName_update = Window_MapName.prototype.update;
+  const _Vanilla_Window_MapName_open = Window_MapName.prototype.open;
+  const _Vanilla_Window_MapName_refresh = Window_MapName.prototype.refresh;
+  const _Vanilla_Window_MapName_drawTextEx = Window_MapName.prototype.drawTextEx;
+  const _Vanilla_Window_MapName_resetFontSettings = Window_MapName.prototype.resetFontSettings;
+  const _Vanilla_Window_MapName_textSizeEx = Window_MapName.prototype.textSizeEx;
+  const _Vanilla_Scene_Map_mapNameWindowRect = Scene_Map.prototype.mapNameWindowRect;
+
+  // ★ ヘルパ: バニラ⇔拡張の切り替え時に状態を軽くリセット
+  Window_MapName.prototype._resetPhaseForModeSwitch = function () {
+    this._phase = 0;
+    this._fadeTimer = 0;
+    this._started = false;
+    this.contentsOpacity = 255; // 標準表示はフェード管理しないので不透明に戻す
+    this.opacity = 255; // 念のため
+  };
+
+  /**
+   * @remarks v1.3.0 added-end
+   */
 
   /**
    * UIエリアのマージンを取得します。
@@ -279,7 +316,7 @@
         break;
       case 'topRight':
         this.x = -uiMarginX + Graphics.width - width + mapNameTextX;
-        this.y = -uiMarginY + +mapNameTextY;
+        this.y = -uiMarginY + mapNameTextY;
         break;
       case 'bottomLeft':
         this.x = -uiMarginX + mapNameTextX;
@@ -304,6 +341,11 @@
    * @param {Rectangle} rect - ウィンドウの表示領域を示す矩形
    */
   Window_MapName.prototype.initialize = function (rect) {
+    if (isVanillaMode()) {
+      // 標準の initialize をそのまま使う（拡張の初期化は一切しない）
+      _Vanilla_Window_MapName_initialize.call(this, rect);
+      return;
+    }
     _Window_MapName_initialize.call(this, rect);
     this.opacity = 0; // ウィンドウの透明度を0に設定
     this.updatePosition(); // ウィンドウの位置を更新
@@ -317,11 +359,19 @@
 
   const _Window_MapName_prototype_open = Window_MapName.prototype.open;
   Window_MapName.prototype.open = function () {
+    if (isVanillaMode()) {
+      _Vanilla_Window_MapName_open.call(this);
+      return;
+    }
     _Window_MapName_prototype_open.call(this);
     this._started = true;
   };
 
   Window_MapName.prototype.update = function () {
+    if (isVanillaMode()) {
+      _Vanilla_Window_MapName_update.call(this);
+      return;
+    }
     Window_Base.prototype.update.call(this);
     this.updateMapNameVisible();
     if (this._started && $gameMap.isNameDisplayEnabled()) {
@@ -412,6 +462,10 @@
    * マップ名の表示に使用するフォントとフォントサイズを設定します。
    */
   Window_MapName.prototype.resetFontSettings = function () {
+    if (isVanillaMode()) {
+      _Vanilla_Window_MapName_resetFontSettings.call(this);
+      return;
+    }
     this.contents.fontFace = $gameSystem.mapNameFontFace();
     this.contents.fontSize = mainFontSize;
     this.resetTextColor();
@@ -433,6 +487,10 @@
    * 致し方なくオーバーライドする
    */
   Window_MapName.prototype.drawTextEx = function (text, x, y, width) {
+    if (isVanillaMode()) {
+      return _Vanilla_Window_MapName_drawTextEx.call(this, text, x, y, width);
+    }
+    // 拡張側（フォント差し替え対策で reset を呼ばない版）
     // this.resetFontSettings();
     const textState = this.createTextState(text, x, y, width);
     this.processAllText(textState);
@@ -444,6 +502,10 @@
    * 致し方なくオーバーライドする
    */
   Window_MapName.prototype.textSizeEx = function (text) {
+    if (isVanillaMode()) {
+      return _Vanilla_Window_MapName_textSizeEx.call(this, text);
+    }
+    // 拡張側（フォント差し替え対策で reset を呼ばない版）
     // this.resetFontSettings();
     const textState = this.createTextState(text, 0, 0, 0);
     textState.drawing = false;
@@ -465,6 +527,9 @@
    * 表示するマップ名のテキストの幅と高さを自動的に計算し、ウィンドウサイズを調整します。
    */
   Window_MapName.prototype.refresh = function () {
+    if (isVanillaMode()) {
+      return _Vanilla_Window_MapName_refresh.call(this);
+    }
     this.contents.clear();
     if ($gameMap.mapNameExtendDisplayName()) {
       const [mainName, subName] = $gameMap.mapNameExtendDisplayName().split('|') || ['', ''];
@@ -550,6 +615,10 @@
    * @returns {Rectangle} ウィンドウの矩形領域
    */
   Scene_Map.prototype.mapNameWindowRect = function () {
+    if (isVanillaMode()) {
+      // 標準の矩形（退避したオリジナル）を使用
+      return _Vanilla_Scene_Map_mapNameWindowRect.call(this);
+    }
     const { uiMarginX, uiMarginY } = getMarginOfUIArea();
     const wx = -uiMarginX;
     const wy = -uiMarginY;
