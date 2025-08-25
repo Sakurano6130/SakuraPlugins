@@ -195,16 +195,6 @@
   const _Vanilla_Window_MapName_resetFontSettings = Window_MapName.prototype.resetFontSettings;
   const _Vanilla_Window_MapName_textSizeEx = Window_MapName.prototype.textSizeEx;
   const _Vanilla_Scene_Map_mapNameWindowRect = Scene_Map.prototype.mapNameWindowRect;
-
-  // ★ ヘルパ: バニラ⇔拡張の切り替え時に状態を軽くリセット
-  Window_MapName.prototype._resetPhaseForModeSwitch = function () {
-    this._phase = 0;
-    this._fadeTimer = 0;
-    this._started = false;
-    this.contentsOpacity = 255; // 標準表示はフェード管理しないので不透明に戻す
-    this.opacity = 255; // 念のため
-  };
-
   /**
    * @remarks v1.3.0 added-end
    */
