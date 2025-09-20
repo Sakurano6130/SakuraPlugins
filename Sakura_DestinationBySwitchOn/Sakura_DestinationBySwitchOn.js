@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/09/21 2.2.0 アーカイブシーンを開く際に、特定のアーカイブを指定して直接開く機能を追加
  * 2025/02/27 2.1.7 アーカイブシーンでマウスの右クリックのキャンセルに対応
  * 2024/12/17 2.1.6 ブラウザ版で ReferenceError: require is not defined のエラーが出ないように修正
  * 2024/11/25 2.1.5 アーカイブシーンでピクチャを指定したときだけに小目的が表示されていたため、表示されないように修正
@@ -117,8 +118,8 @@
  * @text 📞ｱｰｶｲﾌﾞｼｰﾝの呼び出し
  * @desc ｱｰｶｲﾌﾞｼｰﾝを呼び出します。
  * @arg title
- * @text タイトル
- * @desc タイトルを指定してください。ｱｰｶｲﾌﾞｼｰﾝの左上に大きく出るタイトルになります。指定しなければ表示されません。
+ * @text 画面左上表示
+ * @desc ｱｰｶｲﾌﾞｼｰﾝの左上に大きく出る文字です。指定しなければ表示されません。
  * @type string
  * @default
  * @arg targetCategories
@@ -126,6 +127,22 @@
  * @desc 対象のｶﾃｺﾞﾘを指定してください。（前方一致検索します。複数指定可。未指定の場合はすべて対象になります）
  * @type string[]
  * @default []
+ * @arg focusTitle
+ * @text 直接開くｱｰｶｲﾌﾞのﾀｲﾄﾙ
+ * @desc 特定のｱｰｶｲﾌﾞを直接開きたい場合、そのﾀｲﾄﾙを指定してください。複数ﾋｯﾄする場合は最初に見つかったものになります。
+ * @type string
+ * @default
+ * @arg notFound
+ * @text 見つからなかった時
+ * @desc 「直接開くｱｰｶｲﾌﾞのﾀｲﾄﾙ」で見つからなかった場合の挙動を指定してください。
+ * @type select
+ * @option error（ｴﾗｰにする）
+ * @value error
+ * @option buzzer（ｱｰｶｲﾌﾞｼｰﾝが開かれてﾌﾞｻﾞｰが鳴る）
+ * @value buzzer
+ * @option ignore（ｱｰｶｲﾌﾞｼｰﾝが開かれてそのまま）
+ * @value ignore
+ * @default error
 
  *
  * @param groupMapDisplay
@@ -568,6 +585,7 @@
     _Game_Temp_prototype_initialize.call(this);
     this._sceneArchiveTitle = '';
     this._sceneArchiveTargetCategories = [];
+    this._archiveFocusByTitle = null;
   };
 
   // ---------------------------------------------------------------------
@@ -617,6 +635,9 @@
       $gameTemp._sceneArchiveTargetCategories = [];
     }
     $gameTemp._sceneArchiveTargetCategories = targetCategories;
+    const focusTitle = String(args['focusTitle'] || '');
+    const notFound = String(args['notFound'] || 'error');
+    $gameTemp._archiveFocusByTitle = focusTitle ? { title: focusTitle, notFound } : null;
     SceneManager.push(Scene_Archive);
   });
 
@@ -2154,6 +2175,91 @@ ${outputFilePath}
       }
       this.setHelpWindowItem(this.item());
     }
+
+    findIndexPathByExactTitle(archiveTitle) {
+      for (let categoryIndex = 0; categoryIndex < this._categories.length; categoryIndex++) {
+        const category = this._categories[categoryIndex];
+        const itemIndex = category.items.findIndex((item) => item.archiveTitle === archiveTitle);
+        if (itemIndex >= 0) {
+          return { categoryIndex, itemIndexInCategory: itemIndex };
+        }
+      }
+      return { categoryIndex: -1, itemIndexInCategory: -1 };
+    }
+
+    forceExpandByCategoryIndex(categoryIndex) {
+      const category = this._categories[categoryIndex];
+      if (!category) return;
+
+      this._expandedCategories[category.name] = true;
+      this._animatingCategories[category.name] = category.items.length;
+    }
+
+    flatIndexOfItem(categoryIndex, itemIndexInCategory) {
+      let flatIndex = 0;
+      for (
+        let currentCategoryIndex = 0;
+        currentCategoryIndex < this._categories.length;
+        currentCategoryIndex++
+      ) {
+        const category = this._categories[currentCategoryIndex];
+        if (currentCategoryIndex === categoryIndex) {
+          return flatIndex + 1 + itemIndexInCategory; // +1 は見出し行
+        }
+        flatIndex += 1 + Math.ceil(this._animatingCategories[category.name] || 0);
+      }
+      return -1;
+    }
+
+    /**
+     * @remarks v2.2.0 今後のために一応イージングを入れておく。現在の呼び出しは duration = 0
+     */
+    centerOnFlatIndexAnimated(flatIndex, duration = 24) {
+      const visibleItemCount = this.maxVisibleItems
+        ? this.maxVisibleItems()
+        : Math.floor(this.innerHeight / this.itemHeight());
+
+      const targetTopRow = Math.max(0, flatIndex - Math.floor(visibleItemCount / 2));
+      const startTopRow = this.topRow
+        ? this.topRow()
+        : Math.floor(this.origin.y / this.itemHeight());
+
+      const maxTopRow = this.maxTopRow ? this.maxTopRow() : Infinity;
+      const clampedTopRow = Math.min(targetTopRow, maxTopRow);
+
+      this._scrollAnimation = {
+        from: startTopRow,
+        to: clampedTopRow,
+        frame: 0,
+        duration: Math.max(1, duration),
+      };
+    }
+
+    update() {
+      super.update();
+
+      if (this._scrollAnimation) {
+        const scrollAnimation = this._scrollAnimation;
+        scrollAnimation.frame++;
+
+        const time = Math.min(1, scrollAnimation.frame / scrollAnimation.duration);
+        const eased = 1 - Math.pow(1 - time, 3);
+
+        const currentRow = Math.round(
+          scrollAnimation.from + (scrollAnimation.to - scrollAnimation.from) * eased
+        );
+
+        if (this.setTopRow) {
+          this.setTopRow(currentRow);
+        } else {
+          this.origin.y = currentRow * this.itemHeight();
+        }
+
+        if (time >= 1) {
+          this._scrollAnimation = null;
+        }
+      }
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -2427,6 +2533,7 @@ ${outputFilePath}
       this._listWindow.activate();
       this._listWindow.select(0);
       this._detailWindow.deactivate();
+      this.tryAutoOpenByTitleIfRequested();
     }
 
     createArchiveTitleWindow() {
@@ -2491,6 +2598,44 @@ ${outputFilePath}
       this._commandWindow.close();
       this._commandWindow.deactivate();
       this._detailWindow.activate();
+    }
+
+    tryAutoOpenByTitleIfRequested() {
+      const focus = $gameTemp._archiveFocusByTitle;
+      $gameTemp._archiveFocusByTitle = null;
+
+      if (!focus || !focus.title) return;
+
+      // 画面に出ている（カテゴリ絞り込み済み＆スイッチON済み）の中から完全一致で検索
+      const { categoryIndex, itemIndexInCategory } = this._listWindow.findIndexPathByExactTitle(
+        focus.title
+      );
+
+      if (categoryIndex < 0) {
+        switch (focus.notFound) {
+          case 'buzzer':
+            SoundManager.playBuzzer();
+            break;
+          case 'ignore':
+            // 何もしない
+            return;
+          case 'error':
+          default:
+            const errorText = `[Sakura_DestinationBySwitchOn] 「${focus.title}」 というアーカイブが見つかりませんでした。指定のアーカイブがスイッチ指定されている場合は、そのスイッチがオンでないと見つからないのでご注意ください。`;
+            throw new Error(errorText);
+        }
+        return;
+      }
+
+      this._listWindow.forceExpandByCategoryIndex(categoryIndex);
+      const flatIndex = this._listWindow.flatIndexOfItem(categoryIndex, itemIndexInCategory);
+
+      this._listWindow.centerOnFlatIndexAnimated(flatIndex, 0);
+      this._listWindow.select(flatIndex);
+
+      this._listWindow.deactivate();
+      this._detailWindow.activate();
+      this._detailWindow.setItem(this._listWindow.item());
     }
   }
 
