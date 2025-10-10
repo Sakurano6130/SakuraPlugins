@@ -12,6 +12,10 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2025/10/10 1.6.0 プラグインパラメータに「表示スイッチ番号」を追加。指定するとONのときだけ表示されます。
+ *                  スイッチ番号 > プラグインコマンド（強制モード） > 自動表示制御 の順で優先します。
+ *                  スイッチがOFFの間は常に非表示になり、強制モードや自動制御は無効化されます。
+ *                  「表示スイッチ番号」を指定している場合、スイッチがOFF→ONになった瞬間はHUDを一度「全表示」します。
  * 2025/02/14 1.5.1 アクター間の余白に負の値を指定できるように。
  * 2024/11/22 1.5.0 職業のメモ欄に<省略名:○○>と書くと、省略した職業名を表示できる機能を追加
  * 2024/11/19 1.4.0 パーティーメンバーの数が $gameParty.maxBattleMembers を超える場合に
@@ -213,13 +217,6 @@
  * @desc HPゲージ始点の色を設定します。
  * @default 20
  *
- * @param gaugeColorHp1
- * @parent groupLayout
- * @text HPゲージ始点の色
- * @type color
- * @desc HPゲージ始点の色を設定します。
- * @default 20
- *
  * @param gaugeColorHp2
  * @parent groupLayout
  * @text HPゲージ終点の色
@@ -344,6 +341,13 @@
  * @desc プレイヤーと重なった時、HUDを半透明にします。処理が重たくなってしまうようだったらfalseにしてください。
  * @default true
  *
+ * @param visibleSwitchId
+ * @parent controlVisibility
+ * @text 表示スイッチ番号
+ * @type switch
+ * @desc このスイッチがONのときだけHUDを表示します（0で無効）
+ * @default 0
+ *
  * @command forceNeedsAllShowOn
  * @text 常に表示モードにする
  * @desc HUDを常に表示します。自動表示モードに戻すまで表示し続けます。イベント実行中も表示されます。
@@ -408,6 +412,9 @@
   const labelColor = Number(parameters['labelColor'] || 16);
 
   const needsCheckPlayerCollide = parameters['needsCheckPlayerCollide'] === 'true';
+
+  const visibleSwitchId = Number(parameters['visibleSwitchId'] || 0);
+  const hudSwitchOn = () => (visibleSwitchId <= 0 ? true : $gameSwitches.value(visibleSwitchId));
 
   const WINDOW_PADDING = 12;
 
@@ -1295,7 +1302,13 @@
       super.initialize(rect);
       this.opacity = 0;
       this.refresh();
-      this.allShow();
+      this._lastGateOn = hudSwitchOn();
+      this.visible = this._lastGateOn;
+      if (this.visible) {
+        this.allShow();
+      } else {
+        this.allHide();
+      }
     }
 
     render(renderer) {
@@ -1363,7 +1376,7 @@
         this.placeStateIconMapStatusHud(actor, x + 1, stateIconY);
       }
 
-      this.allShow();
+      if (this.visible) this.allShow();
     }
 
     setActor(actor) {
@@ -1372,6 +1385,9 @@
     }
 
     update() {
+      this.updateCheckVisibleSwitchOn();
+      if (!this.visible) return;
+
       super.update();
       this.updateHide();
       if (needsCheckPlayerCollide) {
@@ -1379,6 +1395,23 @@
         this.updateOpacity();
       }
       this.createPopup();
+    }
+
+    updateCheckVisibleSwitchOn() {
+      const gateOn = hudSwitchOn();
+
+      this.visible = gateOn;
+      if (!this.visible) {
+        this._lastGateOn = false;
+        return;
+      }
+
+      // 表示スイッチがOFF→ONになった瞬間はallShowする
+      if (!this._lastGateOn && gateOn) {
+        this._hideCount = this.constructor.HIDE_COUNT;
+        this.allShow();
+      }
+      this._lastGateOn = gateOn;
     }
 
     updateHide() {
