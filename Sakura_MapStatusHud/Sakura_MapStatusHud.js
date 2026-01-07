@@ -12,6 +12,8 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2026/01/07 1.7.0 表示順に「左から右」を追加。この場合、画面下に横並びになります。
+ *                  この場合、時間差で半分隠すという挙動はなく、常に表示されます。
  * 2025/10/10 1.6.0 プラグインパラメータに「表示スイッチ番号」を追加。指定するとONのときだけ表示されます。
  *                  スイッチ番号 > プラグインコマンド（強制モード） > 自動表示制御 の順で優先します。
  *                  スイッチがOFFの間は常に非表示になり、強制モードや自動制御は無効化されます。
@@ -152,6 +154,8 @@
  * @value fromTopToBottom
  * @option 下から上
  * @value fromBottomToTop
+ * @option 左から右
+ * @value leftToRight
  * @default fromTopToBottom
  *
  * @param windowWidth
@@ -418,6 +422,8 @@
 
   const WINDOW_PADDING = 12;
 
+  const isHorizontal = () => displayOrder === 'leftToRight';
+
   /**
    * プラグインコマンドの登録
    */
@@ -489,7 +495,7 @@
       this._battler = null;
       this._baseScale = 1;
       this._defaultCount = 20;
-      this._updateCount = this._defaultCount;
+      this._updateCount = 0;
     }
 
     destroy(options) {
@@ -502,7 +508,10 @@
     setup(battler, scale) {
       this._battler = battler;
       const innerWidth = faceSize || windowWidth / 2 - WINDOW_PADDING * 2;
-      this._baseScale = scale ?? 1 * (innerWidth / ImageManager.faceWidth);
+      this._baseScale = (scale ?? 1) * (innerWidth / ImageManager.faceWidth);
+      this.scale.x = this._baseScale;
+      this.scale.y = this._baseScale;
+      this._updateCount = 0;
       this._faceIndex = this._battler._faceIndex;
       this._faceImage = null;
       this._faceSprite = null;
@@ -961,7 +970,7 @@
       // this._displayedValue = this._value;
       this._displayedValue = Math.max(this._battler.nextRequiredExp(), 0);
       const innerWidth = faceSize || windowWidth / 2 - WINDOW_PADDING * 2;
-      this._baseScale = scale ?? 1 * (innerWidth / ImageManager.faceWidth);
+      this._baseScale = (scale ?? 1) * (innerWidth / ImageManager.faceWidth);
       this.scale.x = this._baseScale;
       this.scale.y = this._baseScale;
     }
@@ -1194,8 +1203,8 @@
   };
 
   class Window_StatusBaseTween extends Window_StatusBase {
-    constructor(rect) {
-      super(rect);
+    initialize(rect) {
+      super.initialize(rect);
       this._animationStack = [];
     }
 
@@ -1236,7 +1245,7 @@
     updateAnimation() {
       if (this._animationStack) {
         if (this._animationStack.length > 0) {
-          this._animationStack[0].update(this);
+          this._animationStack[0].update();
           if (this._animationStack[0].isEnd()) {
             this._animationStack.shift();
           }
@@ -1256,27 +1265,14 @@
   class Window_MapStatusHud extends Window_StatusBaseTween {
     static HIDE_COUNT = hudHideCount;
 
-    constructor(rect, index) {
-      super(rect);
+    initialize(rect, index) {
+      super.initialize(rect);
       this._index = index;
-      this._animationStack = [];
       this._hideCount = this.constructor.HIDE_COUNT;
       this._isAllShow = false;
       this._isHalfHidden = false;
       this._isAllHidden = false;
-      const sx = Graphics.width - getMarginXOfUIArea();
-      const sy = this.y;
-      const dx = Graphics.width - this.width - getMarginXOfUIArea() + windowOffsetX;
-      const dy = sy;
-      const hx = sx - this.width / 2;
-      const hy = dy;
 
-      this._sx = sx;
-      this._sy = sy;
-      this._dx = dx;
-      this._dy = dy;
-      this._hx = hx;
-      this._hy = hy;
       this._oldHp = null;
       this._oldMp = null;
       this._oldTp = null;
@@ -1284,8 +1280,9 @@
       this._oldClassId = null;
       this._oldStates = null;
       this._oldExp = null;
-      this._targetOpacity = 255; // 目標の透明度（ウィンドウ内のコンテンツの透明度）
-      this._fadeSpeed = 10; // フェードの速さ
+
+      this._targetOpacity = 255;
+      this._fadeSpeed = 10;
 
       this._oldHpForPopup = null;
       this._hpPosition = new Point(0, 0);
@@ -1295,19 +1292,66 @@
       this._tpPosition = new Point(0, 0);
       this._oldExpForPopup = null;
       this._expPosition = new Point(0, 0);
-      this.initialize(rect);
+
+      // スライド位置計算
+      this.setupSlidePositions(rect);
+
+      // 初期表示状態
+      if (this.visible) {
+        this.allShow(true);
+      } else {
+        this.allHide(true);
+      }
+
+      this.visible = true;
+      this.opacity = 0;
     }
 
-    initialize(rect) {
-      super.initialize(rect);
-      this.opacity = 0;
-      this.refresh();
-      this._lastGateOn = hudSwitchOn();
-      this.visible = this._lastGateOn;
-      if (this.visible) {
-        this.allShow();
+    setupSlidePositions(rect) {
+      const marginX = getMarginXOfUIArea();
+      // const marginY = getMarginYOfUIArea();
+
+      const sx = Graphics.width - marginX;
+      const dx = Graphics.width - rect.width - marginX + windowOffsetX;
+      const hx = sx - rect.width / 2;
+
+      const sy = rect.y;
+      const dy = rect.y;
+      const hy = rect.y;
+
+      if (isHorizontal()) {
+        const showY = rect.y;
+        const hideY = Graphics.boxHeight + rect.height;
+
+        this._dx = rect.x;
+        this._hx = rect.x;
+        this._sx = rect.x;
+
+        this._dy = showY;
+        this._hy = showY;
+        this._sy = hideY;
       } else {
-        this.allHide();
+        this._sx = sx;
+        this._dx = dx;
+        this._hx = hx;
+
+        this._sy = sy;
+        this._dy = dy;
+        this._hy = hy;
+      }
+    }
+
+    setPositionInstant(mode) {
+      this.deleteAllTweenAnime();
+      if (mode === 'allShow') {
+        this.x = this._dx;
+        this.y = this._dy;
+      } else if (mode === 'halfHide') {
+        this.x = this._hx;
+        this.y = this._hy;
+      } else if (mode === 'allHide') {
+        this.x = this._sx;
+        this.y = this._sy;
       }
     }
 
@@ -1455,6 +1499,12 @@
       if ($gameSystem._mapHudForceControlMode === 'halfHide') {
         return false;
       }
+
+      if (isHorizontal() && this._isAllHidden && !$gameMap.isEventRunning()) {
+        this._hideCount = this.constructor.HIDE_COUNT;
+        return true;
+      }
+
       // 拡張用
       // if (this._requestShowPartyHud) {
       //   this._requestShowPartyHud = false;
@@ -1512,6 +1562,7 @@
     }
 
     needsHalfHide() {
+      if (isHorizontal()) return false; // 横は常に表示
       if ($gameSystem._mapHudForceControlMode === 'halfHide') {
         return true;
       }
@@ -1530,16 +1581,35 @@
       return false;
     }
 
-    allShow() {
+    allShow(instant = false) {
       if (this._isAllShow) return;
       this._isAllShow = true;
       this._isHalfHidden = false;
       this._isAllHidden = false;
       this._hideCount = this.constructor.HIDE_COUNT;
-      this.forceTweenMoveTo({ x: this._dx, y: this._dy });
+
+      if (instant) {
+        this.deleteAllTweenAnime();
+        this.x = this._dx;
+        this.y = this._dy;
+      } else {
+        this.forceTweenMoveTo({ x: this._dx, y: this._dy });
+      }
     }
 
     halfHide() {
+      if (isHorizontal()) {
+        // 横並びは「常に表示」：halfHide を allShow と同義にする
+        this.deleteAllTweenAnime();
+        this._isAllShow = true;
+        this._isHalfHidden = false;
+        this._isAllHidden = false;
+        this._hideCount = this.constructor.HIDE_COUNT;
+        this.x = this._dx;
+        this.y = this._dy;
+        return;
+      }
+
       if (this._isHalfHidden) return;
       this._isAllShow = false;
       this._isHalfHidden = true;
@@ -1547,12 +1617,19 @@
       this.forceTweenMoveTo({ x: this._hx, y: this._hy });
     }
 
-    allHide() {
+    allHide(instant = false) {
       if (this._isAllHidden) return;
       this._isAllShow = false;
       this._isHalfHidden = false;
       this._isAllHidden = true;
-      this.forceTweenMoveTo({ x: this._sx, y: this._sy });
+
+      if (instant) {
+        this.deleteAllTweenAnime();
+        this.x = this._sx;
+        this.y = this._sy;
+      } else {
+        this.forceTweenMoveTo({ x: this._sx, y: this._sy });
+      }
     }
 
     // プレイヤーとの重なりをチェックして透明度を変更するメソッド
@@ -1705,13 +1782,22 @@
   };
 
   Scene_Map.prototype.createMapStatusHudWindows = function () {
-    const baseX = Graphics.width - getMarginXOfUIArea() + windowOffsetX;
+    const baseX = isHorizontal()
+      ? windowOffsetX - getMarginXOfUIArea()
+      : Graphics.width - getMarginXOfUIArea() + windowOffsetX;
+
     const baseY = Graphics.height - windowHeight - getMarginYOfUIArea() + windowOffsetY;
+
     this._mapStatusHudWindows = [];
 
     let i = 0;
-    const members =
-      displayOrder === 'fromTopToBottom' ? $gameParty.members().reverse() : $gameParty.members();
+    const members = (() => {
+      const party = $gameParty.members();
+      if (displayOrder === 'fromBottomToTop') return party;
+      if (displayOrder === 'fromTopToBottom') return party.slice().reverse();
+      if (displayOrder === 'leftToRight') return party;
+      return party;
+    })();
 
     for (const actor of members) {
       if (!actor) continue;
@@ -1723,12 +1809,11 @@
       }
 
       const margin = marginOfEachActor;
-      const rect = new Rectangle(
-        baseX,
-        baseY - i * (windowHeight + margin),
-        windowWidth,
-        windowHeight
-      );
+
+      const rect = isHorizontal()
+        ? new Rectangle(baseX + i * (windowWidth + margin), baseY, windowWidth, windowHeight)
+        : new Rectangle(baseX, baseY - i * (windowHeight + margin), windowWidth, windowHeight);
+
       const window = new Window_MapStatusHud(rect, i);
       window.setActor(actor);
       this._mapStatusHudWindows.push(window);
