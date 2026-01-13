@@ -12,12 +12,12 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2026/01/13 1.7.1 メニュー開閉時に一瞬HPなどが0になる問題を修正。
+ *                  表示順が「上から下」「下から上」の場合は、既存通りメニュー復帰後スライド演出するように修正。
+ *                  プラグインコマンド「常に全部隠すモード」を選択後、メニューを閉じたあとにスライド演出が入る問題を修正。
  * 2026/01/07 1.7.0 表示順に「左から右」を追加。この場合、画面下に横並びになります。
  *                  この場合、時間差で半分隠すという挙動はなく、常に表示されます。
  * 2025/10/10 1.6.0 プラグインパラメータに「表示スイッチ番号」を追加。指定するとONのときだけ表示されます。
- *                  スイッチ番号 > プラグインコマンド（強制モード） > 自動表示制御 の順で優先します。
- *                  スイッチがOFFの間は常に非表示になり、強制モードや自動制御は無効化されます。
- *                  「表示スイッチ番号」を指定している場合、スイッチがOFF→ONになった瞬間はHUDを一度「全表示」します。
  * 2025/02/14 1.5.1 アクター間の余白に負の値を指定できるように。
  * 2024/11/22 1.5.0 職業のメモ欄に<省略名:○○>と書くと、省略した職業名を表示できる機能を追加
  * 2024/11/19 1.4.0 パーティーメンバーの数が $gameParty.maxBattleMembers を超える場合に
@@ -390,7 +390,7 @@
   const showActorExpDiff = parameters['ShowActorExpDiff'] === 'true';
 
   const windowWidth = Number(parameters['windowWidth'] || 220);
-  const windowHeight = Number(parameters['windowHeight'] || 100);
+  const windowHeight = Number(parameters['windowHeight'] || 110);
   const faceSize = Number(parameters['faceSize'] || 0);
   const nameFontSize = Number(parameters['nameFontSize'] || 18);
   const levelFontSize = Number(parameters['levelFontSize'] || 18);
@@ -440,7 +440,7 @@
     $gameSystem._mapHudForceControlMode = null;
   });
 
-  Bitmap.prototype.maskedBlt = function (source1, sx, sy, sw, sh, dx, dy, dw, dh) {
+  Bitmap.prototype.maskedBlt_MapHud = function (source1, sx, sy, sw, sh, dx, dy, dw, dh) {
     dw = dw || sw;
     dh = dh || sh;
     if (
@@ -559,7 +559,7 @@
       const sh = this._faceImage.height;
       const dx = 0;
       const dy = 0;
-      this._faceSprite.bitmap.maskedBlt(this._faceImage, sx, sy, sw, sh, dx, dy);
+      this._faceSprite.bitmap.maskedBlt_MapHud(this._faceImage, sx, sy, sw, sh, dx, dy);
       this._faceSprite.anchor.x = 0;
       this._faceSprite.anchor.y = 0;
       this._faceSprite.visible = true;
@@ -678,7 +678,8 @@
   class Sprite_Gauge_MapStatusHud extends Sprite_Gauge {
     initialize() {
       super.initialize();
-      this._displayedValue = 0; // 初期化時点ではまだ値がないため、0で初期化
+      this._displayedValue = NaN;
+      this._lastStableValue = null;
     }
 
     bitmapWidth() {
@@ -697,12 +698,7 @@
     }
 
     gaugeX() {
-      if (this._statusType === 'time') {
-        return 0;
-      } else {
-        // return this.measureLabelWidth() + 6;
-        return 0;
-      }
+      return 0;
     }
 
     // ゲージの描画
@@ -745,12 +741,10 @@
     }
 
     labelColor() {
-      // 16
       return ColorManager.textColor(labelColor);
     }
 
     labelOutlineColor() {
-      //     return "rgba(0, 0, 0, 0.6)";
       return ColorManager.outlineColor();
     }
 
@@ -800,42 +794,68 @@
       }
     }
 
-    // setupが呼ばれたときにアニメーション用の値を初期化
     setup(battler, statusType) {
       super.setup(battler, statusType);
-      this._displayedValue = this._value; // setup時に現在の値で初期化
+
+      const v = this.safeCurrentValue();
+      this._displayedValue = Number.isFinite(v) ? v : NaN;
+      this._lastStableValue = Number.isFinite(v) ? v : null;
+
+      this.redraw();
     }
 
-    // 更新処理を追加
+    safeCurrentValue() {
+      if (!this._battler) return null;
+
+      const v = this.currentValue();
+      const m = this.currentMaxValue();
+
+      if (!Number.isFinite(v) || !Number.isFinite(m) || m <= 0) return null;
+      return v;
+    }
+
     update() {
       super.update();
-      this.updateDisplayedValue(); // ゲージの表示値を更新
+      this.updateDisplayedValue();
     }
 
     // HP/MP/TPの表示をアニメーションで更新
     updateDisplayedValue() {
-      const realValue = this._value; // ゲージの現在の目標値（_value）
+      const realValue = this.safeCurrentValue();
+      if (realValue === null) return;
+
+      // 1フレだけ0になるノイズを無視（直前が>0のときだけ）
+      if (realValue === 0 && this._lastStableValue !== null && this._lastStableValue > 0) {
+        return;
+      }
+
+      this._lastStableValue = realValue;
+
+      if (!Number.isFinite(this._displayedValue)) {
+        this._displayedValue = realValue;
+        this.redraw();
+        return;
+      }
+
       if (this._displayedValue !== realValue) {
-        const changeSpeed = Math.abs(realValue - this._displayedValue) / 10; // 調整可能な速度
+        const changeSpeed = Math.max(1, Math.abs(realValue - this._displayedValue) / 10);
         if (this._displayedValue < realValue) {
           this._displayedValue = Math.min(this._displayedValue + changeSpeed, realValue);
         } else {
           this._displayedValue = Math.max(this._displayedValue - changeSpeed, realValue);
         }
-        this.redraw(); // 値が変わったら再描画
+        this.redraw();
       }
     }
-
-    // 数字もアニメーション用の値で描画
     drawValue() {
-      const currentValue = Math.floor(this._displayedValue); // アニメーション用の値を使用
+      if (!this._battler || !Number.isFinite(this._displayedValue)) return;
+      const currentValue = Math.floor(this._displayedValue);
       const width = this.bitmapWidth();
       const height = this.textHeight();
       this.setupValueFont();
       this.bitmap.drawText(currentValue, 0, 0, width, height, 'right');
     }
 
-    // フォント設定
     setupValueFont() {
       this.bitmap.fontFace = this.valueFontFace();
       this.bitmap.fontSize = this.valueFontSize();
@@ -1296,11 +1316,28 @@
       // スライド位置計算
       this.setupSlidePositions(rect);
 
-      // 初期表示状態
-      if (this.visible) {
-        this.allShow(true);
+      // 初期表示状態（force/allHide を最優先）
+      const forceMode = $gameSystem._mapHudForceControlMode;
+      const gateOn = hudSwitchOn();
+
+      if (!gateOn || forceMode === 'allHide' || $gameMap.isEventRunning()) {
+        this.setPositionInstant('allHide');
+        this._isAllHidden = true;
+        this._isAllShow = false;
+        this._isHalfHidden = false;
+      } else if (isHorizontal()) {
+        // 横並びは仕様通り「即表示」
+        this.setPositionInstant('allShow');
+        this._isAllShow = true;
+        this._isAllHidden = false;
+        this._isHalfHidden = false;
       } else {
-        this.allHide(true);
+        // 縦並びは「隠し位置から開始」→updateHideでallShowが走ってスライドする
+        this.setPositionInstant('allHide');
+        this._isAllHidden = true;
+        this._isAllShow = false;
+        this._isHalfHidden = false;
+        this._hideCount = this.constructor.HIDE_COUNT;
       }
 
       this.visible = true;
@@ -1419,8 +1456,6 @@
          */
         this.placeStateIconMapStatusHud(actor, x + 1, stateIconY);
       }
-
-      if (this.visible) this.allShow();
     }
 
     setActor(actor) {
@@ -1452,8 +1487,11 @@
 
       // 表示スイッチがOFF→ONになった瞬間はallShowする
       if (!this._lastGateOn && gateOn) {
-        this._hideCount = this.constructor.HIDE_COUNT;
-        this.allShow();
+        const forceMode = $gameSystem._mapHudForceControlMode;
+        if (forceMode !== 'allHide' && !$gameMap.isEventRunning()) {
+          this._hideCount = this.constructor.HIDE_COUNT;
+          this.allShow();
+        }
       }
       this._lastGateOn = gateOn;
     }
@@ -1834,11 +1872,13 @@
   const _Game_Player_prototype_refresh = Game_Player.prototype.refresh;
   Game_Player.prototype.refresh = function () {
     _Game_Player_prototype_refresh.call(this);
-    if (!SceneManager._scene._mapStatusHudWindows) {
-      return;
-    }
-    SceneManager._scene.destroyMapStatusHudWindows();
-    SceneManager._scene.createMapStatusHudWindows();
+
+    const scene = SceneManager._scene;
+    if (!(scene instanceof Scene_Map)) return;
+    if (!scene._mapStatusHudWindows) return;
+
+    scene.destroyMapStatusHudWindows();
+    scene.createMapStatusHudWindows();
   };
 
   const _Game_System_prototype_initialize = Game_System.prototype.initialize;
