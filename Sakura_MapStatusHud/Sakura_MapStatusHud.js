@@ -12,6 +12,7 @@
  * This software is released under the MIT license.
  * http://opensource.org/licenses/mit-license.php
  * -------------------------------------------------
+ * 2026/01/18 1.7.2 表示順が「左から右」の場合、HUDのスライド演出がされないように修正。
  * 2026/01/13 1.7.1 メニュー開閉時に一瞬HPなどが0になる問題を修正。
  *                  表示順が「上から下」「下から上」の場合は、既存通りメニュー復帰後スライド演出するように修正。
  *                  プラグインコマンド「常に全部隠すモード」を選択後、メニューを閉じたあとにスライド演出が入る問題を修正。
@@ -1626,6 +1627,9 @@
       this._isAllHidden = false;
       this._hideCount = this.constructor.HIDE_COUNT;
 
+      // 横並びの場合は仕様として「常に即表示」
+      if (isHorizontal()) instant = true;
+
       if (instant) {
         this.deleteAllTweenAnime();
         this.x = this._dx;
@@ -1660,6 +1664,9 @@
       this._isAllShow = false;
       this._isHalfHidden = false;
       this._isAllHidden = true;
+
+      // 横並びの場合は仕様として「常に即表示」
+      if (isHorizontal()) instant = true;
 
       if (instant) {
         this.deleteAllTweenAnime();
